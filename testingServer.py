@@ -3,7 +3,7 @@
 import os
 from socket import *
 host = "192.168.0.177"
-port = 1803
+port = 87
 buf = 1024
 addr = (host, port)
 UDPSock = socket(AF_INET, SOCK_DGRAM)

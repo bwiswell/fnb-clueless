@@ -2,8 +2,8 @@
 # Message Sender
 import os
 from socket import *
-host = "192.168.0.173" # set to IP address of target computer
-port = 1803
+host = "73.243.41.224" # set to IP address of target computer
+port = 87
 addr = (host, port)
 UDPSock = socket(AF_INET, SOCK_DGRAM)
 while True:
