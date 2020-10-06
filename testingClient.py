@@ -3,7 +3,7 @@
 import os
 from socket import *
 host = "192.168.0.173" # set to IP address of target computer
-port = 13000
+port = 1803
 addr = (host, port)
 UDPSock = socket(AF_INET, SOCK_DGRAM)
 while True:
