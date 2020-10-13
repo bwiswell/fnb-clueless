@@ -8,7 +8,7 @@ from socket import *
 
 host = "192.168.0.177"
 port = 87
-buf = 1024
+buf = 2048
 addr = (host, port)
 UDPSock = socket(AF_INET,SOCK_STREAM)
 UDPSock.bind((host,port))
