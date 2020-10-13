@@ -25,10 +25,14 @@ class Message:
         os._exit(0)
     
     def SendClientMsg(self):
+        # This will most likely be used to send GUI updates to client from
+        # server. 
 
     def RcvPlayerMsg(self):
+        # This may not be needed as the Server should always be listening
 
     def RcvServerMsg(self):
+        # Might be needed for the client to get messages from the server
 
     #def holdGUIUpdate():
         # This will be used to hold the updated GUI state
