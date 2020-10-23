@@ -17,16 +17,17 @@ ROOM_POSITIONS = [(0, 0), (320, 0), (640, 0), (0, 320), (320, 320), (640, 320), 
 H_HALLWAY_POSITIONS = [(192, 64), (512, 64), (192, 384), (512, 384), (192, 704), (512, 704)]
 V_HALLWAY_POSITIONS = [(64, 192), (64, 512), (384, 192), (384, 512), (704, 192), (704, 512)]
 
+# Basic Sprite subclass for a sprite with a name
 class LocationSprite(pygame.sprite.Sprite):
     def __init__(self, name, asset, position):
         pygame.sprite.Sprite.__init__(self)
         self.name = name
         self.image = asset
-        self.position = position
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
         self.rect.y = position[1]
 
+# Create all location (room and hallway) sprites and set their names and locations
 def loadAll():
     location_assets = pygame.image.load('location_assets.png').convert()
     location_sprites = pygame.sprite.Group()
@@ -53,5 +54,3 @@ def loadAll():
         hallway_position = V_HALLWAY_POSITIONS[i]
         location_sprites.add(LocationSprite(hallway_name, hallway_asset, hallway_position))
     return location_sprites
-
-
