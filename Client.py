@@ -5,7 +5,7 @@ import Message as msgClass
 import Player as pl
 
 player = pl.Player()
-#message = msgClass.Message()
+message = msgClass.Message()
 ans = "N"
 
 while ((ans != "Y") & (ans != "y")):
@@ -41,7 +41,7 @@ while True:
                 msg = player.name + "\t" + move
                 print(player.name + " moving " + menuStrDict[int(move)] + "...")
                 print("")
-                # message.SendServerMsg(msg)
+                message.SendServerMsg(msg)
         else:
             print("Move not confirmed...")
             print("")

@@ -24,7 +24,7 @@ while True:
     player1 = data_var
     
     #(data, addr) = UDPSock.recvfrom(buf)
-    print("Received message: " + player1.name)
+    print("Received message: " + data_var)
     if data_var == "exit":
         print("Exiting server")
         break
