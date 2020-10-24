@@ -9,21 +9,28 @@ class Message:
         host = "73.243.41.224" # set to IP address of target computer
         port = 87
         self.addr = (host, port)
+        self.UDPSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.UDPSock.connect(self.addr)
+
 
     
     def SendServerMsg(self,msg):
-        UDPSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        UDPSock.connect(self.addr)
-        while True:
-            #data = input("Enter message to send or type 'exit': ")
+
+        status = True
+        while status:
             data_string = pickle.dumps(msg)
-            UDPSock.send(data_string)
-            print(data_string)
+
             if data_string == "exit":
                 print("Exiting server")
                 break
-        UDPSock.close()
-        os._exit(0)
+            else:
+                self.UDPSock.send(data_string)
+                print(data_string)
+                status = False
+
+
+        #self.UDPSock.close()
+        #os._exit(0)
     
     #def SendClientMsg(self):
         # This will most likely be used to send GUI updates to client from

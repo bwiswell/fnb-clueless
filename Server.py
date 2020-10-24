@@ -15,15 +15,12 @@ UDPSock.bind((host,port))
 UDPSock.listen(1)
 conn, addr = UDPSock.accept()
 
-player1 = pl.Player()
 
 print(f"Waiting to receive messages from {addr}...")
 while True:
     data = conn.recv(buf)
     data_var = pickle.loads(data)
-    player1 = data_var
     
-    #(data, addr) = UDPSock.recvfrom(buf)
     print("Received message: " + data_var)
     if data_var == "exit":
         print("Exiting server")

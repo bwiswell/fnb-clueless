@@ -38,7 +38,7 @@ while True:
                 print("Exiting...")
                 os._exit(0)
             else:
-                msg = player.name + "\t" + move
+                msg = player.name + " moving " + menuStrDict[int(move)] + "..."
                 print(player.name + " moving " + menuStrDict[int(move)] + "...")
                 print("")
                 message.SendServerMsg(msg)
