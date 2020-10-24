@@ -34,6 +34,7 @@ while True:
         # confirms player move
         if ans == "Y":
             if move == "5":
+                print("Exiting...")
                 os._exit(0)
             else:
                 msg = player.name + "\t" + move
