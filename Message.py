@@ -27,8 +27,6 @@ class Message:
                 self.UDPSock.send(data_string)
                 print(data_string)
                 status = False
-
-
         #self.UDPSock.close()
         #os._exit(0)
     
