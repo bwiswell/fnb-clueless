@@ -13,7 +13,6 @@ class Message:
         self.UDPSock.connect(self.addr)
 
 
-    
     def SendServerMsg(self,msg):
 
         status = True
@@ -27,14 +26,17 @@ class Message:
                 self.UDPSock.send(data_string)
                 print(data_string)
                 status = False
-
-
         #self.UDPSock.close()
         #os._exit(0)
     
-    #def SendClientMsg(self):
+    def SendClientMsg(self, conn, addr, msg):
         # This will most likely be used to send GUI updates to client from
-        # server. 
+        # server.
+        data_string = pickle.dumps(msg)
+        conn.send(data_string)
+        
+    def getConnectionInfo(self):
+        return self.UDPSock
 
     #def RcvPlayerMsg(self):
         # This may not be needed as the Server should always be listening
