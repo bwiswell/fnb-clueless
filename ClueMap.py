@@ -25,11 +25,14 @@ class ClueMap:
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
         self.overlay.set_colorkey((0, 0, 0))
 
+        self.surface = pygame.Surface(size).convert()
+
     # Render the game board from background to foreground
-    def draw(self, surface):
-        surface.blit(self.background, (0, 0))
-        self.locations.draw(surface)
-        surface.blit(self.overlay, (0, 0))
+    def draw(self):
+        self.surface.blit(self.background, (0, 0))
+        self.locations.draw(self.surface)
+        self.surface.blit(self.overlay, (0, 0))
+        return self.surface
 
     # Check for a clicked room or hallway and return its name
     def getClicked(self, position):
