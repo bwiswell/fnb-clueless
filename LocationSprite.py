@@ -21,7 +21,7 @@ V_HALLWAY_POSITIONS = [(64, 192), (64, 512), (384, 192), (384, 512), (704, 192),
 RED = (255, 0, 0)
 
 # Assets filename
-LOCATION_ASSETS = "location_assets.png"
+LOCATION_ASSETS = "assets/location_assets.png"
 
 # Spritesheet and font
 sprite_sheet = None
