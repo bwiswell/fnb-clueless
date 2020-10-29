@@ -1,6 +1,7 @@
 # Save as client.py 
 # Message Sender
 import os
+import pickle
 import Message as msgClass
 import Player as pl
 
@@ -17,7 +18,9 @@ menuDict = {"1", "2", "3", "4", "5", "6"}
 menuStrDict = {1: "up", 2: "down", 3: "left", 4: "right", 5:"diagnol"}
 print("Welcome to FNB-Clueless Game " + player.name + "...")
 
-while True:
+status = True
+
+while status:
     print("Please select from the following menu:")
     print("1) Move Up")
     print("2) Move Down")
@@ -35,8 +38,11 @@ while True:
         # confirms player move
         if ((ans == "Y") | (ans == "y")):
             if move == "6":
+                msg = 'exit'
                 print("Exiting...")
-                os._exit(0)
+                message.SendServerMsg(msg)
+                status = False
+
             else:
                 msg = player.name + " moving " + menuStrDict[int(move)] + "..."
                 print(player.name + " moving " + menuStrDict[int(move)] + "...")
@@ -48,3 +54,15 @@ while True:
     else:
         print("Invalid move selected...")
         print("")
+print("here2")
+
+conn = message.getConnectionInfo()
+data = conn.recv(2048)
+
+   
+# repeat as long as message 
+# string are not empty 
+while data:
+    data_var = pickle.loads(data)
+    print("Received message: " + data_var)
+    data = conn.recv(2048)
