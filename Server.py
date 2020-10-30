@@ -5,9 +5,12 @@ import pickle
 import Message as msg
 import Player as pl
 import Information as info
+import Wrapper as wrap
 from socket import *
 
 info1 = info.Information()
+wph = wrap.Header()
+
 
 open = True
 
@@ -23,7 +26,7 @@ while open:
     conn, addr = UDPSock.accept()
 
     status = True
-
+    data_var = ""
     print(f"Waiting to receive messages from {addr}...")
     while status:
         data = conn.recv(buf)
@@ -31,8 +34,9 @@ while open:
         
         print("Received message: " + data_var)
         if data_var == "exit":
-            print("Exiting server")
+            print("Exiting server...")
             status = False
+    
 
 
 
