@@ -51,7 +51,16 @@ while status:
                 msg = player.name + " moving " + menuStrDict[int(move)] + "..."
                 print(player.name + " moving " + menuStrDict[int(move)] + "...")
                 print("")
-                message.SendServerMsg(msg)
+                conn = message.getConnectionInfo()
+                ip, port = conn.getpeername()
+                player.playerIp = ip
+                player.location = str(menuStrDict[int(move)])
+
+                wpd.setPlayerData(player)
+                wph.data = wpd
+                wph.setHeaderId()
+
+                message.SendServerMsg(wph)
         else:
             print("Move not confirmed...")
             print("")
@@ -59,19 +68,8 @@ while status:
         print("Invalid move selected...")
         print("")
 
-conn = message.getConnectionInfo()
-ip, port = conn.getpeername()
-player.playerIp = ip
+print("here")
 
-wpd.setPlayerData(player)
-wpd.printData()
-print(type(str(wph)))
-print(type(eval("wph")))
-print(wph.data.playerData)
-print(wph.DataSize)
-print(wph.__sizeof__())
-
-message.SendServerMsg(str(wph))
 
 #SendPlayerInformation(player)
 

@@ -21,7 +21,7 @@ class Message:
 
             if msg == "exit":
                 print("Exiting server in snd msg")
-                status = False
+                break
             else:
                 self.UDPSock.send(data_string)
                 print(msg)
