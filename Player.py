@@ -1,9 +1,11 @@
 class Player:
     def __init__(self):
         name = ""
-        #location = Room Class
-        weapon = ""
+        location = ""
+        cards = ""
         turnOrder = 0
+        playerIP = ""
+
     
     def sendServerMsg(self):
         # Here we will impliment the player Directions and how to move
