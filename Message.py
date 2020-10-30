@@ -19,7 +19,7 @@ class Message:
         while status:
             data_string = pickle.dumps(msg)
 
-            if msg == "exit":
+            if data_string == "exit":
                 print("Exiting server in snd msg")
                 break
             else:
