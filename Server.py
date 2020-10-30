@@ -31,14 +31,25 @@ while open:
     while status:
         data = conn.recv(buf)
         data_var = pickle.loads(data)
+        wph = data_var
+   
         
-        print("Received message: " + data_var)
+        print("Received message: " + str(data_var))
+
+        if(wph.HeaderId == 1234):
+            print("Normal Message no object message")
+        elif(wph.HeaderId == 8888):
+            print(wph.data.playerData.location)
+            print(wph.data.playerData.playerIp)
+            info1.updateCurrentLocation(wph.data.playerData)
+            locations = info1.getCurrentLocations()
+            print(locations)
+
+
         if data_var == "exit":
             print("Exiting server...")
             status = False
     
-
-
 
 #    message = msg.Message()
 #    msg = "Does this work? Sending Server -> Client"

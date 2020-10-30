@@ -1,7 +1,7 @@
 class Player:
     def __init__(self):
         name = ""
-        location = ""
+        location = "test"
         cards = ""
         turnOrder = 0
         playerIP = ""
