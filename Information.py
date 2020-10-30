@@ -13,7 +13,7 @@ class Information:
         for index, pair in enumerate(self.currentLocation):
             if pair[0] == player.playerIP:
                 print((pair[0],player.location))
-                self.currentLocation[index] = (pair[0],"new location")
+                self.currentLocation[index] = (pair[0],player.location)
                 print(currentLocation)
             else:
                 self.currentLocation.append((player.playerIp,player.location))

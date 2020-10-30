@@ -19,15 +19,14 @@ class Message:
         while status:
             data_string = pickle.dumps(msg)
 
-            if data_string == "exit":
-                print("Exiting server")
-                break
+            if msg == "exit":
+                print("Exiting server in snd msg")
+                status = False
             else:
                 self.UDPSock.send(data_string)
-                print(data_string)
+                print(msg)
                 status = False
-        #self.UDPSock.close()
-        #os._exit(0)
+
 
     def SendPlayerInformation(self,player):
         print("sending")

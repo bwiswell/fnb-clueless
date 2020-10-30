@@ -4,9 +4,13 @@ import os
 import pickle
 import Message as msgClass
 import Player as pl
+import Wrapper as wrap
 
 player = pl.Player()
 message = msgClass.Message()
+wph = wrap.Header()
+wpd = wrap.Data()
+
 ans = "N"
 
 while ((ans != "Y") & (ans != "y")):
@@ -58,6 +62,16 @@ while status:
 conn = message.getConnectionInfo()
 ip, port = conn.getpeername()
 player.playerIp = ip
+
+wpd.setPlayerData(player)
+wpd.printData()
+print(type(str(wph)))
+print(type(eval("wph")))
+print(wph.data.playerData)
+print(wph.DataSize)
+print(wph.__sizeof__())
+
+message.SendServerMsg(str(wph))
 
 #SendPlayerInformation(player)
 
