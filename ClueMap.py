@@ -23,7 +23,7 @@ class ClueMap:
         overlay_asset_position = pygame.Rect(0, 0, size[0], size[1])
         self.overlay = pygame.Surface(size).convert()
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
-        self.overlay.set_colorkey((0, 0, 0))
+        self.overlay.set_colorkey((0, 0, 5))
 
         self.surface = pygame.Surface(size).convert()
 
