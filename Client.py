@@ -54,15 +54,21 @@ while status:
     else:
         print("Invalid move selected...")
         print("")
-print("here2")
 
 conn = message.getConnectionInfo()
-data = conn.recv(2048)
+ip, port = conn.getpeername()
+player.playerIp = ip
+
+#SendPlayerInformation(player)
+
+print(ip)
+
+#data = conn.recv(2048)
 
    
 # repeat as long as message 
 # string are not empty 
-while data:
-    data_var = pickle.loads(data)
-    print("Received message: " + data_var)
-    data = conn.recv(2048)
+#while data:
+#    data_var = pickle.loads(data)
+#    print("Received message: " + data_var)
+#    data = conn.recv(2048)
