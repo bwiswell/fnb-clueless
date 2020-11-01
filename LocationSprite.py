@@ -70,15 +70,18 @@ def loadAll():
         location_sprites.add(loadAsset(room_name, room_asset_position, room_sprite_position))
 
     # Create all horizontal hallway sprites
+    id = 0
     for i in range(N_H_HALLWAYS):
-        hallway_name = "H Hallway " + str(i + 1)
+        hallway_name = "HW" + str(id)
+        id += 1
         hallway_asset_position = pygame.Rect(HALLWAY_ASSET_X_OFFSET, 0, H_HALLWAY_ASSET_SIZE[0], H_HALLWAY_ASSET_SIZE[1])
         hallway_sprite_position = H_HALLWAY_POSITIONS[i]
         location_sprites.add(loadAsset(hallway_name, hallway_asset_position, hallway_sprite_position))
 
     # Create all vertical hallway sprites
     for i in range(N_V_HALLWAYS):
-        hallway_name = "V Hallway " + str(i + 1)
+        hallway_name = "HW" + str(id)
+        id += 1
         hallway_asset_position = pygame.Rect(HALLWAY_ASSET_X_OFFSET, V_HALLWAY_Y_OFFSET, V_HALLWAY_ASSET_SIZE[0], V_HALLWAY_ASSET_SIZE[1])
         hallway_sprite_position = V_HALLWAY_POSITIONS[i]
         location_sprites.add(loadAsset(hallway_name, hallway_asset_position, hallway_sprite_position))
