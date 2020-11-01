@@ -4,9 +4,13 @@ import os
 import pickle
 import Message as msgClass
 import Player as pl
+import Wrapper as wrap
 
 player = pl.Player()
 message = msgClass.Message()
+wph = wrap.Header()
+wpd = wrap.Data()
+
 ans = "N"
 
 while ((ans != "Y") & (ans != "y")):
@@ -47,22 +51,36 @@ while status:
                 msg = player.name + " moving " + menuStrDict[int(move)] + "..."
                 print(player.name + " moving " + menuStrDict[int(move)] + "...")
                 print("")
-                message.SendServerMsg(msg)
+                conn = message.getConnectionInfo()
+                ip, port = conn.getpeername()
+                player.playerIp = ip
+                player.location = str(menuStrDict[int(move)])
+
+                wpd.setPlayerData(player)
+                wph.data = wpd
+                wph.setHeaderId()
+
+                message.SendServerMsg(wph)
         else:
             print("Move not confirmed...")
             print("")
     else:
         print("Invalid move selected...")
         print("")
-print("here2")
 
-conn = message.getConnectionInfo()
-data = conn.recv(2048)
+print("here")
+
+
+#SendPlayerInformation(player)
+
+print(ip)
+
+#data = conn.recv(2048)
 
    
 # repeat as long as message 
 # string are not empty 
-while data:
-    data_var = pickle.loads(data)
-    print("Received message: " + data_var)
-    data = conn.recv(2048)
+#while data:
+#    data_var = pickle.loads(data)
+#    print("Received message: " + data_var)
+#    data = conn.recv(2048)

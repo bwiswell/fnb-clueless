@@ -20,14 +20,16 @@ class Message:
             data_string = pickle.dumps(msg)
 
             if data_string == "exit":
-                print("Exiting server")
+                print("Exiting server in snd msg")
                 break
             else:
                 self.UDPSock.send(data_string)
-                print(data_string)
+                print(msg)
                 status = False
-        #self.UDPSock.close()
-        #os._exit(0)
+
+
+    def SendPlayerInformation(self,player):
+        print("sending")
     
     def SendClientMsg(self, conn, addr, msg):
         # This will most likely be used to send GUI updates to client from
