@@ -1,4 +1,5 @@
 import pygame
+import os
 
 # Replace with a room class
 N_ROOMS = 9
@@ -21,7 +22,7 @@ V_HALLWAY_POSITIONS = [(64, 192), (64, 512), (384, 192), (384, 512), (704, 192),
 RED = (255, 0, 0)
 
 # Assets filename
-LOCATION_ASSETS = "assets/location_assets.png"
+LOCATION_FILE_PATH = "\\assets\\location_assets.png"
 
 # Spritesheet and font
 sprite_sheet = None
@@ -57,7 +58,8 @@ def loadAsset(name, asset_position, sprite_position):
 def loadAll():
     # Initialize spritesheet and font
     global sprite_sheet, font
-    sprite_sheet = pygame.image.load(LOCATION_ASSETS).convert()
+    asset_path = os.path.dirname(os.path.realpath(__file__)) + LOCATION_FILE_PATH
+    sprite_sheet = pygame.image.load(asset_path).convert()
     font = pygame.font.SysFont(None, 24)
 
     location_sprites = pygame.sprite.Group()

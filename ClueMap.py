@@ -1,5 +1,9 @@
 import pygame
+import os
 import LocationSprite
+
+BACKGROUND_FILE_PATH = "\\assets\\background_asset.png"
+OVERLAY_FILE_PATH = "\\assets\\overlay_asset.png"
 
 # Game board GUI pane
 class ClueMap(pygame.Surface):
@@ -8,7 +12,8 @@ class ClueMap(pygame.Surface):
         self.size = size
 
         # Load the background image and set its position
-        background_asset = pygame.image.load("assets/background_asset.png")
+        background_path = os.path.dirname(os.path.realpath(__file__)) + BACKGROUND_FILE_PATH
+        background_asset = pygame.image.load(background_path)
         background_asset_position = pygame.Rect(0, 0, size[0], size[1])
         self.background = pygame.Surface(size).convert()
         self.background.blit(background_asset, (0, 0), background_asset_position)
@@ -20,7 +25,8 @@ class ClueMap(pygame.Surface):
             location.rect.y += 32
 
         # Load the overlay image (walls, furniture) and set its position
-        overlay_asset = pygame.image.load("assets/overlay_asset.png")
+        overlay_path = os.path.dirname(os.path.realpath(__file__)) + OVERLAY_FILE_PATH
+        overlay_asset = pygame.image.load(overlay_path)
         overlay_asset_position = pygame.Rect(0, 0, size[0], size[1])
         self.overlay = pygame.Surface(size).convert()
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
