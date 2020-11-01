@@ -48,8 +48,8 @@ FONT_SIZE = 24
 
 class ClueGUI(pygame.Surface):
     def __init__(self):
-        pygame.Surface.__init__(self, GUI_SIZE)
         pygame.init()
+        pygame.Surface.__init__(self, GUI_SIZE)
         self.screen = pygame.display.set_mode(GUI_SIZE)
         self.center = (GUI_SIZE[0] // 2, GUI_SIZE[1] // 2)
         self.clue_map = ClueMap(MAPVIEW_SIZE)
