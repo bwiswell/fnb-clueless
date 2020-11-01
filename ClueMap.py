@@ -2,8 +2,9 @@ import pygame
 import LocationSprite
 
 # Game board GUI pane
-class ClueMap:
+class ClueMap(pygame.Surface):
     def __init__(self, size):
+        pygame.Surface.__init__(self, size)
         self.size = size
 
         # Load the background image and set its position
@@ -25,18 +26,15 @@ class ClueMap:
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
         self.overlay.set_colorkey((0, 0, 5))
 
-        self.surface = pygame.Surface(size).convert()
-
     # Render the game board from background to foreground
     def draw(self):
-        self.surface.blit(self.background, (0, 0))
-        self.locations.draw(self.surface)
-        self.surface.blit(self.overlay, (0, 0))
-        return self.surface
+        self.blit(self.background, (0, 0))
+        self.locations.draw(self)
+        self.blit(self.overlay, (0, 0))
 
     # Check for a clicked room or hallway and return its name
     def getClicked(self, position):
         for location in self.locations:
             if location.rect.collidepoint(position):
                 return location.name
-        return "none"
+        return None

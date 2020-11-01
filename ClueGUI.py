@@ -1,16 +1,23 @@
 import pygame
 from ClueMap import ClueMap
-import Dialogues
+from ControlPanel import ControlPanel
+from Dialogues import Message, InputDialogue, ConfirmationDialogue
 
 # Size of the GUI and elements within the GUI, to be replaced with rescaling logic
-GUI_SIZE = (896, 896)
+GUI_SIZE = (1280, 896)
 MAPVIEW_POS = (0, 0)
 MAPVIEW_SIZE = (896, 896)
+CONTROL_POS = (896, 0)
+CONTROL_SIZE = (384, 896)
 
 # Confirmation and message strings
+NAME_PROMPT = "Please enter a character name."
 TURN_MESSAGE = "It's your turn - make a move!"
+ACTION_CONF = "Are you sure you want to "
 MOVE_CONF = "Are you sure you want to move to the "
+INVALID_ACTION = "Pick a valid action to perform!"
 INVALID_MOVE = "That isn't a valid move!"
+ACTION_MESSAGE = "You have chosen to "
 MOVE_MESSAGE = "You moved to the "
 
 # Colors
@@ -21,96 +28,94 @@ WHITE = (255, 255, 255)
 FONT_SIZE = 24
 
 # Main GUI class. Provides several methods for client-GUI interaction:
-#
+
 # updateGUI():                          updates the GUI based on server updates. Will be expanded
 #                                       as the server update system is implemented
-#
+
 # getPlayerName():                      displays a text input dialogue and returns a string containing
 #                                       a player name
 #
+# Possible return values:               an alphanumeric string between 1 and 15 characters (NOT YET FULLY IMPLEMENTED)
+
+# getPlayerAction():                    waits for the player to select an action option button and returns
+#                                       a string indicating the selected action
+#
+# Possible return values:               move, suggest, accuse, end
+
 # getPlayerMove(valid_moves):           valid_moves is a list of location IDs that constitue the valid
 #                                       moves for the current player. Returns a location ID (after 2
 #                                       factor confirmation) that represents the desired move
-#
-# showMessage(message_text):            message_text is a string that will be displayed in a message
-#                                       dialogue at the top of the GUI
-#
-# showConfirmationDialogue(conf_text):  conf_text is a string that will be displayed as the prompt in a
-#                                       confirm/cancel dialogue. Returns True if the confirm option is
-#                                       selected or False if the cancel option is selected.
-class ClueGUI:
+
+class ClueGUI(pygame.Surface):
     def __init__(self):
+        pygame.Surface.__init__(self, GUI_SIZE)
         pygame.init()
         self.screen = pygame.display.set_mode(GUI_SIZE)
-        self.center_x = GUI_SIZE[0] // 2
-        self.center_y = GUI_SIZE[1] // 2
+        self.center = (GUI_SIZE[0] // 2, GUI_SIZE[1] // 2)
         self.clue_map = ClueMap(MAPVIEW_SIZE)
         self.font = pygame.font.SysFont(None, FONT_SIZE)
+        self.control_panel = ControlPanel(CONTROL_SIZE, CONTROL_POS, self.font)
         self.updateGUI()
 
+    # Clear any messages or dialogues currently shown
+    def clearDialogues(self):
+        self.screen.blit(self, (0, 0))
+        pygame.display.update()
+
     def updateGUI(self):
-        self.screen.blit(self.clue_map.draw(), MAPVIEW_POS)
+        self.clue_map.draw()
+        self.blit(self.clue_map, MAPVIEW_POS)
+        self.control_panel.draw()
+        self.blit(self.control_panel, CONTROL_POS)
+        self.screen.blit(self, (0, 0))
         pygame.display.update()
 
     def getPlayerName(self):
-        input_dialogue = Dialogues.InputDialogue(self.font, "Please enter your name")
-        input_size = input_dialogue.get_size()
-        input_x = self.center_x - (input_size[0] // 2)
-        input_y = self.center_y - (input_size[1] // 2)
-        input_pos = (input_x, input_y)
-        self.screen.blit(input_dialogue, input_pos)
-        pygame.display.update()
+        input_dialogue = InputDialogue(self.font, NAME_PROMPT, self.center)
+        input_dialogue.draw(self.screen)
+        name = input_dialogue.getResponse(self.screen)
+        self.clearDialogues()
+        return name
+
+    # getPlayerAction returns: move, suggestion, accusation, endTurn
+    def getPlayerAction(self, valid_actions):
         pygame.event.pump()
-        while True:
+        action_selected = False
+        action = ""
+        while not action_selected:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    name = input_dialogue.handleKeyEvent(event)
-                    self.screen.blit(input_dialogue, input_pos)
-                    pygame.display.update()
-                    if name is not None:
-                        self.updateGUI()
-                        return name
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    action = self.control_panel.getClicked(event.pos)
+                    if action in valid_actions:
+                        self.clearDialogues()
+                        conf_text = ACTION_CONF + action + "?"
+                        conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
+                        conf_dialogue.draw(self.screen)
+                        action_selected = conf_dialogue.getResponse()
+                        self.clearDialogues()
+                    else:
+                        Message(self.font, INVALID_ACTION, self.center).draw(self.screen)
+        action_text = MOVE_MESSAGE + action + "!"
+        Message(self.font, action_text, self.center).draw(self.screen)
+        return action
 
     def getPlayerMove(self, valid_moves):
-        self.showMessage(TURN_MESSAGE)
         pygame.event.pump()
         moved = False
         location = ""
         while not moved:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.updateGUI()
                     location = self.clue_map.getClicked(event.pos)
                     if location in valid_moves:
+                        self.clearDialogues()
                         conf_text = MOVE_CONF + location + "?"
-                        moved = self.showConfirmationDialogue(conf_text)
+                        conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
+                        conf_dialogue.draw(self.screen)
+                        moved = conf_dialogue.getResponse()
+                        self.clearDialogues()
                     else:
-                        self.showMessage(INVALID_MOVE)
+                        Message(self.font, INVALID_MOVE, self.center).draw(self.screen)
         moved_text = MOVE_MESSAGE + location + "!"
-        self.showMessage(moved_text)
+        Message(self.font, moved_text, self.center).draw(self.screen)
         return location
-
-    def showMessage(self, message_text):
-        message = Dialogues.Message(self.font, message_text)
-        message_size = message.get_size()
-        message_x = self.center_x - (message_size[0] // 2)
-        message_pos = (message_x, 0)
-        self.screen.blit(message, message_pos)
-        pygame.display.update()
-
-    def showConfirmationDialogue(self, conf_text):
-        conf_dialogue = Dialogues.ConfirmationDialogue(self.font, conf_text)
-        conf_size = conf_dialogue.get_size()
-        conf_x = self.center_x - (conf_size[0] // 2)
-        conf_y = self.center_y - (conf_size[1] // 2)
-        conf_pos = (conf_x, conf_y)
-        self.screen.blit(conf_dialogue, conf_pos)
-        pygame.display.update()
-        pygame.event.pump()
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    selection = conf_dialogue.getClicked(event.pos, conf_pos)
-                    if selection is not None:
-                        self.updateGUI()
-                        return selection
