@@ -55,15 +55,14 @@ class ClueGUI(pygame.Surface):
         self.clue_map = ClueMap(MAPVIEW_SIZE)
         self.font = pygame.font.SysFont(None, FONT_SIZE)
         self.control_panel = ControlPanel(CONTROL_SIZE, CONTROL_POS, self.font)
-        self.updateGUI()
 
     # Clear any messages or dialogues currently shown
     def clearDialogues(self):
         self.screen.blit(self, (0, 0))
         pygame.display.update()
 
-    def updateGUI(self):
-        self.clue_map.draw()
+    def updateGUI(self, player_locations):
+        self.clue_map.draw(player_locations, True, self.font)
         self.blit(self.clue_map, MAPVIEW_POS)
         self.control_panel.draw()
         self.blit(self.control_panel, CONTROL_POS)
