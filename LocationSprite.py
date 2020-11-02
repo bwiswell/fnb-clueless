@@ -3,10 +3,12 @@ import json
 
 import pygame
 
+# Asset sizes
 ROOM_SIZE = (192, 192)
 H_HALLWAY_SIZE = (128, 64)
 V_HALLWAY_SIZE = (64, 128)
 
+# Player positions within locations
 ROOM_PLAYER_OFFSETS = [(64, 64), (96, 64), (64, 96), (96, 96)]
 H_HALLWAY_PLAYER_OFFSET = (48, 16)
 V_HALLWAY_PLAYER_OFFSET = (16, 48)
@@ -18,10 +20,13 @@ RED = (255, 0, 0)
 DATA_FILE_PATH = "\\assets\\location_assets_data.json"
 ASSET_FILE_PATH = "\\assets\\location_assets.png"
 
+# Basic Exception to be raised when too many players
+# are in one location
 class RoomOverflowError(Exception):
     def __init__(self):
         print("Too many players in a room!")
 
+# Base class for all locations
 class LocationSprite(pygame.Surface):
     def __init__(self, loc_id, name, image, position, size):
         pygame.Surface.__init__(self, size)
@@ -50,6 +55,7 @@ class LocationSprite(pygame.Surface):
         if debug:
             self.drawText(font)
 
+# Subclass of LocationSprite for rooms
 class RoomSprite(LocationSprite):
     def __init__(self, loc_id, name, image, position):
         LocationSprite.__init__(self, loc_id, name, image, position, ROOM_SIZE)
@@ -71,6 +77,7 @@ class RoomSprite(LocationSprite):
         LocationSprite.draw(self, debug, font)
         self.drawPlayers()
 
+# Subclass of LocationSprite for hallways
 class HallwaySprite(LocationSprite):
     def __init__(self, loc_id, name, image, position, size, player_offset):
         LocationSprite.__init__(self, loc_id, name, image, position, size)
@@ -93,14 +100,6 @@ class HallwaySprite(LocationSprite):
         LocationSprite.draw(self, debug, font)
         self.drawPlayers()
 
-class HorizontalSprite(HallwaySprite):
-    def __init__(self, loc_id, name, image, position):
-        HallwaySprite.__init__(self, loc_id, name, image, position, H_HALLWAY_SIZE, H_HALLWAY_PLAYER_OFFSET)
-
-class VerticalSprite(HallwaySprite):
-    def __init__(self, loc_id, name, image, position):
-        HallwaySprite.__init__(self, loc_id, name, image, position, V_HALLWAY_SIZE, V_HALLWAY_PLAYER_OFFSET)
-
 def loadLocationSprites():
     location_data_path = os.path.dirname(os.path.realpath(__file__)) + DATA_FILE_PATH
     with open(location_data_path) as data_file:
@@ -119,10 +118,10 @@ def loadLocationSprites():
         elif data_dict["type"] == "horizontal":
             image = pygame.Surface(H_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, H_HALLWAY_SIZE))
-            location_sprites.append(HorizontalSprite(index, data_dict["name"], image, position))
+            location_sprites.append(HallwaySprite(index, data_dict["name"], image, position, H_HALLWAY_SIZE, H_HALLWAY_PLAYER_OFFSET))
         else:
             image = pygame.Surface(V_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, V_HALLWAY_SIZE))
-            location_sprites.append(VerticalSprite(index, data_dict["name"], image, position))
+            location_sprites.append(HallwaySprite(index, data_dict["name"], image, position, V_HALLWAY_SIZE, V_HALLWAY_PLAYER_OFFSET))
 
     return location_sprites

@@ -40,7 +40,7 @@ FONT_SIZE = 24
 # getPlayerAction():                    waits for the player to select an action option button and returns
 #                                       a string indicating the selected action
 #
-# Possible return values:               move, suggest, accuse, end
+# Possible return values:               move, suggest, accuse, endturn
 
 # getPlayerMove(valid_moves):           valid_moves is a list of location IDs that constitue the valid
 #                                       moves for the current player. Returns a location ID (after 2
@@ -76,7 +76,6 @@ class ClueGUI(pygame.Surface):
         self.clearDialogues()
         return name
 
-    # getPlayerAction returns: move, suggestion, accusation, endTurn
     def getPlayerAction(self, valid_actions):
         pygame.event.pump()
         action_selected = False
