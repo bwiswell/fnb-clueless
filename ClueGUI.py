@@ -4,13 +4,13 @@ from ControlPanel import ControlPanel
 from Dialogues import Message, InputDialogue, ConfirmationDialogue
 
 # Confirmation and message strings
-NAME_PROMPT = "Please enter a character name between 1 and 7 characters."
+NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
 START_MESSAGE = "Waiting for the game to start..."
 PICK_ACTION_MESSAGE = "It's your turn - select an action!"
 ACTION_CONF = "Are you sure you want to "
 MOVE_CONF = "Are you sure you want to move to the "
 INVALID_ACTION = "Pick a valid action to perform!"
-INVALID_MOVE = "That isn't a valid move!"
+INVALID_MOVE = "Pick a valid move to make!"
 ACTION_MESSAGE = "You have chosen to "
 MOVE_MESSAGE = "You moved to the "
 
