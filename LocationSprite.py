@@ -4,17 +4,21 @@ import json
 import pygame
 
 # Asset sizes
-ROOM_SIZE = (192, 192)
-H_HALLWAY_SIZE = (128, 64)
+ROOM_SIZE = (256, 192)
+H_HALLWAY_SIZE = (160, 64)
 V_HALLWAY_SIZE = (64, 128)
 
+# Caption position offset
+CAPTION_OFFSET = (7, 14)
+
 # Player positions within locations
-ROOM_PLAYER_OFFSETS = [(64, 64), (96, 64), (64, 96), (96, 96)]
-H_HALLWAY_PLAYER_OFFSET = (48, 16)
-V_HALLWAY_PLAYER_OFFSET = (16, 48)
+ROOM_PLAYER_OFFSETS = [(64, 32), (128, 32), (64, 96), (128, 96)]
+H_HALLWAY_PLAYER_OFFSET = (48, 0)
+V_HALLWAY_PLAYER_OFFSET = (0, 32)
 
 # Colors
-RED = (255, 0, 0)
+GRAY = (191, 191, 191)
+BLACK = (0, 0, 0)
 
 # Assets filename
 DATA_FILE_PATH = "\\assets\\location_assets_data.json"
@@ -29,7 +33,7 @@ class RoomOverflowError(Exception):
 # Base class for all locations
 class LocationSprite(pygame.Surface):
     def __init__(self, loc_id, name, image, position, size):
-        pygame.Surface.__init__(self, size)
+        pygame.Surface.__init__(self, size, pygame.SRCALPHA)
         self.loc_id = loc_id
         self.name = name
         self.image = image
@@ -43,22 +47,16 @@ class LocationSprite(pygame.Surface):
 
     def drawPlayers(self):
         raise NotImplementedError
- 
-    def drawText(self, font):
-        text_object = font.render(self.name, True, RED)
-        text_x = self.get_size()[0] // 2 - text_object.get_size()[0] // 2
-        text_y = self.get_size()[1] // 2 - text_object.get_size()[1] // 2
-        self.blit(text_object, (text_x, text_y))
 
-    def draw(self, debug=False, font=None):
+    def draw(self):
         self.blit(self.image, (0, 0))
-        if debug:
-            self.drawText(font)
 
 # Subclass of LocationSprite for rooms
 class RoomSprite(LocationSprite):
-    def __init__(self, loc_id, name, image, position):
-        LocationSprite.__init__(self, loc_id, name, image, position, ROOM_SIZE)
+    def __init__(self, loc_id, name, image, position, caption):
+        size = (ROOM_SIZE[0] + CAPTION_OFFSET[0], ROOM_SIZE[1] + CAPTION_OFFSET[1] + caption.get_size()[1])
+        LocationSprite.__init__(self, loc_id, name, image, position, size)
+        self.caption = caption
         self.players = []
 
     def clearPlayers(self):
@@ -73,8 +71,9 @@ class RoomSprite(LocationSprite):
         for index, player in enumerate(self.players):
             self.blit(player, ROOM_PLAYER_OFFSETS[index])
 
-    def draw(self, debug=False, font=None):
-        LocationSprite.draw(self, debug, font)
+    def draw(self):
+        LocationSprite.draw(self)
+        self.blit(self.caption, (160 + CAPTION_OFFSET[0], ROOM_SIZE[1] + CAPTION_OFFSET[1]))
         self.drawPlayers()
 
 # Subclass of LocationSprite for hallways
@@ -96,11 +95,12 @@ class HallwaySprite(LocationSprite):
         if self.player is not None:
             self.blit(self.player, self.player_offset)
 
-    def draw(self, debug=False, font=None):
-        LocationSprite.draw(self, debug, font)
+    def draw(self):
+        LocationSprite.draw(self)
         self.drawPlayers()
 
 def loadLocationSprites():
+    font = pygame.font.SysFont(None, 16)
     location_data_path = os.path.dirname(os.path.realpath(__file__)) + DATA_FILE_PATH
     with open(location_data_path) as data_file:
         location_data = json.load(data_file)
@@ -112,9 +112,15 @@ def loadLocationSprites():
         asset_pos = tuple(int(num) for num in data_dict["asset"].replace('(', '').replace(')', '').split(', '))
         position = tuple(int(num) for num in data_dict["position"].replace('(', '').replace(')', '').split(', '))
         if data_dict["type"] == "room":
+            caption_text = font.render(data_dict["name"], True, BLACK)
+            text_height = caption_text.get_size()[1]
+            caption = pygame.Surface((96, text_height + 2))
+            caption.fill(GRAY)
+            pygame.draw.rect(caption, BLACK, pygame.Rect(0, 0, 96, text_height + 2), 1)
+            caption.blit(caption_text, (48 - caption_text.get_size()[0] // 2, 1))
             image = pygame.Surface(ROOM_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, ROOM_SIZE))
-            location_sprites.append(RoomSprite(index, data_dict["name"], image, position))
+            location_sprites.append(RoomSprite(index, data_dict["name"], image, position, caption))
         elif data_dict["type"] == "horizontal":
             image = pygame.Surface(H_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, H_HALLWAY_SIZE))

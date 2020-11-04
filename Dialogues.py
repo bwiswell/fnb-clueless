@@ -1,3 +1,5 @@
+import re
+
 import pygame
 
 # Colors used for displaying dialogues
@@ -30,7 +32,7 @@ class Message(pygame.Surface):
 # which updates the text in the input box and returns None if the input is not finished,
 # or the value of the inputted text if the KEYDOWN event is the return key
 class InputDialogue(pygame.Surface):
-    def __init__(self, font, text, center):
+    def __init__(self, font, text, center, max_characters):
         self.font = font
         self.input_text = ""
         text_object = font.render(text, True, BLACK)
@@ -43,17 +45,17 @@ class InputDialogue(pygame.Surface):
         half_height = dialogue_height // 2
         self.half_size = (text_width, half_height)
         self.input_surface_pos = (BORDER_RADIUS, BORDER_RADIUS + half_height)
-        input_width = (3 * text_width) // 4
+        input_width = text_width // 2
         input_x = (text_width - input_width) // 2
         y_margins = text_height // 3
-        input_y = half_height - (text_height + y_margins)
-        self.input_pos = (input_x, input_y)
-        self.input_rect = pygame.Rect(input_x - BORDER_RADIUS, input_y - BORDER_RADIUS, input_width + 2 * BORDER_RADIUS, text_height + 2 * BORDER_RADIUS)
+        self.input_y = half_height - (text_height + y_margins)
+        self.input_rect = pygame.Rect(input_x - BORDER_RADIUS, self.input_y - BORDER_RADIUS, input_width + 2 * BORDER_RADIUS, text_height + 2 * BORDER_RADIUS)
         text_surface = pygame.Surface(self.half_size)
         text_surface.fill(WHITE)
         text_surface.blit(text_object, (0, y_margins))
         self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
         self.position = (center[0] - self.get_size()[0] // 2, center[1] - self.get_size()[1] // 2)
+        self.max_characters = max_characters
 
     def drawInput(self):
         input_surface = pygame.Surface(self.half_size)
@@ -61,7 +63,8 @@ class InputDialogue(pygame.Surface):
         input_object = self.font.render(self.input_text, True, BLACK)
         pygame.draw.rect(input_surface, GRAY, self.input_rect)
         pygame.draw.rect(input_surface, BLACK, self.input_rect, BORDER_RADIUS)
-        input_surface.blit(input_object, self.input_pos)
+        input_x = self.input_rect.x + (self.input_rect.size[0] // 2 - input_object.get_size()[0] // 2)
+        input_surface.blit(input_object, (input_x, self.input_y))
         self.blit(input_surface, self.input_surface_pos)
 
     def draw(self, screen):
@@ -74,11 +77,14 @@ class InputDialogue(pygame.Surface):
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        return self.input_text
+                        if len(self.input_text) > 0:
+                            return self.input_text
                     elif event.key == pygame.K_BACKSPACE:
                         self.input_text = self.input_text[:-1]
                     else:
-                        self.input_text += event.unicode
+                        alphanumeric = re.findall("[0-9A-Za-z]", event.unicode)
+                        if len(alphanumeric) != 0 and len(self.input_text) < self.max_characters:
+                            self.input_text += event.unicode
                     self.draw(screen)
         
 # Class to display a confirm/cancel dialogue. The text field should contain the confirm/cancel prompt
