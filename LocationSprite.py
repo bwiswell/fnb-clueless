@@ -34,6 +34,7 @@ class RoomOverflowError(Exception):
 class LocationSprite(pygame.Surface):
     def __init__(self, loc_id, name, image, position, size):
         pygame.Surface.__init__(self, size, pygame.SRCALPHA)
+        self.convert()
         self.loc_id = loc_id
         self.name = name
         self.image = image
@@ -105,8 +106,8 @@ def loadLocationSprites():
     with open(location_data_path) as data_file:
         location_data = json.load(data_file)
     asset_path = os.path.dirname(os.path.realpath(__file__)) + ASSET_FILE_PATH
-    asset_sheet = pygame.image.load(asset_path).convert()
-    location_sprites = []
+    asset_sheet = pygame.image.load(asset_path)
+    location_sprites = {}
 
     for index,data_dict in enumerate(location_data):
         asset_pos = tuple(int(num) for num in data_dict["asset"].replace('(', '').replace(')', '').split(', '))
@@ -120,14 +121,14 @@ def loadLocationSprites():
             caption.blit(caption_text, (48 - caption_text.get_size()[0] // 2, 1))
             image = pygame.Surface(ROOM_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, ROOM_SIZE))
-            location_sprites.append(RoomSprite(index, data_dict["name"], image, position, caption))
+            location_sprites[data_dict["name"].lower()] = RoomSprite(index, data_dict["name"], image, position, caption)
         elif data_dict["type"] == "horizontal":
             image = pygame.Surface(H_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, H_HALLWAY_SIZE))
-            location_sprites.append(HallwaySprite(index, data_dict["name"], image, position, H_HALLWAY_SIZE, H_HALLWAY_PLAYER_OFFSET))
+            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, H_HALLWAY_SIZE, H_HALLWAY_PLAYER_OFFSET)
         else:
             image = pygame.Surface(V_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, V_HALLWAY_SIZE))
-            location_sprites.append(HallwaySprite(index, data_dict["name"], image, position, V_HALLWAY_SIZE, V_HALLWAY_PLAYER_OFFSET))
+            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, V_HALLWAY_SIZE, V_HALLWAY_PLAYER_OFFSET)
 
     return location_sprites

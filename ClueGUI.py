@@ -26,7 +26,7 @@ FONT_SIZE = 24
 #
 # Possible return values:               an alphanumeric string between 1 and 8 characters
 
-# initPlayerSprites(players)            players is a list containing of player objects used to initialize the player
+# initPlayers(players)                  players is a list containing of player objects used to initialize the player
 #                                       sprites and associate them with player ip addresses. Must be invoked before
 #                                       any call to updateGUI() from the client
 
@@ -39,6 +39,14 @@ FONT_SIZE = 24
 # getPlayerMove(valid_moves):           valid_moves is a list of location IDs that constitue the valid
 #                                       moves for the current player. Returns a location ID (after 2
 #                                       factor confirmation) that represents the desired move
+
+class NoPossibleActionError(Exception):
+    def __init__(self):
+        print("No possible actions were provided!")
+
+class NoPossibleMoveError(Exception):
+    def __init__(self):
+        print("No possible moves were provided!")
 
 class ClueGUI(pygame.Surface):
     def __init__(self):
@@ -63,6 +71,8 @@ class ClueGUI(pygame.Surface):
         pygame.display.update()
 
     def updateGUI(self, player_locations):
+        if player_locations is not None:
+            player_locations = [(ip,loc.lower()) for (ip,loc) in player_locations]
         self.clue_map.draw(player_locations)
         self.blit(pygame.transform.smoothscale(self.clue_map, self.map_size), (0, 0))
         self.control_panel.draw()
@@ -79,11 +89,14 @@ class ClueGUI(pygame.Surface):
         Message(self.font, START_MESSAGE, self.center).draw(self.screen)
         return name
 
-    def initPlayerSprites(self, players):
+    def initPlayers(self, players):
         self.clue_map.initPlayerSprites(players)
         self.player_sprite = self.clue_map.getPlayerSpriteByName(self.player_name)
 
     def getPlayerAction(self, valid_actions):
+        if len(valid_actions) == 0:
+            raise NoPossibleActionError
+        valid_actions = [action.lower() for action in valid_actions]
         pygame.event.pump()
         action_selected = False
         action = ""
@@ -107,6 +120,9 @@ class ClueGUI(pygame.Surface):
         return action
 
     def getPlayerMove(self, valid_moves):
+        if len(valid_moves) == 0:
+            raise NoPossibleMoveError
+        valid_moves = [move.lower() for move in valid_moves]
         pygame.event.pump()
         moved = False
         location = ""

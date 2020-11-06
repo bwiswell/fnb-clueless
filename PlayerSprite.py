@@ -1,7 +1,12 @@
+import os
+
 import pygame
 
 # Colors
 WHITE = (255, 255, 255)
+
+# Assets filename
+ASSET_FILE_PATH = "\\assets\\character_assets.png"
 
 # Character asset info
 NUM_CHARACTERS = 4
@@ -14,7 +19,8 @@ font = None
 
 def initCharacterAssets():
     global character_assets, font
-    character_sheet = pygame.image.load("assets/character_assets.png")
+    asset_path = os.path.dirname(os.path.realpath(__file__)) + ASSET_FILE_PATH
+    character_sheet = pygame.image.load(asset_path)
     for i in range(NUM_CHARACTERS):
         character = pygame.Surface(CHARACTER_SIZE, pygame.SRCALPHA)
         character_asset_pos = (0, CHARACTER_SIZE[1] * i)
@@ -26,6 +32,7 @@ def initCharacterAssets():
 class PlayerSprite(pygame.Surface):
     def __init__(self, index, ip, name):
         pygame.Surface.__init__(self, CHARACTER_SIZE, pygame.SRCALPHA)
+        self.convert()
         self.blit(character_assets[index], (0, 0))
         self.ip = ip
         self.name = name

@@ -58,7 +58,7 @@ class ClueMap(pygame.Surface):
 
     # Update the player assets to reflect current positions
     def updateLocations(self, player_locations):
-        for location in self.locations:
+        for location in self.locations.values():
             location.clearPlayers()
         for ip,location in player_locations:
             self.locations[location].addPlayer(self.players_by_ip[ip])
@@ -69,7 +69,7 @@ class ClueMap(pygame.Surface):
         self.blit(self.background, (0, 0))
         if drawPlayers:
             self.updateLocations(player_locations)
-        for location in self.locations:
+        for location in self.locations.values():
             location.draw()
             self.blit(location, location.position)
         self.blit(self.overlay, (0, 0))
@@ -79,5 +79,5 @@ class ClueMap(pygame.Surface):
     def getClicked(self, position):
         for location in self.locations:
             if location.rect.collidepoint(position):
-                return location.name
+                return location.name.lower()
         return None
