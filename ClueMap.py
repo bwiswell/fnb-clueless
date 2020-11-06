@@ -12,8 +12,12 @@ MAP_SIZE = (1152, 896)
 
 # Game board GUI pane
 class ClueMap(pygame.Surface):
-    def __init__(self):
+    def __init__(self, scaled_map_size):
         pygame.Surface.__init__(self, MAP_SIZE)
+
+        scale_x = scaled_map_size[0] / MAP_SIZE[0]
+        scale_y = scaled_map_size[1] / MAP_SIZE[1]
+        scale = (scale_x + scale_y) / 2
 
         # Load the background image and set its position
         background_path = os.path.dirname(os.path.realpath(__file__)) + BACKGROUND_FILE_PATH
@@ -23,7 +27,7 @@ class ClueMap(pygame.Surface):
         self.background.blit(background_asset, (0, 0), background_asset_position)
 
         # Load the room and hallway images and set their positions
-        self.locations = LocationSprite.loadLocationSprites()
+        self.locations = LocationSprite.loadLocationSprites(scale)
 
         # Load the overlay image (walls, furniture) and set its position
         overlay_path = os.path.dirname(os.path.realpath(__file__)) + OVERLAY_FILE_PATH
@@ -74,10 +78,9 @@ class ClueMap(pygame.Surface):
             self.blit(location, location.position)
         self.blit(self.overlay, (0, 0))
 
-
     # Check for a clicked room or hallway and return its name
     def getClicked(self, position):
-        for location in self.locations:
+        for location in self.locations.values():
             if location.rect.collidepoint(position):
                 return location.name.lower()
         return None

@@ -7,6 +7,7 @@ from Dialogues import Message, InputDialogue, ConfirmationDialogue
 NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
 START_MESSAGE = "Waiting for the game to start..."
 PICK_ACTION_MESSAGE = "It's your turn - select an action!"
+PICK_MOVE_MESSAGE = "You have chosen to move - select a valid location!"
 ACTION_CONF = "Are you sure you want to "
 MOVE_CONF = "Are you sure you want to move to the "
 INVALID_ACTION = "Pick a valid action to perform!"
@@ -37,8 +38,9 @@ FONT_SIZE = 24
 # Possible return values:               move, suggest, accuse, endturn
 
 # getPlayerMove(valid_moves):           valid_moves is a list of location IDs that constitue the valid
-#                                       moves for the current player. Returns a location ID (after 2
-#                                       factor confirmation) that represents the desired move
+#                                       moves for the current player. locations IDs should be entirely lowercase.
+#                                       Returns a lowercase location ID (after 2 factor confirmation) that represents 
+#                                       the desired move
 
 class NoPossibleActionError(Exception):
     def __init__(self):
@@ -58,7 +60,7 @@ class ClueGUI(pygame.Surface):
         self.control_pos = (self.map_size[0], 0)
         pygame.Surface.__init__(self, self.gui_size)
         self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
-        self.clue_map = ClueMap()
+        self.clue_map = ClueMap(self.map_size)
         self.font = pygame.font.SysFont(None, FONT_SIZE)
         self.control_panel = ControlPanel(self.control_size, self.control_pos, self.font)
         self.player_name = ""
@@ -94,6 +96,7 @@ class ClueGUI(pygame.Surface):
         self.player_sprite = self.clue_map.getPlayerSpriteByName(self.player_name)
 
     def getPlayerAction(self, valid_actions):
+        self.clearDialogues()
         if len(valid_actions) == 0:
             raise NoPossibleActionError
         valid_actions = [action.lower() for action in valid_actions]
@@ -115,17 +118,19 @@ class ClueGUI(pygame.Surface):
                     else:
                         self.clearDialogues()
                         Message(self.font, INVALID_ACTION, self.center).draw(self.screen)
-        action_text = MOVE_MESSAGE + action + "!"
+        action_text = ACTION_MESSAGE + action + "!"
         Message(self.font, action_text, self.center).draw(self.screen)
         return action
 
     def getPlayerMove(self, valid_moves):
+        self.clearDialogues()
         if len(valid_moves) == 0:
             raise NoPossibleMoveError
         valid_moves = [move.lower() for move in valid_moves]
         pygame.event.pump()
         moved = False
         location = ""
+        Message(self.font, PICK_MOVE_MESSAGE, self.center).draw(self.screen)
         while not moved:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -138,6 +143,7 @@ class ClueGUI(pygame.Surface):
                         moved = conf_dialogue.getResponse()
                         self.clearDialogues()
                     else:
+                        self.clearDialogues()
                         Message(self.font, INVALID_MOVE, self.center).draw(self.screen)
         moved_text = MOVE_MESSAGE + location + "!"
         Message(self.font, moved_text, self.center).draw(self.screen)

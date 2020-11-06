@@ -17,6 +17,7 @@ character_assets = []
 FONT_SIZE = 18
 font = None
 
+# Loads all character assets from file and initializes the font
 def initCharacterAssets():
     global character_assets, font
     asset_path = os.path.dirname(os.path.realpath(__file__)) + ASSET_FILE_PATH
@@ -29,6 +30,8 @@ def initCharacterAssets():
         character_assets.append(character)
     font = pygame.font.SysFont(None, FONT_SIZE)
 
+# Basic player Sprite class consisting of a player image and username
+# caption
 class PlayerSprite(pygame.Surface):
     def __init__(self, index, ip, name):
         pygame.Surface.__init__(self, CHARACTER_SIZE, pygame.SRCALPHA)

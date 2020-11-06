@@ -32,13 +32,14 @@ class RoomOverflowError(Exception):
 
 # Base class for all locations
 class LocationSprite(pygame.Surface):
-    def __init__(self, loc_id, name, image, position, size):
+    def __init__(self, loc_id, name, image, position, size, collisionBox):
         pygame.Surface.__init__(self, size, pygame.SRCALPHA)
         self.convert()
         self.loc_id = loc_id
         self.name = name
         self.image = image
         self.position = position
+        self.rect = collisionBox
 
     def clearPlayers(self):
         raise NotImplementedError
@@ -54,9 +55,9 @@ class LocationSprite(pygame.Surface):
 
 # Subclass of LocationSprite for rooms
 class RoomSprite(LocationSprite):
-    def __init__(self, loc_id, name, image, position, caption):
+    def __init__(self, loc_id, name, image, position, collisionBox, caption):
         size = (ROOM_SIZE[0] + CAPTION_OFFSET[0], ROOM_SIZE[1] + CAPTION_OFFSET[1] + caption.get_size()[1])
-        LocationSprite.__init__(self, loc_id, name, image, position, size)
+        LocationSprite.__init__(self, loc_id, name, image, position, size, collisionBox)
         self.caption = caption
         self.players = []
 
@@ -72,6 +73,7 @@ class RoomSprite(LocationSprite):
         for index, player in enumerate(self.players):
             self.blit(player, ROOM_PLAYER_OFFSETS[index])
 
+    # Draws the room, room caption, and any players in the room
     def draw(self):
         LocationSprite.draw(self)
         self.blit(self.caption, (160 + CAPTION_OFFSET[0], ROOM_SIZE[1] + CAPTION_OFFSET[1]))
@@ -79,8 +81,8 @@ class RoomSprite(LocationSprite):
 
 # Subclass of LocationSprite for hallways
 class HallwaySprite(LocationSprite):
-    def __init__(self, loc_id, name, image, position, size, player_offset):
-        LocationSprite.__init__(self, loc_id, name, image, position, size)
+    def __init__(self, loc_id, name, image, position, size, collisionBox, player_offset):
+        LocationSprite.__init__(self, loc_id, name, image, position, size, collisionBox)
         self.player = None
         self.player_offset = player_offset
 
@@ -96,11 +98,13 @@ class HallwaySprite(LocationSprite):
         if self.player is not None:
             self.blit(self.player, self.player_offset)
 
+    # Draws the hallway and and any players in the hallway
     def draw(self):
         LocationSprite.draw(self)
         self.drawPlayers()
 
-def loadLocationSprites():
+# Loads all location sprites and returns them as an (id, locationSprite) dictionary
+def loadLocationSprites(scale):
     font = pygame.font.SysFont(None, 16)
     location_data_path = os.path.dirname(os.path.realpath(__file__)) + DATA_FILE_PATH
     with open(location_data_path) as data_file:
@@ -121,14 +125,23 @@ def loadLocationSprites():
             caption.blit(caption_text, (48 - caption_text.get_size()[0] // 2, 1))
             image = pygame.Surface(ROOM_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, ROOM_SIZE))
-            location_sprites[data_dict["name"].lower()] = RoomSprite(index, data_dict["name"], image, position, caption)
+            collisionPos = (position[0] * scale, position[1] * scale)
+            collisionSize = (ROOM_SIZE[0] * scale, ROOM_SIZE[1] * scale)
+            collisionBox = pygame.Rect(collisionPos, collisionSize)
+            location_sprites[data_dict["name"].lower()] = RoomSprite(index, data_dict["name"], image, position, collisionBox, caption)
         elif data_dict["type"] == "horizontal":
             image = pygame.Surface(H_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, H_HALLWAY_SIZE))
-            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, H_HALLWAY_SIZE, H_HALLWAY_PLAYER_OFFSET)
+            collisionPos = (position[0] * scale, position[1] * scale)
+            collisionSize = (H_HALLWAY_SIZE[0] * scale, H_HALLWAY_SIZE[1] * scale)
+            collisionBox = pygame.Rect(collisionPos, collisionSize)
+            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, H_HALLWAY_SIZE, collisionBox, H_HALLWAY_PLAYER_OFFSET)
         else:
             image = pygame.Surface(V_HALLWAY_SIZE).convert()
             image.blit(asset_sheet, (0, 0), pygame.Rect(asset_pos, V_HALLWAY_SIZE))
-            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, V_HALLWAY_SIZE, V_HALLWAY_PLAYER_OFFSET)
+            collisionPos = (position[0] * scale, position[1] * scale)
+            collisionSize = (V_HALLWAY_SIZE[0] * scale, V_HALLWAY_SIZE[1] * scale)
+            collisionBox = pygame.Rect(collisionPos, collisionSize)
+            location_sprites[data_dict["name"].lower()] = HallwaySprite(index, data_dict["name"], image, position, V_HALLWAY_SIZE, collisionBox, V_HALLWAY_PLAYER_OFFSET)
 
     return location_sprites
