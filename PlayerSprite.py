@@ -13,6 +13,11 @@ NUM_CHARACTERS = 4
 CHARACTER_SIZE = (64, 64)
 character_assets = []
 
+# Image info
+IMAGE_Y_OFFSET = 12
+IMAGE_POS = (0, 12)
+IMAGE_SIZE = (64, 52)
+
 # Font info
 FONT_SIZE = 18
 font = None
@@ -42,3 +47,5 @@ class PlayerSprite(pygame.Surface):
         text_object = font.render(name, True, WHITE)
         text_x = 32 - text_object.get_size()[0] // 2
         self.blit(text_object, (text_x, 0))
+        self.image = pygame.Surface(IMAGE_SIZE, pygame.SRCALPHA)
+        self.image.blit(character_assets[index], (0, 0), pygame.Rect(IMAGE_POS, IMAGE_SIZE))

@@ -138,3 +138,103 @@ class Button(pygame.Surface):
         self.blit(text_object, (self.size[0] // 2 - text_size[0] // 2, self.size[1] // 2 - text_size[1] // 2))
         self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
         self.rect = pygame.Rect(self.position, self.size)
+
+class Slot(pygame.Surface):
+    def __init__(self, width, position, category, cards):
+        height = 5 * (width // 3)
+        self.size = (width, height)
+        pygame.Surface.__init__(self, self.size)
+        self.position = position
+        self.rect = pygame.Rect(position, self.size)
+        self.category = category
+        self.cards = cards
+        self.num_cards = len(self.cards)
+        self.current_index = 0
+        self.current_card = self.cards[self.current_index]
+
+        card_width = 4 * (width // 5)
+        card_height = 4 * (card_width // 3)
+        self.card_size = (card_width, card_height)
+        
+        half_x_margin = (width - card_width) // 2
+        half_y_margin = (height - card_height) // 2
+        self.card_pos = (half_x_margin, half_y_margin)
+
+        up_points = [(half_x_margin, half_y_margin), (width - half_x_margin, half_y_margin), (width // 2, 0)]
+        down_points = [(half_x_margin, height - half_y_margin), (width - half_x_margin, height - half_y_margin), (width // 2, height)]
+        self.up = pygame.Rect(half_x_margin, 0, card_width, half_y_margin)
+        self.down = pygame.Rect(half_x_margin, height - half_y_margin, card_width, half_y_margin)
+
+        self.fill(WHITE)
+        pygame.draw.polygon(self, BLACK, up_points)
+        pygame.draw.polygon(self, BLACK, down_points)
+        self.drawCard()
+
+    def drawCard(self):
+        self.blit(pygame.transform.smoothscale(self.current_card, self.card_size), self.card_pos)
+
+    def handleClick(self, click_pos):
+        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
+        if self.up.collidepoint(adj_pos):
+            self.current_index -= 1
+            self.current_card = self.cards[self.current_index % self.num_cards]
+            self.drawCard()
+        elif self.down.collidepoint(adj_pos):
+            self.current_index += 1
+            self.current_card = self.cards[self.current_index % self.num_cards]
+            self.drawCard()
+
+class SuggestionDialogue(pygame.Surface):
+    def __init__(self, font, text, center, screen_width, card_deck):
+        text_object = font.render(text, True, BLACK)
+        text_size = text_object.get_size()
+        dialogue_width = screen_width // 3
+        slot_width = dialogue_width // 3
+        slot_y_offset = text_size[1] * 2
+        text_pos = (dialogue_width // 2 - text_size[0] // 2, slot_y_offset // 2 - text_size[1] // 2)
+        player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
+        weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
+        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.location_cards)
+        self.slots = [player_slot, location_slot, weapon_slot]
+        slot_height = player_slot.size[1]
+        dialogue_height = slot_height + slot_y_offset * 2
+        self.size = (dialogue_width, dialogue_height)
+        pygame.Surface.__init__(self, self.size)
+
+        self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
+        self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
+
+        self.fill(WHITE)
+        self.blit(text_object, text_pos)
+        for slot in self.slots:
+            self.blit(slot, slot.position)
+        self.blit(self.confirm, self.confirm.position)
+        self.blit(self.cancel, self.cancel.position)
+        self.position = (center[0] - (self.size[0] // 2), center[1] - (self.size[1] // 2))
+
+    def draw(self, screen):
+        screen.blit(self, self.position)
+        pygame.display.update()
+
+    def getSelection(self):
+        selection = {}
+        for slot in self.slots:
+            selection[slot.category] = slot.current_card.id
+        return selection
+
+    def getResponse(self, screen):
+        pygame.event.pump()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    adj_pos = (event.pos[0] - self.position[0], event.pos[1] - self.position[1])
+                    if self.confirm.rect.collidepoint(adj_pos):
+                        return self.getSelection()
+                    elif self.cancel.rect.collidepoint(adj_pos):
+                        return self.cancel.return_value
+                    else:
+                        for slot in self.slots:
+                            if slot.rect.collidepoint(adj_pos):
+                                slot.handleClick(adj_pos)
+                                self.blit(slot, slot.position)
+                                self.draw(screen)

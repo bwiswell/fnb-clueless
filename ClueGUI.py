@@ -1,7 +1,7 @@
 import pygame
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
-from Dialogues import Message, InputDialogue, ConfirmationDialogue
+from Dialogues import Message, InputDialogue, ConfirmationDialogue, SuggestionDialogue
 
 # Confirmation and message strings
 NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
@@ -14,6 +14,7 @@ INVALID_ACTION = "Pick a valid action to perform!"
 INVALID_MOVE = "Pick a valid move to make!"
 ACTION_MESSAGE = "You have chosen to "
 MOVE_MESSAGE = "You moved to the "
+PICK_SUGGESTION_MESSAGE = "Pick a player card, weapon card, and location card to make a suggestion!"
 
 # The font size to use for dialogues and messages
 FONT_SIZE = 24
@@ -62,7 +63,7 @@ class ClueGUI(pygame.Surface):
         self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
         self.clue_map = ClueMap(self.map_size)
         self.font = pygame.font.SysFont(None, FONT_SIZE)
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.font)
+        self.control_panel = None
         self.player_name = ""
         self.player_sprite = None
         self.updateGUI(None)
@@ -77,8 +78,6 @@ class ClueGUI(pygame.Surface):
             player_locations = [(ip,loc.lower()) for (ip,loc) in player_locations]
         self.clue_map.draw(player_locations)
         self.blit(pygame.transform.smoothscale(self.clue_map, self.map_size), (0, 0))
-        self.control_panel.draw()
-        self.blit(self.control_panel, self.control_pos)
         self.screen.blit(self, (0, 0))
         pygame.display.update()
 
@@ -94,6 +93,9 @@ class ClueGUI(pygame.Surface):
     def initPlayers(self, players):
         self.clue_map.initPlayerSprites(players)
         self.player_sprite = self.clue_map.getPlayerSpriteByName(self.player_name)
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player_sprite)
+        self.blit(self.control_panel, self.control_pos)
+        self.updateGUI(None)
 
     def getPlayerAction(self, valid_actions):
         self.clearDialogues()
@@ -148,3 +150,10 @@ class ClueGUI(pygame.Surface):
         moved_text = MOVE_MESSAGE + location + "!"
         Message(self.font, moved_text, self.center).draw(self.screen)
         return location
+
+    def getPlayerSuggestion(self, card_deck):
+        self.clearDialogues()
+        pygame.event.pump()
+        suggestion_dialogue = SuggestionDialogue(self.font, PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], card_deck)
+        suggestion_dialogue.draw(self.screen)
+        return suggestion_dialogue.getResponse(self.screen)
