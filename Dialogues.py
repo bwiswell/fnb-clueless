@@ -17,11 +17,15 @@ class Message(pygame.Surface):
         self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.position = (center[0] - (self.get_size()[0] // 2), 0)
 
+class Dialogue(pygame.Surface):
+    def __init__(self, size):
+        pygame.Surface.__init__(self, size)
+
 # Class to display a text input dialogue. The text field should contain the input prompt
 # (i.e. "Enter a player name"). KEYDOWN events can be passed to handleKeyEvent,
 # which updates the text in the input box and returns None if the input is not finished,
 # or the value of the inputted text if the KEYDOWN event is the return key
-class InputDialogue(pygame.Surface):
+class InputDialogue(Dialogue):
     def __init__(self, font, text, center, max_characters):
         self.font = font
         self.input_text = ""
@@ -30,7 +34,7 @@ class InputDialogue(pygame.Surface):
         text_width = text_rect.size[0]
         text_height = text_rect.size[1]
         dialogue_height = text_height * 3
-        pygame.Surface.__init__(self, (text_width + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        Dialogue.__init__(self, (text_width + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
         self.fill(GUIConstants.BLACK)
         half_height = dialogue_height // 2
         self.half_size = (text_width, half_height)
@@ -84,12 +88,12 @@ class InputDialogue(pygame.Surface):
 # (i.e. "Are you sure you want to move to the Kitchen?"). MOUSEBUTTONDOWN events can be passed to getClicked,
 # which returns True if the click position is within the "confirm" button, False if the click position is
 # within the "cancel" button, and None if the click is anywhere else
-class ConfirmationDialogue(pygame.Surface):
+class ConfirmationDialogue(Dialogue):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
         dialogue_height = text_rect.size[1] * 3
-        pygame.Surface.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        Dialogue.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
         text_surface = pygame.Surface((text_rect.size[0], dialogue_height))
         text_surface.fill(GUIConstants.WHITE)
         x_margins = text_rect.size[0] // 3
@@ -184,7 +188,7 @@ class Slot(pygame.Surface):
 # and weapon card comprising a suggestion/accusation. Allows the player to scroll
 # through each category of card until "confirm" or "cancel" is selected. On "confirm",
 # the name of each selected card is returned. Otherwise, False is returned.
-class SuggestionDialogue(pygame.Surface):
+class SuggestionDialogue(Dialogue):
     def __init__(self, font, text, center, screen_width, card_deck):
         text_object = font.render(text, True, GUIConstants.BLACK)
         text_size = text_object.get_size()
@@ -199,7 +203,7 @@ class SuggestionDialogue(pygame.Surface):
         slot_height = player_slot.size[1]
         dialogue_height = slot_height + slot_y_offset * 2
         self.size = (dialogue_width, dialogue_height)
-        pygame.Surface.__init__(self, self.size)
+        Dialogue.__init__(self, self.size)
 
         self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
         self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
