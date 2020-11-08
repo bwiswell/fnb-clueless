@@ -4,15 +4,15 @@ import os
 import pickle
 import pygame
 from ClueGUI import ClueGUI
-#import Message as msgClass
+import Message as msgClass
 import Player as pl
-#import Wrapper as wrap
+import Wrapper as wrap
 
 gui = ClueGUI()
 player = pl.Player()
-#message = msgClass.Message()
-#wph = wrap.Header()
-#wpd = wrap.Data()
+message = msgClass.Message()
+wph = wrap.Header()
+wpd = wrap.Data()
 
 studyList = ["HW0", "HW6", "Kitchen", "Lounge", "Conservatory"]
 hall0List = ["Study", "Hall"]
@@ -43,20 +43,24 @@ kitchenList = ["HW5", "HW11", "Study", "Lounge", "Conservatory"]
 moveDict = {
             "HW0":hall0List, "HW1":hall1List, "HW2":hall2List, "HW3":hall3List, "HW4":hall4List, "HW5":hall5List,
             "HW6":hall6List, "HW7":hall7List, "HW8":hall8List, "HW9":hall9List, "HW10":hall10List, "HW11":hall11List,
-            "Study": studyList, "Hall": hallList, "Lounge": loungeList,
-            "Library": libraryList, "Billiard Room": billiardRoomList, "Dining Room": diningRoom,
-            "Conservatory": conservatoryList, "Ballroom": ballroomList, "Kitchen": kitchenList
+            "Study":studyList, "Hall":hallList, "Lounge":loungeList,
+            "Library":libraryList, "Billiard Room":billiardRoomList, "Dining Room":diningRoom,
+            "Conservatory":conservatoryList, "Ballroom":ballroomList, "Kitchen":kitchenList
            }
 
-actionList = ["accuse", "suggest", "endTurn"]
+actionList = ["accuse", "suggest", "endturn"]
 locList = ["Hall", "Library"]
 playerLocs = {"Hall", "HW1", "Study"}
 player.location = "Hall"
 gui.updateGUI()
 
 while True:
+    # wait for server update along with updated player locations
+    # generate playerLoc list
+    
+    # determine list of valid player moves
     moveList = moveDict[player.location]
-    actionList = ["accuse", "suggest", "endTurn"]
+    actionList = ["accuse", "suggest", "endturn"]
     print(moveList)
 
     if "HW" in player.location:
@@ -70,15 +74,27 @@ while True:
     print(moveList)
 
     action = gui.getPlayerAction(actionList)
+
+    if action == "endturn":
+        raise SystemExit
+
     move = gui.getPlayerMove(moveList)
     print(action)
     print(move)
     player.location = move
+    conn = message.getConnectionInfo()
+    ip, port = conn.getpeername()
+
+    player.playerIp = ip
+
+    wpd.setPlayerData(player)
+    wph.data = wpd
+    wph.setHeaderId()
+
+    message.SendServerMsg(wph)
     #if suggestion made check
     #package message and send update to server
 
-    if action == "endTurn":
-        raise SystemExit
     # for event in pygame.event.get():
     #     if event.type == pygame.KEYDOWN:
     #         if event.key == pygame.K_ESCAPE:
