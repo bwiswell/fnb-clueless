@@ -2,30 +2,20 @@ import re
 
 import pygame
 
-# Colors used for displaying dialogues
-BLACK = (0, 0, 0)
-GRAY = (191, 191, 191)
-WHITE = (255, 255, 255)
-
-# The border radius to use around text items
-BORDER_RADIUS = 1
+import GUIConstants
 
 # Simple class to render a text message on a white background with a black border
 class Message(pygame.Surface):
     def __init__(self, font, text, center):
-        text_object = font.render(text, True, BLACK)
+        text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
-        pygame.Surface.__init__(self, (text_rect.size[0] + BORDER_RADIUS * 8, text_rect.size[1] + BORDER_RADIUS * 8))
-        text_surface = pygame.Surface((text_rect.size[0] + BORDER_RADIUS * 6, text_rect.size[1] + BORDER_RADIUS * 6))
-        text_surface.fill(WHITE)
-        text_surface.blit(text_object, (BORDER_RADIUS * 3, BORDER_RADIUS * 3))
-        self.fill(BLACK)
-        self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
+        pygame.Surface.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 8, text_rect.size[1] + GUIConstants.BORDER_RADIUS * 8))
+        text_surface = pygame.Surface((text_rect.size[0] + GUIConstants.BORDER_RADIUS * 6, text_rect.size[1] + GUIConstants.BORDER_RADIUS * 6))
+        text_surface.fill(GUIConstants.WHITE)
+        text_surface.blit(text_object, (GUIConstants.BORDER_RADIUS * 3, GUIConstants.BORDER_RADIUS * 3))
+        self.fill(GUIConstants.BLACK)
+        self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.position = (center[0] - (self.get_size()[0] // 2), 0)
-
-    def draw(self, screen):
-        screen.blit(self, self.position)
-        pygame.display.update()
 
 # Class to display a text input dialogue. The text field should contain the input prompt
 # (i.e. "Enter a player name"). KEYDOWN events can be passed to handleKeyEvent,
@@ -35,42 +25,41 @@ class InputDialogue(pygame.Surface):
     def __init__(self, font, text, center, max_characters):
         self.font = font
         self.input_text = ""
-        text_object = font.render(text, True, BLACK)
+        text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
         text_width = text_rect.size[0]
         text_height = text_rect.size[1]
         dialogue_height = text_height * 3
-        pygame.Surface.__init__(self, (text_width + BORDER_RADIUS * 2, dialogue_height + BORDER_RADIUS * 2))
-        self.fill(BLACK)
+        pygame.Surface.__init__(self, (text_width + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        self.fill(GUIConstants.BLACK)
         half_height = dialogue_height // 2
         self.half_size = (text_width, half_height)
-        self.input_surface_pos = (BORDER_RADIUS, BORDER_RADIUS + half_height)
+        self.input_surface_pos = (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS + half_height)
         input_width = text_width // 2
         input_x = (text_width - input_width) // 2
         y_margins = text_height // 3
         self.input_y = half_height - (text_height + y_margins)
-        self.input_rect = pygame.Rect(input_x - BORDER_RADIUS, self.input_y - BORDER_RADIUS, input_width + 2 * BORDER_RADIUS, text_height + 2 * BORDER_RADIUS)
+        self.input_rect = pygame.Rect(input_x - GUIConstants.BORDER_RADIUS, self.input_y - GUIConstants.BORDER_RADIUS, input_width + 2 * GUIConstants.BORDER_RADIUS, text_height + 2 * GUIConstants.BORDER_RADIUS)
         text_surface = pygame.Surface(self.half_size)
-        text_surface.fill(WHITE)
+        text_surface.fill(GUIConstants.WHITE)
         text_surface.blit(text_object, (0, y_margins))
-        self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
+        self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.position = (center[0] - self.get_size()[0] // 2, center[1] - self.get_size()[1] // 2)
         self.max_characters = max_characters
 
     def drawInput(self):
         input_surface = pygame.Surface(self.half_size)
-        input_surface.fill(WHITE)
-        input_object = self.font.render(self.input_text, True, BLACK)
-        pygame.draw.rect(input_surface, GRAY, self.input_rect)
-        pygame.draw.rect(input_surface, BLACK, self.input_rect, BORDER_RADIUS)
+        input_surface.fill(GUIConstants.WHITE)
+        input_object = self.font.render(self.input_text, True, GUIConstants.BLACK)
+        pygame.draw.rect(input_surface, GUIConstants.GRAY, self.input_rect)
+        pygame.draw.rect(input_surface, GUIConstants.BLACK, self.input_rect, GUIConstants.BORDER_RADIUS)
         input_x = self.input_rect.x + (self.input_rect.size[0] // 2 - input_object.get_size()[0] // 2)
         input_surface.blit(input_object, (input_x, self.input_y))
         self.blit(input_surface, self.input_surface_pos)
 
     def draw(self, screen):
         self.drawInput()
-        screen.blit(self, self.position)
-        pygame.display.update()
+        screen.draw(self)
 
     def getResponse(self, screen):
         while True:
@@ -93,12 +82,12 @@ class InputDialogue(pygame.Surface):
 # within the "cancel" button, and None if the click is anywhere else
 class ConfirmationDialogue(pygame.Surface):
     def __init__(self, font, text, center):
-        text_object = font.render(text, True, BLACK)
+        text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
         dialogue_height = text_rect.size[1] * 3
-        pygame.Surface.__init__(self, (text_rect.size[0] + BORDER_RADIUS * 2, dialogue_height + BORDER_RADIUS * 2))
+        pygame.Surface.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
         text_surface = pygame.Surface((text_rect.size[0], dialogue_height))
-        text_surface.fill(WHITE)
+        text_surface.fill(GUIConstants.WHITE)
         x_margins = text_rect.size[0] // 3
         y_margins = dialogue_height // 4
         text_surface.blit(text_object, (0, y_margins - text_rect.size[1] // 2))
@@ -106,12 +95,8 @@ class ConfirmationDialogue(pygame.Surface):
         text_surface.blit(self.confirm, self.confirm.position)
         self.cancel = Button(font, "Cancel", (x_margins * 2, y_margins * 3), False)
         text_surface.blit(self.cancel, self.cancel.position)
-        self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
+        self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
-
-    def draw(self, screen):
-        screen.blit(self, self.position)
-        pygame.display.update()
     
     def getResponse(self):
         pygame.event.pump()
@@ -127,14 +112,14 @@ class ConfirmationDialogue(pygame.Surface):
 class Button(pygame.Surface):
     def __init__(self, font, text, center, return_value, size=None):
         self.return_value = return_value
-        text_object = font.render(text, True, BLACK)
+        text_object = font.render(text, True, GUIConstants.BLACK)
         text_size = text_object.get_rect().size
         self.size = size
         if size is None:
-            self.size = (text_size[0] + BORDER_RADIUS * 2, text_size[1] + BORDER_RADIUS * 2)
+            self.size = (text_size[0] + GUIConstants.BORDER_RADIUS * 2, text_size[1] + GUIConstants.BORDER_RADIUS * 2)
         pygame.Surface.__init__(self, self.size)
-        self.fill(GRAY)
-        pygame.draw.rect(self, BLACK, self.get_rect(), BORDER_RADIUS)
+        self.fill(GUIConstants.GRAY)
+        pygame.draw.rect(self, GUIConstants.BLACK, self.get_rect(), GUIConstants.BORDER_RADIUS)
         self.blit(text_object, (self.size[0] // 2 - text_size[0] // 2, self.size[1] // 2 - text_size[1] // 2))
         self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
         self.rect = pygame.Rect(self.position, self.size)
@@ -165,9 +150,9 @@ class Slot(pygame.Surface):
         self.up = pygame.Rect(half_x_margin, 0, card_width, half_y_margin)
         self.down = pygame.Rect(half_x_margin, height - half_y_margin, card_width, half_y_margin)
 
-        self.fill(WHITE)
-        pygame.draw.polygon(self, BLACK, up_points)
-        pygame.draw.polygon(self, BLACK, down_points)
+        self.fill(GUIConstants.WHITE)
+        pygame.draw.polygon(self, GUIConstants.BLACK, up_points)
+        pygame.draw.polygon(self, GUIConstants.BLACK, down_points)
         self.drawCard()
 
     def drawCard(self):
@@ -186,7 +171,7 @@ class Slot(pygame.Surface):
 
 class SuggestionDialogue(pygame.Surface):
     def __init__(self, font, text, center, screen_width, card_deck):
-        text_object = font.render(text, True, BLACK)
+        text_object = font.render(text, True, GUIConstants.BLACK)
         text_size = text_object.get_size()
         dialogue_width = screen_width // 3
         slot_width = dialogue_width // 3
@@ -204,7 +189,7 @@ class SuggestionDialogue(pygame.Surface):
         self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
         self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
 
-        self.fill(WHITE)
+        self.fill(GUIConstants.WHITE)
         self.blit(text_object, text_pos)
         for slot in self.slots:
             self.blit(slot, slot.position)
@@ -213,8 +198,7 @@ class SuggestionDialogue(pygame.Surface):
         self.position = (center[0] - (self.size[0] // 2), center[1] - (self.size[1] // 2))
 
     def draw(self, screen):
-        screen.blit(self, self.position)
-        pygame.display.update()
+        screen.draw(self)
 
     def getSelection(self):
         selection = {}

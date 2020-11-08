@@ -2,38 +2,35 @@ import os
 
 import pygame
 
+import GUIConstants
+
 import LocationSprite
 import PlayerSprite
-
-BACKGROUND_FILE_PATH = "\\assets\\background_asset.png"
-OVERLAY_FILE_PATH = "\\assets\\overlay_asset.png"
-
-MAP_SIZE = (1152, 896)
 
 # Game board GUI pane
 class ClueMap(pygame.Surface):
     def __init__(self, scaled_map_size):
-        pygame.Surface.__init__(self, MAP_SIZE)
+        pygame.Surface.__init__(self, GUIConstants.MAP_SIZE)
 
-        scale_x = scaled_map_size[0] / MAP_SIZE[0]
-        scale_y = scaled_map_size[1] / MAP_SIZE[1]
+        scale_x = scaled_map_size[0] / GUIConstants.MAP_SIZE[0]
+        scale_y = scaled_map_size[1] / GUIConstants.MAP_SIZE[1]
         scale = (scale_x + scale_y) / 2
 
         # Load the background image and set its position
-        background_path = os.path.dirname(os.path.realpath(__file__)) + BACKGROUND_FILE_PATH
+        background_path = os.path.dirname(os.path.realpath(__file__)) + GUIConstants.BACKGROUND_ASSET_FILE_PATH
         background_asset = pygame.image.load(background_path)
-        background_asset_position = pygame.Rect(0, 0, MAP_SIZE[0], MAP_SIZE[1])
-        self.background = pygame.Surface(MAP_SIZE).convert()
+        background_asset_position = pygame.Rect(0, 0, GUIConstants.MAP_SIZE[0], GUIConstants.MAP_SIZE[1])
+        self.background = pygame.Surface(GUIConstants.MAP_SIZE).convert()
         self.background.blit(background_asset, (0, 0), background_asset_position)
 
         # Load the room and hallway images and set their positions
         self.locations = LocationSprite.loadLocationSprites(scale)
 
         # Load the overlay image (walls, furniture) and set its position
-        overlay_path = os.path.dirname(os.path.realpath(__file__)) + OVERLAY_FILE_PATH
+        overlay_path = os.path.dirname(os.path.realpath(__file__)) + GUIConstants.OVERLAY_ASSET_FILE_PATH
         overlay_asset = pygame.image.load(overlay_path)
-        overlay_asset_position = pygame.Rect(0, 0, MAP_SIZE[0], MAP_SIZE[1])
-        self.overlay = pygame.Surface(MAP_SIZE)
+        overlay_asset_position = pygame.Rect(0, 0, GUIConstants.MAP_SIZE[0], GUIConstants.MAP_SIZE[1])
+        self.overlay = pygame.Surface(GUIConstants.MAP_SIZE)
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
         self.overlay.set_colorkey((0, 0, 5))
 
