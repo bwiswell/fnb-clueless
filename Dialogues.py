@@ -47,6 +47,7 @@ class InputDialogue(pygame.Surface):
         self.position = (center[0] - self.get_size()[0] // 2, center[1] - self.get_size()[1] // 2)
         self.max_characters = max_characters
 
+    # Render the text currently entered by the player
     def drawInput(self):
         input_surface = pygame.Surface(self.half_size)
         input_surface.fill(GUIConstants.WHITE)
@@ -57,10 +58,13 @@ class InputDialogue(pygame.Surface):
         input_surface.blit(input_object, (input_x, self.input_y))
         self.blit(input_surface, self.input_surface_pos)
 
+    # Render the entire dialogue
     def draw(self, screen):
         self.drawInput()
         screen.draw(self)
 
+    # Detect key presses to edit the input text and return the
+    # final text input
     def getResponse(self, screen):
         while True:
             for event in pygame.event.get():
@@ -98,6 +102,7 @@ class ConfirmationDialogue(pygame.Surface):
         self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
     
+    # Detect clicks until the player selects "confirm" or "cancel"
     def getResponse(self):
         pygame.event.pump()
         while True:
@@ -109,6 +114,8 @@ class ConfirmationDialogue(pygame.Surface):
                     elif self.cancel.rect.collidepoint(adj_pos):
                         return self.cancel.return_value
 
+# Simple class to render a button consisting of some text on a gray background
+# with a black border
 class Button(pygame.Surface):
     def __init__(self, font, text, center, return_value, size=None):
         self.return_value = return_value
@@ -124,6 +131,8 @@ class Button(pygame.Surface):
         self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
         self.rect = pygame.Rect(self.position, self.size)
 
+# Simple class that takes a list of cards, displays one, and has up and down arrows
+# the player can interact with to scroll through the cards in the list
 class Slot(pygame.Surface):
     def __init__(self, width, position, category, cards):
         height = 5 * (width // 3)
@@ -155,9 +164,11 @@ class Slot(pygame.Surface):
         pygame.draw.polygon(self, GUIConstants.BLACK, down_points)
         self.drawCard()
 
+    # Draw the currently selected card
     def drawCard(self):
         self.blit(pygame.transform.smoothscale(self.current_card, self.card_size), self.card_pos)
 
+    # Detect clicks to the up and down buttons
     def handleClick(self, click_pos):
         adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
         if self.up.collidepoint(adj_pos):
@@ -169,6 +180,10 @@ class Slot(pygame.Surface):
             self.current_card = self.cards[self.current_index % self.num_cards]
             self.drawCard()
 
+# Class to display a dialogue in which the player can select a player, location,
+# and weapon card comprising a suggestion/accusation. Allows the player to scroll
+# through each category of card until "confirm" or "cancel" is selected. On "confirm",
+# the name of each selected card is returned. Otherwise, False is returned.
 class SuggestionDialogue(pygame.Surface):
     def __init__(self, font, text, center, screen_width, card_deck):
         text_object = font.render(text, True, GUIConstants.BLACK)
@@ -197,15 +212,19 @@ class SuggestionDialogue(pygame.Surface):
         self.blit(self.cancel, self.cancel.position)
         self.position = (center[0] - (self.size[0] // 2), center[1] - (self.size[1] // 2))
 
+    # Renders the dialogue
     def draw(self, screen):
         screen.draw(self)
 
+    # Encapsulates the currently selected cards into a dict whose keys are the
+    # names of the card categories ("player", "location", "weapon")
     def getSelection(self):
         selection = {}
         for slot in self.slots:
             selection[slot.category] = slot.current_card.id
         return selection
 
+    # Detect clicks until the player selects "confirm" or "cancel"
     def getResponse(self, screen):
         pygame.event.pump()
         while True:

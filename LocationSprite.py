@@ -41,14 +41,18 @@ class RoomSprite(LocationSprite):
         self.caption = caption
         self.players = []
 
+    # Empties the list of players currently in the room
     def clearPlayers(self):
         self.players = []
 
+    # Adds a player to the room if there are less than 4 currently
+    # in it
     def addPlayer(self, player):
         if len(self.players) >= 4:
             raise RoomOverflowError
         self.players.append(player)
 
+    # Renders the players currently in the room
     def drawPlayers(self):
         for index, player in enumerate(self.players):
             self.blit(player, GUIConstants.ROOM_PLAYER_OFFSETS[index])
@@ -66,14 +70,17 @@ class HallwaySprite(LocationSprite):
         self.player = None
         self.player_offset = player_offset
 
+    # Removes any player currently in the hallway
     def clearPlayers(self):
         self.player = None
 
+    # Adds a player to the hallway if there is not one already
     def addPlayer(self, player):
         if self.player is not None:
             raise RoomOverflowError
         self.player = player
 
+    # Renders a player in the hallway
     def drawPlayers(self):
         if self.player is not None:
             self.blit(self.player, self.player_offset)

@@ -12,6 +12,7 @@ class ClueMap(pygame.Surface):
     def __init__(self, scaled_map_size):
         pygame.Surface.__init__(self, GUIConstants.MAP_SIZE)
 
+        # Scaling information
         scale_x = scaled_map_size[0] / GUIConstants.MAP_SIZE[0]
         scale_y = scaled_map_size[1] / GUIConstants.MAP_SIZE[1]
         scale = (scale_x + scale_y) / 2
