@@ -5,7 +5,7 @@ import pygame
 import GUIConstants
 
 # Simple class to render a text message on a white background with a black border
-class Message(pygame.Surface):
+class GUIMessage(pygame.Surface):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
@@ -245,3 +245,28 @@ class SuggestionDialogue(Dialogue):
                                 slot.handleClick(adj_pos)
                                 self.blit(slot, slot.position)
                                 self.draw(screen)
+
+# Class to display a text dialogue that is only dismissed upon a player click
+class DismissableTextDialogue(Dialogue):
+    def __init__(self, font, text, center):
+        text_object = font.render(text, True, GUIConstants.BLACK)
+        dialogue_height = font.get_height() * 3
+        Dialogue.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        dialogue_surface = pygame.Surface((text_object.get_width(), dialogue_height))
+        dialogue_surface.fill(GUIConstants.WHITE)
+        y_offset = dialogue_height // 4
+        dialogue_surface.blit(text_object, (0, y_offset - text_object.get_height() // 2))
+        self.dismiss = Button(font, "Dismiss", (text_object.get_width() // 2, y_offset * 3), True)
+        dialogue_surface.blit(self.dismiss, self.dismiss.position)
+        self.blit(dialogue_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
+        self.position = (center[0] - self.get_width() // 2, center[1] - self.get_height() // 2)
+
+    # Detect clicks until the player selects "dismiss"
+    def getResponse(self):
+        pygame.event.pump()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    adj_pos = (event.pos[0] - self.position[0], event.pos[1] - self.position[1])
+                    if self.dismiss.rect.collidepoint(adj_pos):
+                        return

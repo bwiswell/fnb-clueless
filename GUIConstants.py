@@ -18,6 +18,18 @@ INVALID_MOVE = "Pick a valid move to make!"
 ACTION_MESSAGE = "You have chosen to "
 MOVE_MESSAGE = "You moved to the "
 PICK_SUGGESTION_MESSAGE = "Pick a player card, weapon card, and location card to make a suggestion!"
+SUGGESTION_DISPROVEN_PRE = "Your suggestion was disproven by "
+SUGGESTION_DISPROVEN_POST = " with the "
+SUGGESTION_NOT_DISPROVEN = "Nobody had a card that disproved your suggestion!"
+SUGGESTION_NOTIFICATION_PRE = " suggested that it was "
+SUGGESTION_NOTIFICATION_MID = " in the "
+SUGGESTION_NOTIFICATION_POST = " with the "
+SUGGESTION_NOTIFICATION_DISPROVEN = " but was disproven."
+SUGGESTION_NOTIFICATION_NOT_DISPROVEN = " and was not disproven."
+ACCUSATION_RESPONSE = "Your accusation was "
+ACCUSATION_NOTIFICATION_PRE = " accused "
+ACCUSATION_CORRECT = " and was right!"
+ACCUSATION_INCORRECT = " but was wrong!"
 
 # GUI font information
 GUI_FONT_SIZES = [16, 24, 32, 40, 48]

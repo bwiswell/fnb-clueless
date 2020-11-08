@@ -8,7 +8,7 @@ from ThreadedScreen import ThreadedScreen
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
 from Notepad import Notepad
-from Dialogues import Message, InputDialogue, ConfirmationDialogue, SuggestionDialogue
+from Dialogues import GUIMessage, InputDialogue, ConfirmationDialogue, SuggestionDialogue, DismissableTextDialogue
 
 # Main GUI class. Provides several methods for client-GUI interaction:
 
@@ -33,6 +33,24 @@ from Dialogues import Message, InputDialogue, ConfirmationDialogue, SuggestionDi
 #                                       moves for the current player. locations IDs should be entirely lowercase.
 #                                       Returns a lowercase location ID (after 2 factor confirmation) that represents 
 #                                       the desired move
+
+# showSuggestionResponse(disproven=False, disproving_player=None, disproving_card=None)
+#                                       disproven is a boolean that indicates if the player's suggestion was disproven
+#                                       by another player's card. disproving_player is the player who had the disproving
+#                                       card if there was one. disproving_card is the id of the disproving card if there
+#                                       was one
+
+# notifySuggestion(suggesting_player, suggestion, disproven=False)
+#                                       suggesting_player is the player who made the suggestion. suggestion is the dict
+#                                       containing that player's suggestion. disproven indicates if the suggestion was
+#                                       disproven by another player's card
+
+# showAccusationResponse(correct=False) correct is a boolean indicates if the player's accusation was correct
+
+# notifyAccusation(accusing_player, accusation, correct=False)
+#                                       accusing_player is the player who made the accusation. accusation is the dict
+#                                       containing that player's accusation. correct indicates if the accusation was
+#                                       correct
 
 # quit()                                must be called to safely exit keylistener and mouselistener threads
 #                                       as well as pygame
@@ -103,7 +121,7 @@ class ClueGUI(pygame.Surface):
         self.clearDialogues()
         self.notepad.unblock()
         self.player_name = name
-        self.screen.draw(Message(self.font, GUIConstants.START_MESSAGE, self.center))
+        self.screen.draw(GUIMessage(self.font, GUIConstants.START_MESSAGE, self.center))
         return name
 
     def initPlayers(self, players):
@@ -132,7 +150,7 @@ class ClueGUI(pygame.Surface):
         pygame.event.pump()
         done = False
         response = ""
-        self.screen.draw(Message(self.font, pick_text, self.center))
+        self.screen.draw(GUIMessage(self.font, pick_text, self.center))
         while not done:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -145,19 +163,66 @@ class ClueGUI(pygame.Surface):
                         done = conf_dialogue.getResponse()
                         self.clearDialogues()
                     else:
-                        self.screen.draw(Message(self.font, invalid_text, self.center))
+                        self.screen.draw(GUIMessage(self.font, invalid_text, self.center))
         success_text += response + "!"
-        self.screen.draw(Message(self.font, success_text, self.center))
+        self.screen.draw(GUIMessage(self.font, success_text, self.center))
         self.notepad.unblock()
         return response
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
     def getPlayerSuggestion(self, card_deck):
+        self.notepad.block()
         self.clearDialogues()
         pygame.event.pump()
         suggestion_dialogue = SuggestionDialogue(self.font, GUIConstants.PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], card_deck)
         self.screen.draw(suggestion_dialogue)
-        return suggestion_dialogue.getResponse(self.screen)
+        response = suggestion_dialogue.getResponse(self.screen)
+        self.notepad.unblock()
+        self.clearDialogues()
+        return response
+
+    def showSuggestionResponse(self, disproven=False, disproving_player=None, disproving_card=None):
+        text = GUIConstants.SUGGESTION_NOT_DISPROVEN
+        if disproven:
+            text = GUIConstants.SUGGESTION_DISPROVEN_PRE + disproving_player.name + GUIConstants.SUGGESTION_DISPROVEN_POST + disproving_card + "card!"
+        self.showDismassableDialogue(text)
+
+    def notifySuggestion(self, suggesting_player, suggestion, disproven=False):
+        text = suggesting_player.name + GUIConstants.SUGGESTION_NOTIFICATION_PRE + suggestion["player"]
+        text += GUIConstants.SUGGESTION_NOTIFICATION_MID + suggestion["location"]
+        text += GUIConstants.SUGGESTION_NOTIFICATION_POST + suggestion["weapon"]
+        if disproven:
+            text += GUIConstants.SUGGESTION_NOTIFICATION_DISPROVEN
+        else:
+            text += GUIConstants.SUGGESTION_NOTIFICATION_NOT_DISPROVEN
+        self.showDismassableDialogue(text)
+
+    def showAccusationResponse(self, correct=False):
+        text = GUIConstants.ACCUSATION_RESPONSE
+        if correct:
+            text += "correct!"
+        else:
+            text += "incorrect!"
+        self.showDismassableDialogue(text)
+
+    def notifyAccusation(self, accusing_player, accusation, correct=False):
+        text = accusing_player.name + GUIConstants.ACCUSATION_NOTIFICATION_PRE + accusation["player"]
+        text += GUIConstants.SUGGESTION_NOTIFICATION_MID + accusation["location"]
+        text += GUIConstants.SUGGESTION_NOTIFICATION_POST + accusation["weapon"]
+        if correct:
+            text += GUIConstants.ACCUSATION_CORRECT
+        else:
+            text += GUIConstants.ACCUSATION_INCORRECT
+        self.showDismassableDialogue(text)
+
+    # Helper function to show a dismissable dialogue
+    def showDismassableDialogue(self, text):
+        self.notepad.block()
+        dismissable_dialogue = DismissableTextDialogue(self.font, text, self.center)
+        self.screen.draw(dismissable_dialogue)
+        dismissable_dialogue.getResponse()
+        self.clearDialogues()
+        self.notepad.unblock()
 
     def quit(self):
         self.notepad.quit()
