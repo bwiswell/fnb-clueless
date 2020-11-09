@@ -116,7 +116,7 @@ class ClueGUI(pygame.Surface):
     def getPlayerName(self):
         self.notepad.block()
         input_dialogue = InputDialogue(self.font, GUIConstants.NAME_PROMPT, self.center, 8)
-        input_dialogue.draw(self.screen)
+        self.screen.draw(input_dialogue)
         name = input_dialogue.getResponse(self.screen)
         self.clearDialogues()
         self.notepad.unblock()
@@ -185,7 +185,7 @@ class ClueGUI(pygame.Surface):
         text = GUIConstants.SUGGESTION_NOT_DISPROVEN
         if disproven:
             text = GUIConstants.SUGGESTION_DISPROVEN_PRE + disproving_player.name + GUIConstants.SUGGESTION_DISPROVEN_POST + disproving_card + "card!"
-        self.showDismassableDialogue(text)
+        self.showDismissableDialogue(text)
 
     def notifySuggestion(self, suggesting_player, suggestion, disproven=False):
         text = suggesting_player.name + GUIConstants.SUGGESTION_NOTIFICATION_PRE + suggestion["player"]
@@ -195,7 +195,7 @@ class ClueGUI(pygame.Surface):
             text += GUIConstants.SUGGESTION_NOTIFICATION_DISPROVEN
         else:
             text += GUIConstants.SUGGESTION_NOTIFICATION_NOT_DISPROVEN
-        self.showDismassableDialogue(text)
+        self.showDismissableDialogue(text)
 
     def showAccusationResponse(self, correct=False):
         text = GUIConstants.ACCUSATION_RESPONSE
@@ -203,7 +203,7 @@ class ClueGUI(pygame.Surface):
             text += "correct!"
         else:
             text += "incorrect!"
-        self.showDismassableDialogue(text)
+        self.showDismissableDialogue(text)
 
     def notifyAccusation(self, accusing_player, accusation, correct=False):
         text = accusing_player.name + GUIConstants.ACCUSATION_NOTIFICATION_PRE + accusation["player"]
@@ -213,10 +213,10 @@ class ClueGUI(pygame.Surface):
             text += GUIConstants.ACCUSATION_CORRECT
         else:
             text += GUIConstants.ACCUSATION_INCORRECT
-        self.showDismassableDialogue(text)
+        self.showDismissableDialogue(text)
 
     # Helper function to show a dismissable dialogue
-    def showDismassableDialogue(self, text):
+    def showDismissableDialogue(self, text):
         self.notepad.block()
         dismissable_dialogue = DismissableTextDialogue(self.font, text, self.center)
         self.screen.draw(dismissable_dialogue)

@@ -18,8 +18,9 @@ class GUIMessage(pygame.Surface):
         self.position = (center[0] - (self.get_size()[0] // 2), 0)
 
 class Dialogue(pygame.Surface):
-    def __init__(self, size):
+    def __init__(self, size, center):
         pygame.Surface.__init__(self, size)
+        self.position = (center[0] - size[0] // 2, center[1] - size[1] // 2)
 
 # Class to display a text input dialogue. The text field should contain the input prompt
 # (i.e. "Enter a player name"). KEYDOWN events can be passed to handleKeyEvent,
@@ -34,7 +35,7 @@ class InputDialogue(Dialogue):
         text_width = text_rect.size[0]
         text_height = text_rect.size[1]
         dialogue_height = text_height * 3
-        Dialogue.__init__(self, (text_width + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        Dialogue.__init__(self, (text_width + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2), center)
         self.fill(GUIConstants.BLACK)
         half_height = dialogue_height // 2
         self.half_size = (text_width, half_height)
@@ -48,7 +49,6 @@ class InputDialogue(Dialogue):
         text_surface.fill(GUIConstants.WHITE)
         text_surface.blit(text_object, (0, y_margins))
         self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
-        self.position = (center[0] - self.get_size()[0] // 2, center[1] - self.get_size()[1] // 2)
         self.max_characters = max_characters
 
     # Render the text currently entered by the player
@@ -61,11 +61,6 @@ class InputDialogue(Dialogue):
         input_x = self.input_rect.x + (self.input_rect.size[0] // 2 - input_object.get_size()[0] // 2)
         input_surface.blit(input_object, (input_x, self.input_y))
         self.blit(input_surface, self.input_surface_pos)
-
-    # Render the entire dialogue
-    def draw(self, screen):
-        self.drawInput()
-        screen.draw(self)
 
     # Detect key presses to edit the input text and return the
     # final text input
@@ -82,7 +77,8 @@ class InputDialogue(Dialogue):
                         alphanumeric = re.findall("[0-9A-Za-z]", event.unicode)
                         if len(alphanumeric) != 0 and len(self.input_text) < self.max_characters:
                             self.input_text += event.unicode
-                    self.draw(screen)
+                    self.drawInput()
+                    screen.draw(self)
         
 # Class to display a confirm/cancel dialogue. The text field should contain the confirm/cancel prompt
 # (i.e. "Are you sure you want to move to the Kitchen?"). MOUSEBUTTONDOWN events can be passed to getClicked,
@@ -93,7 +89,7 @@ class ConfirmationDialogue(Dialogue):
         text_object = font.render(text, True, GUIConstants.BLACK)
         text_rect = text_object.get_rect()
         dialogue_height = text_rect.size[1] * 3
-        Dialogue.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        Dialogue.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2), center)
         text_surface = pygame.Surface((text_rect.size[0], dialogue_height))
         text_surface.fill(GUIConstants.WHITE)
         x_margins = text_rect.size[0] // 3
@@ -104,7 +100,6 @@ class ConfirmationDialogue(Dialogue):
         self.cancel = Button(font, "Cancel", (x_margins * 2, y_margins * 3), False)
         text_surface.blit(self.cancel, self.cancel.position)
         self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
-        self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
     
     # Detect clicks until the player selects "confirm" or "cancel"
     def getResponse(self):
@@ -202,8 +197,7 @@ class SuggestionDialogue(Dialogue):
         self.slots = [player_slot, location_slot, weapon_slot]
         slot_height = player_slot.size[1]
         dialogue_height = slot_height + slot_y_offset * 2
-        self.size = (dialogue_width, dialogue_height)
-        Dialogue.__init__(self, self.size)
+        Dialogue.__init__(self, (dialogue_width, dialogue_height), center)
 
         self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
         self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
@@ -214,11 +208,6 @@ class SuggestionDialogue(Dialogue):
             self.blit(slot, slot.position)
         self.blit(self.confirm, self.confirm.position)
         self.blit(self.cancel, self.cancel.position)
-        self.position = (center[0] - (self.size[0] // 2), center[1] - (self.size[1] // 2))
-
-    # Renders the dialogue
-    def draw(self, screen):
-        screen.draw(self)
 
     # Encapsulates the currently selected cards into a dict whose keys are the
     # names of the card categories ("player", "location", "weapon")
@@ -244,14 +233,14 @@ class SuggestionDialogue(Dialogue):
                             if slot.rect.collidepoint(adj_pos):
                                 slot.handleClick(adj_pos)
                                 self.blit(slot, slot.position)
-                                self.draw(screen)
+                                screen.draw(self)
 
 # Class to display a text dialogue that is only dismissed upon a player click
 class DismissableTextDialogue(Dialogue):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, GUIConstants.BLACK)
         dialogue_height = font.get_height() * 3
-        Dialogue.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2))
+        Dialogue.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2), center)
         dialogue_surface = pygame.Surface((text_object.get_width(), dialogue_height))
         dialogue_surface.fill(GUIConstants.WHITE)
         y_offset = dialogue_height // 4
@@ -259,7 +248,6 @@ class DismissableTextDialogue(Dialogue):
         self.dismiss = Button(font, "Dismiss", (text_object.get_width() // 2, y_offset * 3), True)
         dialogue_surface.blit(self.dismiss, self.dismiss.position)
         self.blit(dialogue_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
-        self.position = (center[0] - self.get_width() // 2, center[1] - self.get_height() // 2)
 
     # Detect clicks until the player selects "dismiss"
     def getResponse(self):
