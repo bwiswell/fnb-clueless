@@ -14,15 +14,6 @@ from Dialogues import GUIMessage, InputDialogue, ConfirmationDialogue, Suggestio
 
 # updateGUI(player_locations)           player_locations is a list of (name, location) tuples used to update the GUI.
 
-# getPlayerName()                       displays a text input dialogue and returns a string containing
-#                                       a player name
-#
-# Possible return values:               an alphanumeric string between 1 and 8 characters
-
-# initPlayers(players)                  players is a list containing of player objects used to initialize the player
-#                                       sprites and associate them with player names. Must be invoked before any call
-#                                       to updateGUI() from the client
-
 # getPlayerAction(valid_actions)        valid_actions is a list of actions that are available for the current
 #                                       player. Returns a string (after 2 factor confirmation) that represents 
 #                                       the desired action
@@ -60,9 +51,7 @@ class NoPossibleActionError(Exception):
         print("No possible actions were provided!")
 
 class ClueGUI(pygame.Surface):
-    def __init__(self):
-        windll.shcore.SetProcessDpiAwareness(c_int(1))
-        pygame.init()
+    def __init__(self, player, all_players):
         self.screen = ThreadedScreen()
         self.position = (0, 0)
 
@@ -81,18 +70,21 @@ class ClueGUI(pygame.Surface):
         font_size = self.getFontSize()
         self.font = pygame.font.SysFont(None, font_size)
 
-        # GUI elements
+        # Clue Map
         self.clue_map = ClueMap(self.map_size)
-        self.control_panel = None
-        self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
+        self.clue_map.initPlayerSprites(all_players)
 
         # Player information
-        self.player_name = ""
-        self.player = None
-        self.player_sprite = None
+        self.player = player
+        self.player_sprite = self.clue_map.getPlayerSprite(self.player.name)
+
+        # Control Panel
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player_sprite, self.player.cards, self.font)
+        self.blit(self.control_panel, self.control_pos)
+        self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
 
         # Initial GUI render
-        self.updateGUI(None)
+        self.updateGUI([(player.name, player.location) for player in all_players])
 
     # Get a font size appropriate to the screen size
     def getFontSize(self):
@@ -109,28 +101,7 @@ class ClueGUI(pygame.Surface):
     def updateGUI(self, player_locations):
         self.clue_map.draw(player_locations)
         self.blit(pygame.transform.smoothscale(self.clue_map, self.map_size), (0, 0))
-        self.screen.draw(self)
-
-    def getPlayerName(self):
-        self.notepad.block()
-        input_dialogue = InputDialogue(self.font, GUIConstants.NAME_PROMPT, self.center, 8)
-        self.screen.draw(input_dialogue)
-        name = input_dialogue.getResponse(self.screen)
-        self.clearDialogues()
-        self.notepad.unblock()
-        self.player_name = name
-        self.screen.draw(GUIMessage(self.font, GUIConstants.START_MESSAGE, self.center))
-        return name
-
-    def initPlayers(self, players):
-        self.clue_map.initPlayerSprites(players)
-        for player in players:
-            if player.name == self.player_name:
-                self.player = player
-        self.player_sprite = self.clue_map.getPlayerSpriteByName(self.player_name)
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player_sprite, self.player.cards, self.font)
-        self.blit(self.control_panel, self.control_pos)
-        self.updateGUI(None)
+        self.screen.draw(self)        
 
     def getPlayerAction(self, valid_actions):
         return self.getPlayerResponse(valid_actions, self.control_panel, GUIConstants.PICK_ACTION_MESSAGE, GUIConstants.ACTION_CONF, GUIConstants.INVALID_ACTION, GUIConstants.ACTION_MESSAGE)

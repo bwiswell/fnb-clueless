@@ -35,11 +35,11 @@ class ClueMap(pygame.Surface):
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
         self.overlay.set_colorkey((0, 0, 5))
 
-        self.players_sprites = {}
+        self.player_sprites = {}
 
     # Get a player sprite by their username
     def getPlayerSprite(self, name):
-        return self.players_sprites[name]
+        return self.player_sprites[name]
 
     # Assign player assets to each player
     def initPlayerSprites(self, players):
@@ -53,7 +53,7 @@ class ClueMap(pygame.Surface):
         for location in self.locations.values():
             location.clearPlayers()
         for name,location in player_locations:
-            self.locations[location].addPlayer(self.players_sprites[name])
+            self.locations[location].addPlayer(self.player_sprites[name])
 
     # Render the game board from background to foreground
     def draw(self, player_locations):

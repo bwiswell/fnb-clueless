@@ -32,5 +32,5 @@ class PlayerSprite(pygame.Surface):
         
         self.blit(character_assets[index], (0, 0))
         text_object = font.render(name, True, GUIConstants.WHITE)
-        text_x = 32 - text_object.get_width() // 2
+        text_x = self.get_width() // 2 - text_object.get_width() // 2
         self.blit(text_object, (text_x, 0))

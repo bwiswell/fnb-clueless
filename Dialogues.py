@@ -11,7 +11,7 @@ class GUIMessage(pygame.Surface):
         pygame.Surface.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 8, text_object.get_height() + GUIConstants.BORDER_RADIUS * 8))
         self.fill(GUIConstants.WHITE)
         pygame.draw.rect(self, GUIConstants.BLACK, self.get_rect(), GUIConstants.BORDER_RADIUS)
-        self.blit(text_object, GUIConstants.BORDER_RADIUS * 4, GUIConstants.BORDER_RADIUS * 4)
+        self.blit(text_object, (GUIConstants.BORDER_RADIUS * 4, GUIConstants.BORDER_RADIUS * 4))
         self.position = (center[0] - (self.get_width() // 2), 0)
 
 # Simple class to render a button consisting of some text on a gray background
@@ -111,6 +111,11 @@ class InputDialogue(Dialogue):
         text_surface.blit(text_object, (0, y_margins))
         self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
         self.max_characters = max_characters
+        input_surface = pygame.Surface(self.half_size)
+        input_surface.fill(GUIConstants.WHITE)
+        pygame.draw.rect(input_surface, GUIConstants.GRAY, self.input_rect)
+        pygame.draw.rect(input_surface, GUIConstants.BLACK, self.input_rect, GUIConstants.BORDER_RADIUS)
+        self.blit(input_surface, self.input_surface_pos)
 
     # Render the text currently entered by the player
     def drawInput(self):

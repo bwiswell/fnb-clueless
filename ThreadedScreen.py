@@ -33,3 +33,6 @@ class ThreadedScreen():
             pygame.display.update()
         finally:
             self.lock.release()
+
+    def close(self):
+        pygame.display.quit()
