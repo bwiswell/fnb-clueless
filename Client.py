@@ -27,7 +27,7 @@ class Client():
         name = lobby.getPlayerName()
 
         player.name = name
-        player.location = "ballroom"
+        #player.location = "ballroom"
 
         msgWrap = wrap.MsgUpdatePlayer(player)
         helper = wrap.HeaderNew(msgWrap)

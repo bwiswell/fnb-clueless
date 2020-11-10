@@ -4,7 +4,7 @@ class Information:
     def __init__(self):
         self.storeAllPlayers = []
         self.currentLocation = []
-        self.allLocations = []
+        self.startLocations = ["hw2", "hw11", "hw8", "hw5"]
 
     def updateCurrentLocation(self,incomingPlayer):
         player = pl.Player()

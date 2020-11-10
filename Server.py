@@ -58,7 +58,8 @@ class Server():
         player_count = self.counter
         print("THe player count is: " + str(player_count))
         if player_count < self.max_players:
-            new_player = Player(number=player_count, writer=writer)
+            new_player = Player(number=player_count, writer=writer, 
+                        location=info1.startLocations.pop(0))
             self.game.players.append(new_player)
             info1.storeAllPlayers.append(new_player)
             self.counter += 1

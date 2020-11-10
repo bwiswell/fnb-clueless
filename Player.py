@@ -1,9 +1,9 @@
 import pickle
 
 class Player:
-    def __init__(self, number=None, writer=None):
+    def __init__(self, number=None, writer=None, location=None):
         self.name = ""
-        self.location = "test"
+        self.location = location
         self.cards = ""
         self.turnOrder = 0
         self.playerIP = ""
