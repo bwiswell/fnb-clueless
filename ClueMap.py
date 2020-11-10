@@ -35,35 +35,25 @@ class ClueMap(pygame.Surface):
         self.overlay.blit(overlay_asset, (0, 0), overlay_asset_position)
         self.overlay.set_colorkey((0, 0, 5))
 
-        self.players_by_ip = None
-        self.players_by_name = None
-
-    # Get a player sprite by their IP
-    def getPlayerSpriteByIP(self, ip):
-        return self.players_by_ip[ip]
+        self.players_sprites = {}
 
     # Get a player sprite by their username
-    def getPlayerSpriteByName(self, name):
-        return self.players_by_name[name]
+    def getPlayerSprite(self, name):
+        return self.players_sprites[name]
 
     # Assign player assets to each player
     def initPlayerSprites(self, players):
         PlayerSprite.initCharacterAssets()
-        ip_dict = {}
-        name_dict = {}
         for index,player in enumerate(players):
-            player_sprite = PlayerSprite.PlayerSprite(index, player.ip, player.name)
-            ip_dict[player.ip] = player_sprite
-            name_dict[player.name] = player_sprite
-        self.players_by_ip = ip_dict
-        self.players_by_name = name_dict
+            player_sprite = PlayerSprite.PlayerSprite(index, player.name)
+            self.player_sprites[player.name] = player_sprite
 
     # Update the player assets to reflect current positions
     def updateLocations(self, player_locations):
         for location in self.locations.values():
             location.clearPlayers()
-        for ip,location in player_locations:
-            self.locations[location].addPlayer(self.players_by_ip[ip])
+        for name,location in player_locations:
+            self.locations[location].addPlayer(self.players_sprites[name])
 
     # Render the game board from background to foreground
     def draw(self, player_locations):

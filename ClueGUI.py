@@ -12,7 +12,7 @@ from Dialogues import GUIMessage, InputDialogue, ConfirmationDialogue, Suggestio
 
 # Main GUI class. Provides several methods for client-GUI interaction:
 
-# updateGUI(player_locations)           player_locations is a list of (ip, location) tuples used to update the GUI.
+# updateGUI(player_locations)           player_locations is a list of (name, location) tuples used to update the GUI.
 
 # getPlayerName()                       displays a text input dialogue and returns a string containing
 #                                       a player name
@@ -20,8 +20,8 @@ from Dialogues import GUIMessage, InputDialogue, ConfirmationDialogue, Suggestio
 # Possible return values:               an alphanumeric string between 1 and 8 characters
 
 # initPlayers(players)                  players is a list containing of player objects used to initialize the player
-#                                       sprites and associate them with player ip addresses. Must be invoked before
-#                                       any call to updateGUI() from the client
+#                                       sprites and associate them with player names. Must be invoked before any call
+#                                       to updateGUI() from the client
 
 # getPlayerAction(valid_actions)        valid_actions is a list of actions that are available for the current
 #                                       player. Returns a string (after 2 factor confirmation) that represents 
@@ -107,8 +107,6 @@ class ClueGUI(pygame.Surface):
         self.screen.draw(self)
 
     def updateGUI(self, player_locations):
-        if player_locations is not None:
-            player_locations = [(ip,loc.lower()) for (ip,loc) in player_locations]
         self.clue_map.draw(player_locations)
         self.blit(pygame.transform.smoothscale(self.clue_map, self.map_size), (0, 0))
         self.screen.draw(self)
@@ -170,7 +168,8 @@ class ClueGUI(pygame.Surface):
         return response
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
-    def getPlayerSuggestion(self, card_deck):
+    def getPlayerSuggestion(self):
+        """
         self.notepad.block()
         self.clearDialogues()
         pygame.event.pump()
@@ -180,6 +179,7 @@ class ClueGUI(pygame.Surface):
         self.notepad.unblock()
         self.clearDialogues()
         return response
+        """
 
     def showSuggestionResponse(self, disproven=False, disproving_player=None, disproving_card=None):
         text = GUIConstants.SUGGESTION_NOT_DISPROVEN

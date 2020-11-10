@@ -58,9 +58,6 @@ LOCATION_ASSET_FILE_PATH = "\\assets\\location_assets.png"
 CHARACTER_ASSET_FILE_PATH = "\\assets\\character_assets.png"
 NUM_CHARACTERS = 4
 CHARACTER_ASSET_SIZE = (64, 64)
-CHARACTER_IMAGE_Y_OFFSET = 12
-CHARACTER_IMAGE_POS = (0, 12)
-CHARACTER_IMAGE_SIZE = (64, 52)
 CHARACTER_NAME_FONT_SIZE = 18
 
 # Control panel information

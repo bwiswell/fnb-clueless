@@ -8,14 +8,75 @@ import GUIConstants
 class GUIMessage(pygame.Surface):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, GUIConstants.BLACK)
-        text_rect = text_object.get_rect()
-        pygame.Surface.__init__(self, (text_rect.size[0] + GUIConstants.BORDER_RADIUS * 8, text_rect.size[1] + GUIConstants.BORDER_RADIUS * 8))
-        text_surface = pygame.Surface((text_rect.size[0] + GUIConstants.BORDER_RADIUS * 6, text_rect.size[1] + GUIConstants.BORDER_RADIUS * 6))
-        text_surface.fill(GUIConstants.WHITE)
-        text_surface.blit(text_object, (GUIConstants.BORDER_RADIUS * 3, GUIConstants.BORDER_RADIUS * 3))
-        self.fill(GUIConstants.BLACK)
-        self.blit(text_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
-        self.position = (center[0] - (self.get_size()[0] // 2), 0)
+        pygame.Surface.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 8, text_object.get_height() + GUIConstants.BORDER_RADIUS * 8))
+        self.fill(GUIConstants.WHITE)
+        pygame.draw.rect(self, GUIConstants.BLACK, self.get_rect(), GUIConstants.BORDER_RADIUS)
+        self.blit(text_object, GUIConstants.BORDER_RADIUS * 4, GUIConstants.BORDER_RADIUS * 4)
+        self.position = (center[0] - (self.get_width() // 2), 0)
+
+# Simple class to render a button consisting of some text on a gray background
+# with a black border
+class Button(pygame.Surface):
+    def __init__(self, font, text, center, return_value, size=None):
+        text_object = font.render(text, True, GUIConstants.BLACK)
+        if size is None:
+            size = (text_object.get_width() + GUIConstants.BORDER_RADIUS * 2, text_object.get_height() + GUIConstants.BORDER_RADIUS * 2)
+        pygame.Surface.__init__(self, size)
+        self.fill(GUIConstants.GRAY)
+        pygame.draw.rect(self, GUIConstants.BLACK, self.get_rect(), GUIConstants.BORDER_RADIUS)
+        self.blit(text_object, (size[0] // 2 - text_object.get_width() // 2, size[1] // 2 - text_object.get_height() // 2))
+        self.position = (center[0] - (size[0] // 2), center[1] - (size[1] // 2))
+        self.rect = pygame.Rect(self.position, size)
+        self.return_value = return_value
+
+# Simple class that takes a list of cards, displays one, and has up and down arrows
+# the player can interact with to scroll through the cards in the list
+class Slot(pygame.Surface):
+    def __init__(self, width, position, category, cards):
+        height = 5 * (width // 3)
+        self.size = (width, height)
+        pygame.Surface.__init__(self, self.size)
+        self.position = position
+        self.rect = pygame.Rect(position, self.size)
+        self.category = category
+        self.cards = cards
+        self.num_cards = len(self.cards)
+        self.current_index = 0
+        self.current_card = self.cards[self.current_index]
+
+        card_width = 4 * (width // 5)
+        card_height = 4 * (card_width // 3)
+        self.card_size = (card_width, card_height)
+        
+        half_x_margin = (width - card_width) // 2
+        half_y_margin = (height - card_height) // 2
+        self.card_pos = (half_x_margin, half_y_margin)
+
+        up_points = [(half_x_margin, half_y_margin), (width - half_x_margin, half_y_margin), (width // 2, 0)]
+        down_points = [(half_x_margin, height - half_y_margin), (width - half_x_margin, height - half_y_margin), (width // 2, height)]
+        self.up = pygame.Rect(half_x_margin, 0, card_width, half_y_margin)
+        self.down = pygame.Rect(half_x_margin, height - half_y_margin, card_width, half_y_margin)
+
+        self.fill(GUIConstants.WHITE)
+        pygame.draw.polygon(self, GUIConstants.BLACK, up_points)
+        pygame.draw.polygon(self, GUIConstants.BLACK, down_points)
+        self.drawCard()
+
+    # Draw the currently selected card
+    def drawCard(self):
+        self.blit(pygame.transform.smoothscale(self.current_card, self.card_size), self.card_pos)
+
+    # Detect clicks to the up and down buttons
+    def handleClick(self, click_pos):
+        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
+        if self.up.collidepoint(adj_pos):
+            self.current_index -= 1
+            self.current_card = self.cards[self.current_index % self.num_cards]
+            self.drawCard()
+        elif self.down.collidepoint(adj_pos):
+            self.current_index += 1
+            self.current_card = self.cards[self.current_index % self.num_cards]
+            self.drawCard()
 
 class Dialogue(pygame.Surface):
     def __init__(self, size, center):
@@ -113,72 +174,6 @@ class ConfirmationDialogue(Dialogue):
                     elif self.cancel.rect.collidepoint(adj_pos):
                         return self.cancel.return_value
 
-# Simple class to render a button consisting of some text on a gray background
-# with a black border
-class Button(pygame.Surface):
-    def __init__(self, font, text, center, return_value, size=None):
-        self.return_value = return_value
-        text_object = font.render(text, True, GUIConstants.BLACK)
-        text_size = text_object.get_rect().size
-        self.size = size
-        if size is None:
-            self.size = (text_size[0] + GUIConstants.BORDER_RADIUS * 2, text_size[1] + GUIConstants.BORDER_RADIUS * 2)
-        pygame.Surface.__init__(self, self.size)
-        self.fill(GUIConstants.GRAY)
-        pygame.draw.rect(self, GUIConstants.BLACK, self.get_rect(), GUIConstants.BORDER_RADIUS)
-        self.blit(text_object, (self.size[0] // 2 - text_size[0] // 2, self.size[1] // 2 - text_size[1] // 2))
-        self.position = (center[0] - (self.get_size()[0] // 2), center[1] - (self.get_size()[1] // 2))
-        self.rect = pygame.Rect(self.position, self.size)
-
-# Simple class that takes a list of cards, displays one, and has up and down arrows
-# the player can interact with to scroll through the cards in the list
-class Slot(pygame.Surface):
-    def __init__(self, width, position, category, cards):
-        height = 5 * (width // 3)
-        self.size = (width, height)
-        pygame.Surface.__init__(self, self.size)
-        self.position = position
-        self.rect = pygame.Rect(position, self.size)
-        self.category = category
-        self.cards = cards
-        self.num_cards = len(self.cards)
-        self.current_index = 0
-        self.current_card = self.cards[self.current_index]
-
-        card_width = 4 * (width // 5)
-        card_height = 4 * (card_width // 3)
-        self.card_size = (card_width, card_height)
-        
-        half_x_margin = (width - card_width) // 2
-        half_y_margin = (height - card_height) // 2
-        self.card_pos = (half_x_margin, half_y_margin)
-
-        up_points = [(half_x_margin, half_y_margin), (width - half_x_margin, half_y_margin), (width // 2, 0)]
-        down_points = [(half_x_margin, height - half_y_margin), (width - half_x_margin, height - half_y_margin), (width // 2, height)]
-        self.up = pygame.Rect(half_x_margin, 0, card_width, half_y_margin)
-        self.down = pygame.Rect(half_x_margin, height - half_y_margin, card_width, half_y_margin)
-
-        self.fill(GUIConstants.WHITE)
-        pygame.draw.polygon(self, GUIConstants.BLACK, up_points)
-        pygame.draw.polygon(self, GUIConstants.BLACK, down_points)
-        self.drawCard()
-
-    # Draw the currently selected card
-    def drawCard(self):
-        self.blit(pygame.transform.smoothscale(self.current_card, self.card_size), self.card_pos)
-
-    # Detect clicks to the up and down buttons
-    def handleClick(self, click_pos):
-        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
-        if self.up.collidepoint(adj_pos):
-            self.current_index -= 1
-            self.current_card = self.cards[self.current_index % self.num_cards]
-            self.drawCard()
-        elif self.down.collidepoint(adj_pos):
-            self.current_index += 1
-            self.current_card = self.cards[self.current_index % self.num_cards]
-            self.drawCard()
-
 # Class to display a dialogue in which the player can select a player, location,
 # and weapon card comprising a suggestion/accusation. Allows the player to scroll
 # through each category of card until "confirm" or "cancel" is selected. On "confirm",
@@ -186,11 +181,10 @@ class Slot(pygame.Surface):
 class SuggestionDialogue(Dialogue):
     def __init__(self, font, text, center, screen_width, card_deck):
         text_object = font.render(text, True, GUIConstants.BLACK)
-        text_size = text_object.get_size()
         dialogue_width = screen_width // 3
         slot_width = dialogue_width // 3
-        slot_y_offset = text_size[1] * 2
-        text_pos = (dialogue_width // 2 - text_size[0] // 2, slot_y_offset // 2 - text_size[1] // 2)
+        slot_y_offset = text_object.get_height() * 2
+        text_pos = (dialogue_width // 2 - text_object.get_width() // 2, slot_y_offset // 2 - text_object.get_height() // 2)
         player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
         weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
         location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.location_cards)
@@ -199,14 +193,13 @@ class SuggestionDialogue(Dialogue):
         dialogue_height = slot_height + slot_y_offset * 2
         Dialogue.__init__(self, (dialogue_width, dialogue_height), center)
 
-        self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
-        self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
-
         self.fill(GUIConstants.WHITE)
         self.blit(text_object, text_pos)
         for slot in self.slots:
             self.blit(slot, slot.position)
+        self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
         self.blit(self.confirm, self.confirm.position)
+        self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
         self.blit(self.cancel, self.cancel.position)
 
     # Encapsulates the currently selected cards into a dict whose keys are the
@@ -241,13 +234,11 @@ class DismissableTextDialogue(Dialogue):
         text_object = font.render(text, True, GUIConstants.BLACK)
         dialogue_height = font.get_height() * 3
         Dialogue.__init__(self, (text_object.get_width() + GUIConstants.BORDER_RADIUS * 2, dialogue_height + GUIConstants.BORDER_RADIUS * 2), center)
-        dialogue_surface = pygame.Surface((text_object.get_width(), dialogue_height))
-        dialogue_surface.fill(GUIConstants.WHITE)
+        self.fill(GUIConstants.WHITE)
         y_offset = dialogue_height // 4
-        dialogue_surface.blit(text_object, (0, y_offset - text_object.get_height() // 2))
-        self.dismiss = Button(font, "Dismiss", (text_object.get_width() // 2, y_offset * 3), True)
-        dialogue_surface.blit(self.dismiss, self.dismiss.position)
-        self.blit(dialogue_surface, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS))
+        self.blit(text_object, (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS + y_offset - text_object.get_height() // 2))
+        self.dismiss = Button(font, "Dismiss", (GUIConstants.BORDER_RADIUS + text_object.get_width() // 2, GUIConstants.BORDER_RADIUS + y_offset * 3), True)
+        self.blit(self.dismiss, self.dismiss.position)
 
     # Detect clicks until the player selects "dismiss"
     def getResponse(self):
