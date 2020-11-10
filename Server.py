@@ -50,14 +50,18 @@ class Server():
         self.running = False
         self.players = []
         self.max_players = 4
+        self.counter = 0
         self.game = Game()
 
     def register_player(self, writer):
-        player_count = len(self.players)
+        
+        player_count = self.counter
+        print("THe player count is: " + str(player_count))
         if player_count < self.max_players:
             new_player = Player(number=player_count, writer=writer)
             self.game.players.append(new_player)
             info1.storeAllPlayers.append(new_player)
+            self.counter += 1
             return new_player, self.game
         else:
             return None
@@ -73,7 +77,7 @@ class Server():
         while self.running and player is not None:
             data = await reader.read(buf)
             msg = pickle.loads(data)
-            print(msg.id)
+            print("here " + str(msg.id))
             print("Received message: " + str(msg.data))
 
             if(msg.id == 1000):
