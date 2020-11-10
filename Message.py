@@ -27,7 +27,6 @@ class Message:
                 print(msg)
                 status = False
 
-
     def SendPlayerInformation(self,player):
         print("sending")
     

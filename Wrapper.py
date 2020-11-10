@@ -19,8 +19,6 @@ class Header:
         else:
             self.HeaderId = 12345
     
-
-        
         
 class Data:
     def __init__(self):
