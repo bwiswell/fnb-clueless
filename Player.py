@@ -10,6 +10,7 @@ class Player:
         self.number = number
         self.writer = writer
 
+    # method to send server any msg type usinga wrapper
     async def sendServerMsg(self,msg):
         data_string = pickle.dumps(msg)
         self.writer.write(data_string)

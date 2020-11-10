@@ -1,5 +1,3 @@
-# Save as server.py 
-# Message Receiver
 import os
 import pickle
 import Message as msg
@@ -17,13 +15,14 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.players = []
-        
+    # method called in order to begin the player 
+    # turn sequence and starting the game    
     async def start_game(self, player):
         print("gmae started")
         if player.number == 0:
             msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
             await player.sendServerMsg(msg)
-
+    # Ends current players turn and sends server updated info class
     async def end_turn(self, player):
         player_count = len(self.players)
         self.active_player = (player.number + 1) % player_count
@@ -31,7 +30,8 @@ class Game():
         next_player = self.players[self.active_player]
         msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
         await next_player.sendServerMsg(msg)
-
+    # method to updated player location for GUI to eventually see and use to
+    # move the char then ends the turn
     async def move(self, player, data):
         if player.number == self.active_player:
             print(data.location)
@@ -52,6 +52,10 @@ class Server():
         self.max_players = 4
         self.counter = 0
         self.game = Game()
+    
+    # this method will create a new player based on connection 
+    # anytime someone connects it will create their thread and 
+    # set the char with all initial info
 
     def register_player(self, writer):
         
@@ -72,9 +76,12 @@ class Server():
         player, game = self.register_player(writer)
         print("player num: " + str(player.number))
         
+        # send player its turn number after intialization.
         msg = pickle.dumps(wrap.HeaderNew(wrap.MsgPassPlayerNum(player.number)))
         writer.write(msg)
 
+        # waits to read/ get data from client will then sort the msg wrapper
+        # based on msg.id and determine what tasks need to be done
         while self.running and player is not None:
             data = await reader.read(buf)
             msg = pickle.loads(data)
@@ -103,6 +110,7 @@ class Server():
         writer.close()
         await writer.wait_closed()
 
+    # starts server and listens for connection
     async def run(self, host, port):
         self.running = True
         server = await asyncio.start_server(

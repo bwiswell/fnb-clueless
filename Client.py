@@ -1,5 +1,3 @@
-# Save as client.py 
-# Message Sender
 import os
 import pickle
 import Message as msgClass
@@ -14,8 +12,6 @@ player = pl.Player()
 message = msgClass.Message()
 
 
-
-
 class Client():
     def __init__(self):
         self.running = False
@@ -23,31 +19,34 @@ class Client():
         self.gui = None
 
     async def handle_server(self,reader,writer):
+        # start the lobby
         lobby = Lobby.Lobby()
+        # get name from lobby
         name = lobby.getPlayerName()
 
         player.name = name
         #player.location = "ballroom"
-
+        # send msg across pipe to update server player
         msgWrap = wrap.MsgUpdatePlayer(player)
         helper = wrap.HeaderNew(msgWrap)
         data_string = pickle.dumps(helper)
         writer.write(data_string)
 
         buf = 2048
-        # send game start
-
 
         while self.running:
-
+            # async wait to read data from server and process them below
+            # based on msg.id
             data = await reader.read(buf)
             data_var = pickle.loads(data)
             playerUpdate = data_var
             self.info = playerUpdate
             print("Received message: " + str(data_var))
-
+            # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
                 print(data_var.data.playerNum)
+                # checking player position and if 0 starting game using button
+                # Then start GUI after wrtiting to server
                 if(data_var.data.playerNum == 0):
                     lobby.giveStartButton()
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
@@ -72,7 +71,7 @@ class Client():
         # send move
         writer.close()
         await writer.wait_closed()
-
+    # method to connect the client to the server.
     async def run(self,host,port):
         self.running = True
         reader, writer = await asyncio.open_connection(
