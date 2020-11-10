@@ -7,9 +7,6 @@ import GUIConstants
 import LocationSprite
 import PlayerSprite
 
-BACKGROUND_FILE_PATH = "\\assets\\background_asset.png"
-OVERLAY_FILE_PATH = "\\assets\\overlay_asset.png"
-
 # Game board GUI pane
 class ClueMap(pygame.Surface):
     def __init__(self, scaled_map_size):

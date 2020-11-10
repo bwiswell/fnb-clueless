@@ -32,6 +32,10 @@ class MsgPassPlayerNum():
 class MsgPassInformation():
     def __init__(self,info):
         self.info = info
+
+class MsgUpdatePlayer():
+    def __init__(self,player):
+        self.player = player
     
 class HeaderNew:
     ids = {
@@ -39,6 +43,7 @@ class HeaderNew:
         MsgPlayerReadyResp: 101,
         MsgPassPlayer: 102,
         MsgPassPlayerNum: 103,
+        MsgUpdatePlayer: 104,
         MsgUpdateGame: 500,
         MsgPassInformation: 501,
         MsgLobbyReady: 1000,

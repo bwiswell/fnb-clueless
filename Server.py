@@ -66,6 +66,7 @@ class Server():
         buf = 2048
         player, game = self.register_player(writer)
         print("player num: " + str(player.number))
+        
         msg = pickle.dumps(wrap.HeaderNew(wrap.MsgPassPlayerNum(player.number)))
         writer.write(msg)
 
@@ -82,6 +83,13 @@ class Server():
             elif(msg.id == 102):
                 playerData = msg.data.player
                 await game.move(player, playerData)
+            elif(msg.id == 104):
+                print("here")
+                print(msg.data.player.name)
+                player.name = msg.data.player.name
+                print(player.name)
+            
+
 
             if msg == "exit":
                 print("Exiting server...")

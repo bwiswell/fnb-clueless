@@ -1,5 +1,3 @@
-from ctypes import windll, c_int
-
 import pygame
 
 import GUIConstants
