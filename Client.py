@@ -21,8 +21,8 @@ class Client():
     async def handle_server(self,reader,writer):
         buf = 2048
         # send game start
-        data_string = pickle.dumps(wrap.MsgLobbyReady())
-        writer.write(data_string)
+
+
         while self.running:
 
             data = await reader.read(buf)
@@ -31,13 +31,22 @@ class Client():
             self.info = playerUpdate
             print("Received message: " + str(data_var))
 
+            if (data_var.id == 103):
+                print(data_var.data.playerNum)
+                data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
+                writer.write(data_string)       
+            else:
+                pass
+            
             player.name = "Rob"
             player.location = "Right"
 
-            data_string = pickle.dumps(wrap.MsgPassPlayer(player))
+            msgWrap = wrap.MsgPassPlayer(player)
+            helper = wrap.HeaderNew(msgWrap)
+            data_string = pickle.dumps(helper)
             writer.write(data_string)
 
-            # send move
+        # send move
         writer.close()
         await writer.wait_closed()
 
@@ -111,20 +120,3 @@ while status:
     else:
         print("Invalid move selected...")
         print("")
-
-print("here")
-
-
-#SendPlayerInformation(player)
-
-print(ip)
-
-#data = conn.recv(2048)
-
-   
-# repeat as long as message 
-# string are not empty 
-#while data:
-#    data_var = pickle.loads(data)
-#    print("Received message: " + data_var)
-#    data = conn.recv(2048)
