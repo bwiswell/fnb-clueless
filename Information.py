@@ -5,29 +5,22 @@ class Information:
         self.storeAllPlayers = []
         self.currentLocation = []
         self.allLocations = []
-        print("here123")
-
 
     def updateCurrentLocation(self,incomingPlayer):
-        print("here124")
-
         player = pl.Player()
         player = incomingPlayer
         if(self.currentLocation.__len__() != 0):
             for index, pair in enumerate(self.currentLocation):
-                if pair[0] == player.playerIP:
+                if pair[0] == player.name:
                     print((pair[0],player.location))
                     self.currentLocation[index] = (pair[0],player.location)
                     print(currentLocation)
                 else:
-                    self.currentLocation.append((player.playerIp,player.location))
-                    print("here123")
+                    self.currentLocation.append((player.name,player.location))
                     print(self.currentLocation.__len__())
         else:
-            self.currentLocation.append((player.playerIp,player.location))
-            print("here125")
+            self.currentLocation.append((player.name,player.location))
             print(self.currentLocation.__len__())
-
 
 
     def getCurrentLocations(self):

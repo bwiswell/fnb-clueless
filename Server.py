@@ -11,7 +11,6 @@ import asyncio
 
 
 info1 = info.Information()
-#wph = wrap.Header()
 
 class Game():
     def __init__(self):
@@ -32,10 +31,11 @@ class Game():
 
     async def move(self, player, data):
         if player.number == self.active_player:
-            print(data.playerData.location)
-            print(data.playerData.playerIp)
-            self.info.updateCurrentLocation(data.playerData)
+            print(data.location)
+            print(data.name)
+            self.info.updateCurrentLocation(data)
             locations = self.info.getCurrentLocations()
+            msg = wrap.MsgUpdateGame(self.info)
             print(locations)
             
             await self.end_turn(player)
@@ -65,26 +65,24 @@ class Server():
         while self.running and player is not None:
             data = await reader.read(buf)
             data_var = pickle.loads(data)
-            wph = data_var
+            msgid = wrap.HeaderNew(data_var).id
+            print(msgid)
             print("Received message: " + str(data_var))
 
-            if data_var == "start_game":
+            if(msgid == 1000):
                 await game.start_game(player)
-            elif(wph.HeaderId == 1234):
+            elif(msgid == 1234):
                 print("Normal Message no object message")
-            elif(wph.HeaderId == 8888):
-                await game.move(player, wph.data)
+            elif(msgid == 102):
+                playerData = data_var.player
+                await game.move(player, playerData)
 
-
-
-            if data_var == "exit":
+            if msg == "exit":
                 print("Exiting server...")
                 self.running = False
 
         writer.close()
         await writer.wait_closed()
-
-    
 
     async def run(self, host, port):
         self.running = True

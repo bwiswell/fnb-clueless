@@ -1,39 +1,41 @@
 import Player as pl
 
+
 class Wrapper:
     def __init__(self):
         print("hello")
-
-
-class Header:
-    def __init__(self):
-        self.HeaderId = 1234
-        self.data = Data()
-        self.DataSize = self.data.__sizeof__()
-
-
-    def setHeaderId(self):
-
-        if isinstance(self.data.dataObject, pl.Player):
-            self.HeaderId = 8888
-        else:
-            self.HeaderId = 12345
     
-        
-class Data:
+class MsgPlayerReady:
     def __init__(self):
-        p1 = pl.Player()
-        self.playerData = p1
-        self.dataType = Data
-        self.dataObject = p1
+        pass #stuff
 
-    def setPlayerData(self,data):
+class MsgPlayerReadyResp:
+    def __init__(self):
+        pass #stuff
+
+class MsgUpdateGame():
+    def __init__(self, info):
+        self.info = info
         
-        p1 = pl.Player()
-        p1 = data
-        self.playerData = p1
-        self.dataObject = p1
-        self.dataType = pl.Player
+class MsgLobbyReady():
+    def __init__(self):
+        self.start = "start_game"
 
-    def printData(self):
-        print(self.playerData)
+class MsgPassPlayer():
+    def __init__(self,player):
+        self.player = player
+    
+class HeaderNew:
+    ids = {
+        MsgPlayerReady: 100,
+        MsgPlayerReadyResp: 101,
+        MsgPassPlayer: 102,
+        MsgUpdateGame: 500,
+        MsgLobbyReady: 1000,
+    }
+    
+    def __init__(self, data):
+        self.id = self.ids.get(type(data), 0)
+        self.data = data
+
+        #msg = HeaderNew(mydataobj)

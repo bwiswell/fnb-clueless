@@ -10,8 +10,7 @@ import asyncio
 
 player = pl.Player()
 message = msgClass.Message()
-wph = wrap.Header()
-wpd = wrap.Data()
+
 
 
 class Client():
@@ -22,7 +21,7 @@ class Client():
     async def handle_server(self,reader,writer):
         buf = 2048
         # send game start
-        data_string = pickle.dumps("start_game")
+        data_string = pickle.dumps(wrap.MsgLobbyReady())
         writer.write(data_string)
         while self.running:
 
@@ -32,15 +31,11 @@ class Client():
             self.info = playerUpdate
             print("Received message: " + str(data_var))
 
-            player.playerIp = "192.192.192.192"
+            player.name = "Rob"
             player.location = "Right"
 
-            wpd.setPlayerData(player)
-            wph.data = wpd
-            wph.setHeaderId()
-            data_string = pickle.dumps(wph)
+            data_string = pickle.dumps(wrap.MsgPassPlayer(player))
             writer.write(data_string)
-
 
             # send move
         writer.close()
