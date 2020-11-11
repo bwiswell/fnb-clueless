@@ -104,7 +104,6 @@ class Server():
                 print(player.name)
             
 
-
             if msg == "exit":
                 print("Exiting server...")
                 self.running = False
