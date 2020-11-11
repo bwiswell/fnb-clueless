@@ -1,6 +1,5 @@
 import os
 import pickle
-import Message as msg
 from Player import Player
 import Information as info
 import Wrapper as wrap
@@ -19,6 +18,9 @@ class Game():
     # turn sequence and starting the game    
     async def start_game(self, player):
         print("gmae started")
+        # for player in self.players:
+        #     #send out msg to all players that game is starting and allow player 1 to move
+        #     pass
         if player.number == 0:
             msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
             await player.sendServerMsg(msg)

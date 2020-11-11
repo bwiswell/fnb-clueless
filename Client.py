@@ -1,6 +1,5 @@
 import os
 import pickle
-import Message as msgClass
 import Player as pl
 import Wrapper as wrap
 import Information as info
@@ -9,7 +8,6 @@ import ClueGUI
 import asyncio
 
 player = pl.Player()
-message = msgClass.Message()
 
 
 class Client():
@@ -25,7 +23,7 @@ class Client():
         name = lobby.getPlayerName()
 
         player.name = name
-        #player.location = "ballroom"
+        player.location = "ballroom"
         # send msg across pipe to update server player
         msgWrap = wrap.MsgUpdatePlayer(player)
         helper = wrap.HeaderNew(msgWrap)
@@ -47,6 +45,7 @@ class Client():
                 print(data_var.data.playerNum)
                 # checking player position and if 0 starting game using button
                 # Then start GUI after wrtiting to server
+
                 if(data_var.data.playerNum == 0):
                     lobby.giveStartButton()
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
