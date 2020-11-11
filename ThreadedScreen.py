@@ -1,8 +1,8 @@
-import threading
+from threading import Lock
 
-import pygame
+from pygame import display, FULLSCREEN
 
-import GUIConstants
+from Constants import WHITE
 
 # Screen class for updating the display from multiple threads
 class ThreadedScreen():
@@ -11,13 +11,13 @@ class ThreadedScreen():
         # display if no size is provided
         self.screen = None
         if size is None:
-            self.screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
+            self.screen = display.set_mode(flags=FULLSCREEN)
         else:
-            self.screen = pygame.display.set_mode(size)
-        self.screen.fill(GUIConstants.WHITE)
+            self.screen = display.set_mode(size)
+        self.screen.fill(WHITE)
 
         # Lock to prevent concurrent access
-        self.lock = threading.Lock()
+        self.lock = Lock()
 
     # Getter for the size of the display
     def get_size(self):
@@ -26,13 +26,13 @@ class ThreadedScreen():
     # Method to draw to the display. The lock must be acquired before
     # any drawing can occur. The lock is released after drawing is 
     # complete.
-    def draw(self, surface):
+    def blit(self, drawable, drawable_pos):
         self.lock.acquire()
         try:
-            self.screen.blit(surface, surface.position)
-            pygame.display.update()
+            self.screen.blit(drawable, drawable_pos)
+            display.update()
         finally:
             self.lock.release()
 
     def close(self):
-        pygame.display.quit()
+        display.quit()
