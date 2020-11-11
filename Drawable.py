@@ -3,9 +3,13 @@ import pygame
 from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
 
 class Drawable(pygame.Surface):
-    def __init__(self, size, position):
-        pygame.Surface.__init__(self, size)
-        self.fill(WHITE)
+    def __init__(self, size, position, transparent=False):
+        if transparent:
+            pygame.Surface.__init__(self, size, pygame.SRCALPHA)
+        else:
+            pygame.Surface.__init__(self, size)
+            self.fill(WHITE)
+        self.size = size
         self.position = position
         self.rect = pygame.Rect(position, size)
         self.center = self.rect.center
@@ -14,8 +18,11 @@ class Drawable(pygame.Surface):
         # Make some changes to the Drawable object
         pass
 
-    def draw(self, surface):
-        surface.blit(self, self.position)
+    def draw(self, surface, size=None):
+        if size is None:
+            surface.blit(self, self.position)
+        else:
+            surface.blit(self, self.position, pygame.Rect(self.position, size))
 
 class CenteredDrawable(Drawable):
     def __init__(self, size, center):

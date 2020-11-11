@@ -23,6 +23,7 @@ class Notepad(Drawable):
         # Editable area positions and sizes, as well as the current scroll position
         self.text = ""
         self.text_surface_size = (size[0] - BORDER_RADIUS * 2, size[1] * 10)
+        self.text_border = pygame.Rect(0, label_box.height, size[0], size[1] - label_box.height)
         self.text_box = pygame.Rect(BORDER_RADIUS, label_box.height + BORDER_RADIUS, self.text_surface_size[0], self.text_border.height - BORDER_RADIUS * 2)
         self.scroll_y = 0
         self.scroll_max_y = 0
@@ -46,8 +47,12 @@ class Notepad(Drawable):
         pass
 
     def on_click(self, x, y, button, pressed):
-        if not self.blocked and pressed and button == mouse.Button.left and self.rect.collidepoint((x, y)):
-            self.active = not self.active
+        if not self.active and not self.blocked and pressed and button == mouse.Button.left and self.rect.collidepoint((x, y)):
+            self.active = True
+            self.update(False)
+            self.draw(self.screen)
+        elif self.active and pressed and button == mouse.Button.left and not self.rect.collidepoint((x, y)):
+            self.active = False
             self.update(False)
             self.draw(self.screen)
 
@@ -129,4 +134,4 @@ class Notepad(Drawable):
         text_rect = pygame.Rect((0, self.scroll_y), self.text_box.size)
         self.blit(text_object, self.text_box.topleft, text_rect)
         if self.active:
-            pygame.draw.rect(self, BLUE, self.get_rect(), BORDER_RADIUS)
+            pygame.draw.rect(self, BLUE, self.text_border, BORDER_RADIUS)

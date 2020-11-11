@@ -52,8 +52,8 @@ class ClueMap(Drawable):
     def updateLocations(self, player_locations):
         for location in self.locations.values():
             location.clearPlayers()
-        for name,location in player_locations:
-            self.locations[location].addPlayer(self.player_sprites[name])
+        for character,location in player_locations:
+            self.locations[location].addPlayer(self.player_sprites[character])
 
     def update(self, player_locations):
         self.clue_map.blit(self.background, (0, 0))

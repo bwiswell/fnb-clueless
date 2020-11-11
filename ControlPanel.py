@@ -9,13 +9,13 @@ from ClueEnums import Actions
 from Drawable import Drawable, Button
 
 class ControlPanel(Drawable):
-    def __init__(self, size, position, player_sprite, cards, font):
+    def __init__(self, size, position, player_name, player_sprite, cards, font):
         Drawable.__init__(self, size, position)
         self.fill(MID_GRAY)
 
         # Player data (image and name) sizes and positions
         player_image = player_sprite.image
-        player_name = font.render(player_sprite.name, True, BLACK)
+        player_name = font.render(player_name, True, BLACK)
 
         image_width = size[0] // 4
         image_height = math.floor((player_image.get_size()[1] / player_image.get_size()[0]) * image_width)
@@ -54,9 +54,9 @@ class ControlPanel(Drawable):
         pygame.draw.rect(self, BLACK, left_slot, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, center_slot, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, right_slot, BORDER_RADIUS)
-        self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
-        self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
-        self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
+        #self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
+        #self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
+        #self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
 
         # Button sizes and positions
         button_y = card_slot_y + card_slot_height
@@ -72,7 +72,7 @@ class ControlPanel(Drawable):
     def initButtons(self, size, start_y, font):
         x = size[0] // 2
         y = start_y + size[1] // 2
-        for index,action_text in ACTION_OPTION_TEXT:
+        for index,action_text in enumerate(ACTION_OPTION_TEXT):
             text_obj = font.render(action_text, True, BLACK)
             self.buttons.append(Button(text_obj, (x, y), Actions(index), size))
             y += size[1]       

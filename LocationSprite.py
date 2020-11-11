@@ -17,7 +17,7 @@ from Drawable import Drawable
 # Base class for all locations
 class LocationSprite(Drawable):
     def __init__(self, image, position, size, collision_box):
-        Drawable.__init__(self, size, position)
+        Drawable.__init__(self, size, position, True)
         self.image = image
         self.collision_box = collision_box
 
@@ -33,9 +33,6 @@ class LocationSprite(Drawable):
     def update(self):
         self.blit(self.image, (0, 0))
         self.drawPlayers()
-
-    def draw(self):
-        self.blit(self.image, (0, 0))
 
 # Subclass of LocationSprite for rooms
 class RoomSprite(LocationSprite):

@@ -38,16 +38,17 @@ class ClueGUI(Drawable):
     def __init__(self, player, all_players):
         self.screen = ThreadedScreen()
 
-        self.gui_size = self.screen.get_size()
-        Drawable.__init__(self, self.gui_size, (0, 0))
-
         # GUI element sizes and positions
+        self.gui_size = self.screen.get_size()
         self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
         control_height = 2 * (self.gui_size[1] // 3)
         self.control_size = (self.gui_size[0] - self.map_size[0], control_height)
         self.control_pos = (self.map_size[0], 0)
         self.notepad_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
         self.notepad_pos = (self.map_size[0], self.gui_size[1] - self.notepad_size[1])
+
+        Drawable.__init__(self, self.map_size, (0, 0))
+        self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
 
         # Initialize and font
         font_size = self.getFontSize()
@@ -62,12 +63,12 @@ class ClueGUI(Drawable):
         self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
 
         # Control Panel
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player_sprite, self.player.cards, self.font)
-        self.control_panel.draw(self)
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, self.player.cards, self.font)
+        self.control_panel.draw(self.screen)
         self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
 
         # Initial GUI render
-        self.updateGUI([(player.name, player.location) for player in all_players])
+        self.updateGUI([(player.character, player.location) for player in all_players])
 
     # Get a font size appropriate to the screen size
     def getFontSize(self):
@@ -115,7 +116,7 @@ class ClueGUI(Drawable):
                         self.clearDialogues()
                     else:
                         GUIMessage(self.font, invalid_text, self.center).draw(self.screen)
-        success_text += response + "!"
+        success_text += response.name + "!"
         GUIMessage(self.font, success_text, self.center).draw(self.screen)
         self.notepad.unblock()
         return response

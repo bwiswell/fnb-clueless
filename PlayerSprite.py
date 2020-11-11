@@ -23,7 +23,7 @@ def initPlayerSprites(players):
     asset_sheet = pygame.image.load(asset_path)
     player_sprites = {}
 
-    for player in enumerate(players):
+    for player in players:
         image = pygame.Surface(CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
         asset_rect = pygame.Rect((0, CHARACTER_ASSET_SIZE[1] * player.character.value), CHARACTER_ASSET_SIZE)
         image.blit(asset_sheet, (0, 0), asset_rect)

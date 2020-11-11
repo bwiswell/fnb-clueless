@@ -7,14 +7,13 @@ from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
 from Drawable import CenteredDrawable, Button
 
 # Simple class to render a text message on a white background with a black border
-class GUIMessage(pygame.Surface):
+class GUIMessage(CenteredDrawable):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, BLACK)
-        pygame.Surface.__init__(self, (text_object.get_width() + BORDER_RADIUS * 8, text_object.get_height() + BORDER_RADIUS * 8))
-        self.fill(WHITE)
+        CenteredDrawable.__init__(self, (text_object.get_width() + BORDER_RADIUS * 8, text_object.get_height() + BORDER_RADIUS * 8), center)
         pygame.draw.rect(self, BLACK, self.get_rect(), BORDER_RADIUS)
         self.blit(text_object, (BORDER_RADIUS * 4, BORDER_RADIUS * 4))
-        self.position = (center[0] - (self.get_width() // 2), 0)
+        self.position = (self.position[0], 0)
 
 class Dialogue(CenteredDrawable):
     def __init__(self, size, center):
@@ -101,9 +100,9 @@ class ConfirmationDialogue(Dialogue):
         x_margins = text_rect.size[0] // 3
         y_margins = dialogue_height // 4
         text_surface.blit(text_object, (0, y_margins - text_rect.size[1] // 2))
-        self.confirm = Button(font, "Confirm", (x_margins, y_margins * 3), True)
+        self.confirm = Button(font.render("Confirm", True, BLACK), (x_margins, y_margins * 3), True)
         text_surface.blit(self.confirm, self.confirm.position)
-        self.cancel = Button(font, "Cancel", (x_margins * 2, y_margins * 3), False)
+        self.cancel = Button(font.render("Cancel", True, BLACK), (x_margins * 2, y_margins * 3), False)
         text_surface.blit(self.cancel, self.cancel.position)
         self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
     
