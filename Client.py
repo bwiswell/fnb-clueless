@@ -53,7 +53,7 @@ moveDict = {
 actionList = ["accuse", "suggest", "endturn"]
 locList = ["Hall", "Library"]
 playerLocs = [("Rob", "Hall"), ("Ben", "HW1"), ("Frank", "Study"), ("Sahil", "Hall")]
-gui.updateGUI()
+ClueGUI.ClueGUI(player,[player])
 hasAccused = False
 movedBySuggestion = False
 NAME = 0
