@@ -26,11 +26,15 @@ class ThreadedScreen():
     # Method to draw to the display. The lock must be acquired before
     # any drawing can occur. The lock is released after drawing is 
     # complete.
-    def blit(self, drawable, drawable_pos):
+    def blit(self, drawable, drawable_pos, draw_rect=None):
         self.lock.acquire()
         try:
-            self.screen.blit(drawable, drawable_pos)
-            display.update()
+            if draw_rect is not None:
+                self.screen.blit(drawable, drawable_pos, draw_rect)
+                display.update(draw_rect)
+            else:
+                self.screen.blit(drawable, drawable_pos)
+                display.update()
         finally:
             self.lock.release()
 
