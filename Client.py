@@ -4,15 +4,15 @@ import os
 import pickle
 import pygame
 from ClueGUI import ClueGUI
-import Message as msgClass
-import Player as pl
+#import Message as msgClass
+import Player
 import Wrapper as wrap
 
 gui = ClueGUI()
-player = pl.Player()
-message = msgClass.Message()
-wph = wrap.Header()
-wpd = wrap.Data()
+player = Player()
+#message = msgClass.Message()
+#wph = wrap.Header()
+#wpd = wrap.Data()
 
 studyList = ["HW0", "HW6", "Kitchen", "Lounge", "Conservatory"]
 hall0List = ["Study", "Hall"]
@@ -40,6 +40,8 @@ ballroomList = ["HW4", "HW5", "HW9"]
 hall5List = ["Ballroom", "Kitchen"]
 kitchenList = ["HW5", "HW11", "Study", "Lounge", "Conservatory"]
 
+cornerRooms = ["Study", "Lounge", "Conservatory", "Kitchen"]
+
 moveDict = {
             "HW0":hall0List, "HW1":hall1List, "HW2":hall2List, "HW3":hall3List, "HW4":hall4List, "HW5":hall5List,
             "HW6":hall6List, "HW7":hall7List, "HW8":hall8List, "HW9":hall9List, "HW10":hall10List, "HW11":hall11List,
@@ -50,48 +52,110 @@ moveDict = {
 
 actionList = ["accuse", "suggest", "endturn"]
 locList = ["Hall", "Library"]
-playerLocs = {"Hall", "HW1", "Study"}
-player.location = "Hall"
+playerLocs = [("Rob", "Hall"), ("Ben", "HW1"), ("Frank", "Study"), ("Sahil", "Hall")]
 gui.updateGUI()
+hasAccused = False
+movedBySuggestion = False
+NAME = 0
+LOCATION = 1
+
+def findPlayerIndex(name):
+    for i in playerLocs.__len__():
+        if playerLocs[i][NAME] == name:
+            return i
+
+def determineValidMoves():
+    if "HW" not in player.location:
+
+        for loc in playerLocs:
+            print(loc)
+
+            if "HW" in loc[LOCATION]:
+                if loc[LOCATION] in moveList:
+                    moveList.remove(loc[LOCATION])
+    print(moveList)
 
 while True:
     # wait for server update along with updated player locations
-    # generate playerLoc list
-    
+    # use information class here to get playerLocs list of tuples
+    gui.updateGUI()
+    print(playerLocs)
     # determine list of valid player moves
+    player.location = playerLocs[findPlayerIndex(player.name)][LOCATION]
     moveList = moveDict[player.location]
-    actionList = ["accuse", "suggest", "endturn"]
+    actionList = ["move", "accuse", "suggest", "endturn"]
+    print(moveList)
+    determineValidMoves(playerLocs)
     print(moveList)
 
-    if "HW" in player.location:
-        print("Player is in hallway ", (int(player.location[2]) + 1))
-    else:
-        for loc in playerLocs:
-            print(loc)
-            if "HW" in loc:
-                if loc in moveList:
-                    moveList.remove(loc)
-    print(moveList)
+    if moveList.__len__() == 0:
+        actionList.remove("move")
+
+        if movedBySuggestion is True:
+            if player.location not in cornerRooms:
+                actionList.remove("accuse")
+                actionList.remove("suggest")
+            
+
+    if hasAccused is True:
+        actionList.remove("accuse")
+        actionList.remove("suggest")
 
     action = gui.getPlayerAction(actionList)
 
     if action == "endturn":
         raise SystemExit
 
+    elif action == "accuse":
+        hasAccused = True
+        name = "Rob" # TODO: will need to get from GUI
+        playerToMove = Player()
+        playerToMove.location = player.location
+        # wpd.setPlayerData(player)
+        # wph.data = wpd
+        # wph.setHeaderId()
+        # message.SendServerMsg(wph)
+        
+        # wpd.setPlayerData(playerToMove)
+        # wph.data = wpd
+        # wph.setHeaderId()
+        # message.SendServerMsg(wph)
+        # TODO: send message to server with this information
+        # TODO: wait for server update on whether accusation was correct
+        
+
+    elif action == "suggest":
+        name = "Rob" # TODO: will need to get from GUI
+        playerToMove = Player()
+        playerToMove.location = player.location
+        # wpd.setPlayerData(player)
+        # wph.data = wpd
+        # wph.setHeaderId()
+        # message.SendServerMsg(wph)
+
+        # wpd.setPlayerData(playerToMove)
+        # wph.data = wpd
+        # wph.setHeaderId()
+        # message.SendServerMsg(wph)
+
     move = gui.getPlayerMove(moveList)
     print(action)
     print(move)
     player.location = move
-    conn = message.getConnectionInfo()
-    ip, port = conn.getpeername()
 
-    player.playerIp = ip
 
-    wpd.setPlayerData(player)
-    wph.data = wpd
-    wph.setHeaderId()
 
-    message.SendServerMsg(wph)
+
+
+
+
+    # conn = message.getConnectionInfo()
+    # ip, port = conn.getpeername()
+    #
+    # player.playerIp = ip
+    #
+
+
     #if suggestion made check
     #package message and send update to server
 
