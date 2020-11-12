@@ -18,20 +18,19 @@ class ControlPanel(Drawable):
         player_name = font.render(player_name, True, BLACK)
 
         image_width = size[0] // 4
-        image_height = math.floor((player_image.get_size()[1] / player_image.get_size()[0]) * image_width)
         data_width = image_width * 2
-        data_height = image_height * 2
+        data_height = (player_image.get_height() // player_image.get_width()) * image_width
 
         left_data = pygame.Rect(0, 0, data_width, data_height)
         right_data = pygame.Rect(data_width, 0, data_width, data_height)
 
-        player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - image_height // 2)
+        player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - data_height // 2)
         player_name_pos = (right_data.centerx - player_name.get_size()[0] // 2, right_data.centery - player_name.get_size()[1] // 2)
 
         # Render player data
         pygame.draw.rect(self, BLACK, left_data, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, right_data, BORDER_RADIUS)
-        self.blit(pygame.transform.smoothscale(player_image, (image_width, image_height)), player_image_pos)
+        self.blit(pygame.transform.smoothscale(player_image, (image_width, data_height)), player_image_pos)
         self.blit(player_name, player_name_pos)
 
         # Player cards sizes and positions

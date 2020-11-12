@@ -1,57 +1,67 @@
 from enum import Enum, IntEnum
 
-class Locations(IntEnum):
-    STUDY = 0
-    HW1 = 1
-    HALL = 2
-    HW2 = 3
-    LOUNGE = 4
-    HW3 = 5
-    HW4 = 6
-    HW5 = 7
-    LIBRARY = 8
-    HW6 = 9
-    BILLIARD = 10
-    HW7 = 11
-    DINING = 12
-    HW8 = 13
-    HW9 = 14
-    HW10 = 15
-    CONSERVATORY = 16
-    HW11 = 17
-    BALLROOM = 18
-    HW12 = 19
-    KITCHEN = 20
+class EnumText(Enum):
+    def __new__(cls, *args, **kwds):
+        value = len(cls.__members__)
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
 
-class Rooms(IntEnum):
-    STUDY = 0
-    HALL = 2
-    LOUNGE = 4
-    LIBRARY = 8
-    BILLIARD = 10
-    DINING = 12
-    CONSERVATORY = 16
-    BALLROOM = 18
-    KITCHEN = 20
+    def __init__(self, text: str):
+        self.text = text
 
-class Weapons(Enum):
-    CANDLESTICK = 0
-    REVOLVER = 1
-    ROPE = 2
-    LEADPIPE = 3
-    KNIFE = 4
-    WRENCH = 5
+class Locations(EnumText):
+    STUDY = "study"
+    HW1 = "study-hall hallway"
+    HALL = "hall"
+    HW2 = "hall-lounge hallway"
+    LOUNGE = "lounge"
+    HW3 = "study-library hallway"
+    HW4 = "hall-billiard room hallway"
+    HW5 = "lounge-dining room hallway"
+    LIBRARY = "library"
+    HW6 = "library-billiard room hallway"
+    BILLIARD = "billiard room"
+    HW7 = "billiard room-dining room hallway"
+    DINING = "dining room"
+    HW8 = "library-conservatory hallway"
+    HW9 = "billiard room-ballroom hallway"
+    HW10 = "dining room-kitchen hallway"
+    CONSERVATORY = "conservatory"
+    HW11 = "conservatory-ballroom hallway"
+    BALLROOM = "ballroom"
+    HW12 = "ballroom-kitchen hallway"
+    KITCHEN = "kitchen"
 
-class Characters(Enum):
-    MSSCARLET = 0
-    REVGREEN = 1
-    MRSPEACOCK = 2
-    CNLMUSTARD = 3
-    MRSWHITE = 4
-    PROFPLUM = 5
+class Rooms(EnumText):
+    STUDY = "study"
+    HALL = "hall"
+    LOUNGE = "lounge"
+    LIBRARY = "library"
+    BILLIARD = "billiard room"
+    DINING = "dining room"
+    CONSERVATORY = "conservatory"
+    BALLROOM = "ballroom"
+    KITCHEN = "kitchen"
 
-class Actions(Enum):
-    MOVE = 0
-    SUGGEST = 1
-    ACCUSE = 2
-    ENDTURN = 3
+class Weapons(EnumText):
+    CANDLESTICK = "candlestick"
+    REVOLVER = "revolver"
+    ROPE = "rope"
+    LEADPIPE = "lead pipe"
+    KNIFE = "knife"
+    WRENCH = "wrench"
+
+class Characters(EnumText):
+    MSSCARLET = "Ms. Scarlet"
+    REVGREEN = "Rev. Green"
+    MRSPEACOCK = "Mrs. Peacock"
+    CNLMUSTARD = "Cnl. Mustard"
+    MRSWHITE = "Mrs. White"
+    PROFPLUM = "Prof. Plum"
+
+class Actions(EnumText):
+    MOVE = "move"
+    SUGGEST = "suggest"
+    ACCUSE = "accuse"
+    ENDTURN = "end turn"

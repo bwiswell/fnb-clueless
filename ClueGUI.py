@@ -5,6 +5,7 @@ import pygame
 from Errors import NoPossibleActionError
 
 from Constants import GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
+from Constants import GAME_START_MESSAGE
 from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE
 from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE
 from Constants import PICK_SUGGESTION_MESSAGE
@@ -13,9 +14,9 @@ from Drawable import Drawable
 from ThreadedScreen import ThreadedScreen
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
-from Notepad import Notepad
+from InformationCenter import InformationCenter
 import Card
-from Dialogues import GUIMessage, ConfirmationDialogue, SuggestionDialogue
+from Dialogues import ConfirmationDialogue, SuggestionDialogue
 
 # Main GUI class. Provides several methods for client-GUI interaction:
 
@@ -42,11 +43,11 @@ class ClueGUI(Drawable):
         # GUI element sizes and positions
         self.gui_size = self.screen.get_size()
         self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
-        control_height = 2 * (self.gui_size[1] // 3)
+        control_height = self.gui_size[1] // 2
         self.control_size = (self.gui_size[0] - self.map_size[0], control_height)
         self.control_pos = (self.map_size[0], 0)
-        self.notepad_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
-        self.notepad_pos = (self.map_size[0], self.gui_size[1] - self.notepad_size[1])
+        self.information_center_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
+        self.information_center_pos = (self.map_size[0], self.gui_size[1] - self.information_center_size[1])
 
         Drawable.__init__(self, self.map_size, (0, 0))
         self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
@@ -70,10 +71,11 @@ class ClueGUI(Drawable):
         player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
         self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, player_cards, self.font)
         self.control_panel.draw(self.screen)
-        self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
+        self.information_center = InformationCenter(self.information_center_size, self.information_center_pos, self.font, self.screen)
 
         # Initial GUI render
         self.updateGUI([(player.character, player.location) for player in all_players])
+        self.postMessage(GAME_START_MESSAGE)
 
     # Get a font size appropriate to the screen size
     def getFontSize(self):
@@ -90,7 +92,10 @@ class ClueGUI(Drawable):
     def updateGUI(self, player_locations):
         self.clue_map.update(player_locations)
         self.clue_map.draw(self)
-        self.draw(self.screen)      
+        self.draw(self.screen)
+
+    def postMessage(self, text):
+        self.information_center.postMessage(text)
 
     def getPlayerAction(self, valid_actions):
         return self.getPlayerResponse(valid_actions, self.control_panel, PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE)
@@ -100,45 +105,38 @@ class ClueGUI(Drawable):
 
     # Helper function to get an action/move selection and display the appropriate confirmation dialogue
     def getPlayerResponse(self, valid_actions, click_area, pick_text, conf_text, invalid_text, success_text):
-        self.notepad.block()
-        self.clearDialogues()
         if len(valid_actions) == 0:
             raise NoPossibleActionError
-        pygame.event.pump()
+        self.postMessage(pick_text)
         done = False
         response = ""
-        GUIMessage(self.font, pick_text, self.center).draw(self.screen)
         while not done:
+            pygame.event.pump()
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
                     response = click_area.getClicked(event.pos)
-                    self.clearDialogues()
                     if response in valid_actions:
-                        conf_text += response.name + "?"
+                        conf_text += response.text + "?"
                         conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
                         conf_dialogue.draw(self.screen)
                         done = conf_dialogue.getResponse()
                         self.clearDialogues()
                     else:
-                        GUIMessage(self.font, invalid_text, self.center).draw(self.screen)
-        success_text += response.name + "!"
-        GUIMessage(self.font, success_text, self.center).draw(self.screen)
-        self.notepad.unblock()
+                        self.postMessage(invalid_text)
+        success_text += response.text + "!"
+        self.postMessage(success_text)
         return response
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
     def getPlayerSuggestion(self):
-        self.notepad.block()
-        self.clearDialogues()
         pygame.event.pump()
         suggestion_dialogue = SuggestionDialogue(self.font, PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], self.card_deck)
         suggestion_dialogue.draw(self.screen)
         response = suggestion_dialogue.getResponse(self.screen)
-        self.notepad.unblock()
         self.clearDialogues()
         return response
 
     def quit(self):
-        self.notepad.quit()
+        self.information_center.quit()
         self.screen.close()
         pygame.quit()

@@ -13,13 +13,14 @@ START_BUTTON_TEXT = "Start Game"
 
 # GUI dialogue and message text
 NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
+GAME_START_MESSAGE = "The game has started!"
 PICK_ACTION_MESSAGE = "It's your turn - select an action!"
-PICK_MOVE_MESSAGE = "You have chosen to move - select a valid location!"
 ACTION_CONF = "Are you sure you want to "
-MOVE_CONF = "Are you sure you want to move to the "
 INVALID_ACTION = "Pick a valid action to perform!"
-INVALID_MOVE = "Pick a valid move to make!"
 ACTION_MESSAGE = "You have chosen to "
+PICK_MOVE_MESSAGE = "Click on a valid location to move!"
+MOVE_CONF = "Are you sure you want to move to the "
+INVALID_MOVE = "Pick a valid move to make!"
 MOVE_MESSAGE = "You moved to the "
 PICK_SUGGESTION_MESSAGE = "Pick a player card, weapon card, and location card to make a suggestion!"
 
