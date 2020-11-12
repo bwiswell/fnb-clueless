@@ -158,7 +158,8 @@ while True:
             elif action == "accuse":
                 hasAccused = True
                 actionList.remove("accuse")
-                actionList.remove("suggest")
+                if "suggest" in actionList:
+                    actionList.remove("suggest")
                 print("Making accusation...")
                 # TODO: handle accusation
 

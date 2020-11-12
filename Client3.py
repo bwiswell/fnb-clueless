@@ -184,7 +184,8 @@ class Client():
                         elif action == "accuse":
                             self.hasAccused = True
                             self.actionList.remove("accuse")
-                            self.actionList.remove("suggest")
+                            if "suggest" in self.actionList:
+                                self.actionList.remove("suggest")
                             print("Making accusation...")
                             # TODO: handle accusation
         
