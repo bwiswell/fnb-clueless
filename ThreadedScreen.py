@@ -1,8 +1,8 @@
 from threading import Lock
 
-from pygame import display, FULLSCREEN
+import pygame
 
-from Constants import WHITE
+from Constants import WHITE, BORDER_RADIUS
 
 # Screen class for updating the display from multiple threads
 class ThreadedScreen():
@@ -11,9 +11,9 @@ class ThreadedScreen():
         # display if no size is provided
         self.screen = None
         if size is None:
-            self.screen = display.set_mode(flags=FULLSCREEN)
+            self.screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
         else:
-            self.screen = display.set_mode(size)
+            self.screen = pygame.display.set_mode(size)
         self.screen.fill(WHITE)
 
         # Lock to prevent concurrent access
@@ -31,12 +31,24 @@ class ThreadedScreen():
         try:
             if draw_rect is not None:
                 self.screen.blit(drawable, drawable_pos, draw_rect)
-                display.update(draw_rect)
+                pygame.display.update(draw_rect)
             else:
                 self.screen.blit(drawable, drawable_pos)
-                display.update()
+                pygame.display.update()
         finally:
             self.lock.release()
 
+    # Method to draw a rectangle on the display. The lock must be
+    # acquired before any drawing can occur. The lock is released after
+    # drawing is complete.
+    def drawRect(self, rect, color, border_width):
+        self.lock.acquire()
+        try:
+            pygame.draw.rect(self.screen, color, rect, border_width)
+            pygame.display.update()
+        finally:
+            self.lock.release()
+
+    # Method to safely close the display window
     def close(self):
-        display.quit()
+        pygame.display.quit()

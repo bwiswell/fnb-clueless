@@ -69,7 +69,7 @@ class ClueGUI(Drawable):
 
         # Control Panel
         player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, player_cards, self.font)
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player, self.player_sprite, player_cards, self.font)
         self.control_panel.draw(self.screen)
         self.information_center = InformationCenter(self.information_center_size, self.information_center_pos, self.font, self.screen)
 
@@ -85,9 +85,10 @@ class ClueGUI(Drawable):
                 return GUI_FONT_SIZES[i]
         return GUI_FONT_SIZES[len(GUI_FONT_SIZES) - 1]
 
-    # Clear any messages or dialogues currently shown
-    def clearDialogues(self):
+    # Clear any dialogues or highlights currently shown
+    def clear(self):
         self.draw(self.screen)
+        self.control_panel.draw(self.screen)
 
     def updateGUI(self, player_locations):
         self.clue_map.update(player_locations)
@@ -108,6 +109,7 @@ class ClueGUI(Drawable):
         if len(valid_actions) == 0:
             raise NoPossibleActionError
         self.postMessage(pick_text)
+        click_area.disallow(valid_actions, self.screen)
         done = False
         response = ""
         while not done:
@@ -116,11 +118,14 @@ class ClueGUI(Drawable):
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
                     response = click_area.getClicked(event.pos)
                     if response in valid_actions:
+                        click_area.select(response, self.screen)
                         conf_text += response.text + "?"
                         conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
                         conf_dialogue.draw(self.screen)
                         done = conf_dialogue.getResponse()
-                        self.clearDialogues()
+                        self.clear()
+                        if not done:
+                            click_area.disallow(valid_actions, self.screen)
                     else:
                         self.postMessage(invalid_text)
         success_text += response.text + "!"
@@ -133,7 +138,7 @@ class ClueGUI(Drawable):
         suggestion_dialogue = SuggestionDialogue(self.font, PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], self.card_deck)
         suggestion_dialogue.draw(self.screen)
         response = suggestion_dialogue.getResponse(self.screen)
-        self.clearDialogues()
+        self.clear()
         return response
 
     def quit(self):

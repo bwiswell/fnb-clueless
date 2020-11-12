@@ -2,17 +2,18 @@ import os
 
 import pygame
 
+from Constants import BLACK, BORDER_RADIUS
 from Constants import BACKGROUND_ASSET_FILE_PATH, OVERLAY_ASSET_FILE_PATH, MAP_SIZE
 
-from Drawable import Drawable
+from Drawable import Selectable, GrayOut
 
 import LocationSprite
 import PlayerSprite
 
 # Game board GUI pane
-class ClueMap(Drawable):
+class ClueMap(Selectable):
     def __init__(self, scaled_map_size):
-        Drawable.__init__(self, scaled_map_size, (0, 0))
+        Selectable.__init__(self, scaled_map_size, (0, 0))
         self.clue_map = pygame.Surface(MAP_SIZE)
 
         # Scaling information
@@ -64,6 +65,16 @@ class ClueMap(Drawable):
             location.draw(self.clue_map)
         self.clue_map.blit(self.overlay, (0, 0))
         self.blit(pygame.transform.smoothscale(self.clue_map, self.size), (0, 0))
+
+    def disallow(self, valid_moves, screen):
+        for key,value in self.locations.items():
+            if key not in valid_moves:
+                grayed_area = value.collision_box
+                GrayOut(grayed_area.size, grayed_area.topleft).draw(screen)
+
+    def select(self, move, screen):
+        location = self.locations[move]
+        screen.drawRect(location.collision_box, BLACK, BORDER_RADIUS * 4)
 
     # Check for a clicked room or hallway and return its name
     def getClicked(self, click_pos):

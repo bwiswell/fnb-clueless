@@ -24,6 +24,22 @@ class Drawable(pygame.Surface):
         else:
             surface.blit(self, self.position, pygame.Rect(self.position, size))
 
+class Selectable(Drawable):
+    def __init__(self, size, position):
+        Drawable.__init__(self, size, position)
+
+    def disallow(self, valid_actions, screen):
+        raise NotImplementedError
+
+    def select(self, action, screen):
+        raise NotImplementedError
+
+class GrayOut(Drawable):
+    def __init__(self, size, position):
+        Drawable.__init__(self, size, position)
+        self.set_alpha(128)
+        self.fill(GRAY)
+
 class CenteredDrawable(Drawable):
     def __init__(self, size, center):
         position = (center[0] - size[0] // 2, center[1] - size[1] // 2)

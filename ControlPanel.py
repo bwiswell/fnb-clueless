@@ -2,20 +2,24 @@ import math
 
 import pygame
 
-from Constants import MID_GRAY, BLACK, BORDER_RADIUS, ACTION_OPTION_TEXT
+from Constants import WHITE, MID_GRAY, BLACK, RED, BORDER_RADIUS, ACTION_OPTION_TEXT
 
 from ClueEnums import Actions
 
-from Drawable import Drawable, Button
+from Drawable import Selectable, GrayOut, Button
 
-class ControlPanel(Drawable):
-    def __init__(self, size, position, player_name, player_sprite, cards, font):
-        Drawable.__init__(self, size, position)
+class ControlPanel(Selectable):
+    def __init__(self, size, position, player, player_sprite, cards, font):
+        Selectable.__init__(self, size, position)
         self.fill(MID_GRAY)
 
         # Player data (image and name) sizes and positions
         player_image = player_sprite.image
-        player_name = font.render(player_name, True, BLACK)
+        player_name = font.render(player.name, True, BLACK)
+        player_character = font.render(player.character.text, True, BLACK)
+        player_info = pygame.Surface((max(player_name.get_width(), player_character.get_width()), player_name.get_height() + player_character.get_height()), pygame.SRCALPHA)
+        player_info.blit(player_name, (player_info.get_width() // 2 - player_name.get_width() // 2, 0))
+        player_info.blit(player_character, (player_info.get_width() // 2 - player_character.get_width() // 2, player_name.get_height()))
 
         image_width = size[0] // 4
         data_width = image_width * 2
@@ -25,13 +29,13 @@ class ControlPanel(Drawable):
         right_data = pygame.Rect(data_width, 0, data_width, data_height)
 
         player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - data_height // 2)
-        player_name_pos = (right_data.centerx - player_name.get_size()[0] // 2, right_data.centery - player_name.get_size()[1] // 2)
+        player_info_pos = (right_data.centerx - player_info.get_width() // 2, right_data.centery - player_info.get_height() // 2)
 
         # Render player data
         pygame.draw.rect(self, BLACK, left_data, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, right_data, BORDER_RADIUS)
         self.blit(pygame.transform.smoothscale(player_image, (image_width, data_height)), player_image_pos)
-        self.blit(player_name, player_name_pos)
+        self.blit(player_info, player_info_pos)
 
         # Player cards sizes and positions
         card_width = (size[0] - BORDER_RADIUS * 4) // 3
@@ -74,7 +78,20 @@ class ControlPanel(Drawable):
         for index,action_text in enumerate(ACTION_OPTION_TEXT):
             text_obj = font.render(action_text, True, BLACK)
             self.buttons.append(Button(text_obj, (x, y), Actions(index), size))
-            y += size[1]       
+            y += size[1]
+
+    def disallow(self, valid_actions, screen):
+        for button in self.buttons:
+            if button.return_value not in valid_actions:
+                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
+                GrayOut(button.size, button_true_pos).draw(screen)
+
+    def select(self, action, screen):
+        for button in self.buttons:
+            if button.return_value == action:
+                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
+                button_rect = pygame.Rect(button_true_pos, button.size)
+                screen.drawRect(button_rect, BLACK, BORDER_RADIUS * 4)
 
     # Click detection methods for the action buttons
     def getClicked(self, click_pos):
