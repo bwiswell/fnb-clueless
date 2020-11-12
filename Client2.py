@@ -100,13 +100,13 @@ while True:
     # server will need to tell client whether this is a suggestion/accusation or actual turn
     playerLocs = updateGUI()
     player.location = playerLocs[findPlayerIndex(player.name)][LOCATION]
-    moveList = moveDict[player.location] # derermines potential move options
-    actionList = ["move", "accuse", "suggest"] # all potential actions
-    print(moveList) # TODO: remove this print eventually
-    determineValidMoves()
-    print(moveList) # TODO: remove this print eventually
 
     if isTurn is True:
+        moveList = moveDict[player.location]  # derermines potential move options
+        actionList = ["move", "accuse", "suggest"]  # all potential actions
+        print(moveList)  # TODO: remove this print eventually
+        determineValidMoves()
+        print(moveList)  # TODO: remove this print eventually
         if hasAccused is True:
             actionList.remove("accuse")
             actionList.remove("suggest")
