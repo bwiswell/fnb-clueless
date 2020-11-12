@@ -14,6 +14,7 @@ from ThreadedScreen import ThreadedScreen
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
 from Notepad import Notepad
+import Card
 from Dialogues import GUIMessage, ConfirmationDialogue, SuggestionDialogue
 
 # Main GUI class. Provides several methods for client-GUI interaction:
@@ -62,8 +63,12 @@ class ClueGUI(Drawable):
         self.player = player
         self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
 
+        # Cards
+        self.card_deck = Card.initCards()
+
         # Control Panel
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, self.player.cards, self.font)
+        player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, player_cards, self.font)
         self.control_panel.draw(self.screen)
         self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
 
@@ -123,17 +128,15 @@ class ClueGUI(Drawable):
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
     def getPlayerSuggestion(self):
-        """
         self.notepad.block()
         self.clearDialogues()
         pygame.event.pump()
-        suggestion_dialogue = SuggestionDialogue(self.font, GUIConstants.PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], card_deck)
-        self.screen.draw(suggestion_dialogue)
+        suggestion_dialogue = SuggestionDialogue(self.font, PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], self.card_deck)
+        suggestion_dialogue.draw(self.screen)
         response = suggestion_dialogue.getResponse(self.screen)
         self.notepad.unblock()
         self.clearDialogues()
         return response
-        """
 
     def quit(self):
         self.notepad.quit()

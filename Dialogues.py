@@ -180,7 +180,7 @@ class SuggestionDialogue(Dialogue):
         text_pos = (dialogue_width // 2 - text_object.get_width() // 2, slot_y_offset // 2 - text_object.get_height() // 2)
         player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
         weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
-        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.location_cards)
+        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.room_cards)
         self.slots = [player_slot, location_slot, weapon_slot]
         slot_height = player_slot.size[1]
         dialogue_height = slot_height + slot_y_offset * 2
@@ -190,9 +190,9 @@ class SuggestionDialogue(Dialogue):
         self.blit(text_object, text_pos)
         for slot in self.slots:
             self.blit(slot, slot.position)
-        self.confirm = Button(font, "Confirm", (slot_width, dialogue_height - slot_y_offset // 2), True)
+        self.confirm = Button(font.render("Confirm", True, BLACK), (slot_width, dialogue_height - slot_y_offset // 2), True)
         self.blit(self.confirm, self.confirm.position)
-        self.cancel = Button(font, "Cancel", (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
+        self.cancel = Button(font.render("Cancel", True, BLACK), (slot_width * 2, dialogue_height - slot_y_offset // 2), False)
         self.blit(self.cancel, self.cancel.position)
 
     # Encapsulates the currently selected cards into a dict whose keys are the

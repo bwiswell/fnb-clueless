@@ -54,9 +54,9 @@ class ControlPanel(Drawable):
         pygame.draw.rect(self, BLACK, left_slot, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, center_slot, BORDER_RADIUS)
         pygame.draw.rect(self, BLACK, right_slot, BORDER_RADIUS)
-        #self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
-        #self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
-        #self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
+        self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
+        self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
+        self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
 
         # Button sizes and positions
         button_y = card_slot_y + card_slot_height
