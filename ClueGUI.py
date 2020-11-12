@@ -1,150 +1,141 @@
+from ctypes import windll, c_int
+
 import pygame
+
+from Errors import NoPossibleActionError
+
+from Constants import GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
+from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE
+from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE
+from Constants import PICK_SUGGESTION_MESSAGE
+
+from Drawable import Drawable
+from ThreadedScreen import ThreadedScreen
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
-from Dialogues import Message, InputDialogue, ConfirmationDialogue
-
-# Confirmation and message strings
-NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
-START_MESSAGE = "Waiting for the game to start..."
-PICK_ACTION_MESSAGE = "It's your turn - select an action!"
-PICK_MOVE_MESSAGE = "You have chosen to move - select a valid location!"
-ACTION_CONF = "Are you sure you want to "
-MOVE_CONF = "Are you sure you want to move to the "
-INVALID_ACTION = "Pick a valid action to perform!"
-INVALID_MOVE = "Pick a valid move to make!"
-ACTION_MESSAGE = "You have chosen to "
-MOVE_MESSAGE = "You moved to the "
-
-# The font size to use for dialogues and messages
-FONT_SIZE = 24
+from Notepad import Notepad
+from Dialogues import GUIMessage, ConfirmationDialogue, SuggestionDialogue
 
 # Main GUI class. Provides several methods for client-GUI interaction:
 
-# updateGUI(player_locations):          player_locations is a list of (ip, location) tuples used to update the GUI.
+# updateGUI(player_locations)           player_locations is a list of (name, location) tuples used to update the GUI.
 
-# getPlayerName():                      displays a text input dialogue and returns a string containing
-#                                       a player name
-#
-# Possible return values:               an alphanumeric string between 1 and 8 characters
-
-# initPlayers(players)                  players is a list containing of player objects used to initialize the player
-#                                       sprites and associate them with player ip addresses. Must be invoked before
-#                                       any call to updateGUI() from the client
-
-# getPlayerAction(valid_actions):       valid_actions is a list of actions that are available for the current
+# getPlayerAction(valid_actions)        valid_actions is a list of actions that are available for the current
 #                                       player. Returns a string (after 2 factor confirmation) that represents 
 #                                       the desired action
 #
 # Possible return values:               move, suggest, accuse, endturn
 
-# getPlayerMove(valid_moves):           valid_moves is a list of location IDs that constitue the valid
+# getPlayerMove(valid_moves)            valid_moves is a list of location IDs that constitue the valid
 #                                       moves for the current player. locations IDs should be entirely lowercase.
 #                                       Returns a lowercase location ID (after 2 factor confirmation) that represents 
 #                                       the desired move
 
-class NoPossibleActionError(Exception):
-    def __init__(self):
-        print("No possible actions were provided!")
+# quit()                                must be called to safely exit keylistener and mouselistener threads
+#                                       as well as pygame
 
-class NoPossibleMoveError(Exception):
-    def __init__(self):
-        print("No possible moves were provided!")
+class ClueGUI(Drawable):
+    def __init__(self, player, all_players):
+        self.screen = ThreadedScreen()
 
-class ClueGUI(pygame.Surface):
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
+        # GUI element sizes and positions
         self.gui_size = self.screen.get_size()
         self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
-        self.control_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1])
+        control_height = 2 * (self.gui_size[1] // 3)
+        self.control_size = (self.gui_size[0] - self.map_size[0], control_height)
         self.control_pos = (self.map_size[0], 0)
-        pygame.Surface.__init__(self, self.gui_size)
+        self.notepad_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
+        self.notepad_pos = (self.map_size[0], self.gui_size[1] - self.notepad_size[1])
+
+        Drawable.__init__(self, self.map_size, (0, 0))
         self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
+
+        # Initialize and font
+        font_size = self.getFontSize()
+        self.font = pygame.font.SysFont(None, font_size)
+
+        # Clue Map
         self.clue_map = ClueMap(self.map_size)
-        self.font = pygame.font.SysFont(None, FONT_SIZE)
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.font)
-        self.player_name = ""
-        self.player_sprite = None
-        self.updateGUI(None)
+        self.clue_map.initPlayerSprites(all_players)
+
+        # Player information
+        self.player = player
+        self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
+
+        # Control Panel
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player.name, self.player_sprite, self.player.cards, self.font)
+        self.control_panel.draw(self.screen)
+        self.notepad = Notepad(self.notepad_size, self.notepad_pos, self.screen, self.font)
+
+        # Initial GUI render
+        self.updateGUI([(player.character, player.location) for player in all_players])
+
+    # Get a font size appropriate to the screen size
+    def getFontSize(self):
+        gui_width = self.gui_size[0]
+        for i in range(len(GUI_FONT_THRESHOLDS) - 1):
+            if gui_width >= GUI_FONT_THRESHOLDS[i] and gui_width < GUI_FONT_THRESHOLDS[i+1]:
+                return GUI_FONT_SIZES[i]
+        return GUI_FONT_SIZES[len(GUI_FONT_SIZES) - 1]
 
     # Clear any messages or dialogues currently shown
     def clearDialogues(self):
-        self.screen.blit(self, (0, 0))
-        pygame.display.update()
+        self.draw(self.screen)
 
     def updateGUI(self, player_locations):
-        if player_locations is not None:
-            player_locations = [(ip,loc.lower()) for (ip,loc) in player_locations]
-        self.clue_map.draw(player_locations)
-        self.blit(pygame.transform.smoothscale(self.clue_map, self.map_size), (0, 0))
-        self.control_panel.draw()
-        self.blit(self.control_panel, self.control_pos)
-        self.screen.blit(self, (0, 0))
-        pygame.display.update()
-
-    def getPlayerName(self):
-        input_dialogue = InputDialogue(self.font, NAME_PROMPT, self.center, 8)
-        input_dialogue.draw(self.screen)
-        name = input_dialogue.getResponse(self.screen)
-        self.clearDialogues()
-        self.player_name = name
-        Message(self.font, START_MESSAGE, self.center).draw(self.screen)
-        return name
-
-    def initPlayers(self, players):
-        self.clue_map.initPlayerSprites(players)
-        self.player_sprite = self.clue_map.getPlayerSpriteByName(self.player_name)
+        self.clue_map.update(player_locations)
+        self.clue_map.draw(self)
+        self.draw(self.screen)      
 
     def getPlayerAction(self, valid_actions):
+        return self.getPlayerResponse(valid_actions, self.control_panel, PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE)
+
+    def getPlayerMove(self, valid_moves):
+        return self.getPlayerResponse(valid_moves, self.clue_map, PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE)
+
+    # Helper function to get an action/move selection and display the appropriate confirmation dialogue
+    def getPlayerResponse(self, valid_actions, click_area, pick_text, conf_text, invalid_text, success_text):
+        self.notepad.block()
         self.clearDialogues()
         if len(valid_actions) == 0:
             raise NoPossibleActionError
-        valid_actions = [action.lower() for action in valid_actions]
         pygame.event.pump()
-        action_selected = False
-        action = ""
-        Message(self.font, PICK_ACTION_MESSAGE, self.center).draw(self.screen)
-        while not action_selected:
+        done = False
+        response = ""
+        GUIMessage(self.font, pick_text, self.center).draw(self.screen)
+        while not done:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    action = self.control_panel.getClicked(event.pos)
-                    if action in valid_actions:
-                        self.clearDialogues()
-                        conf_text = ACTION_CONF + action + "?"
+                    response = click_area.getClicked(event.pos)
+                    self.clearDialogues()
+                    if response in valid_actions:
+                        conf_text += response.name + "?"
                         conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
                         conf_dialogue.draw(self.screen)
-                        action_selected = conf_dialogue.getResponse()
+                        done = conf_dialogue.getResponse()
                         self.clearDialogues()
                     else:
-                        self.clearDialogues()
-                        Message(self.font, INVALID_ACTION, self.center).draw(self.screen)
-        action_text = ACTION_MESSAGE + action + "!"
-        Message(self.font, action_text, self.center).draw(self.screen)
-        return action
+                        GUIMessage(self.font, invalid_text, self.center).draw(self.screen)
+        success_text += response.name + "!"
+        GUIMessage(self.font, success_text, self.center).draw(self.screen)
+        self.notepad.unblock()
+        return response
 
-    def getPlayerMove(self, valid_moves):
+    # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
+    def getPlayerSuggestion(self):
+        """
+        self.notepad.block()
         self.clearDialogues()
-        if len(valid_moves) == 0:
-            raise NoPossibleMoveError
-        valid_moves = [move.lower() for move in valid_moves]
         pygame.event.pump()
-        moved = False
-        location = ""
-        Message(self.font, PICK_MOVE_MESSAGE, self.center).draw(self.screen)
-        while not moved:
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    location = self.clue_map.getClicked(event.pos)
-                    if location in valid_moves:
-                        self.clearDialogues()
-                        conf_text = MOVE_CONF + location + "?"
-                        conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
-                        conf_dialogue.draw(self.screen)
-                        moved = conf_dialogue.getResponse()
-                        self.clearDialogues()
-                    else:
-                        self.clearDialogues()
-                        Message(self.font, INVALID_MOVE, self.center).draw(self.screen)
-        moved_text = MOVE_MESSAGE + location + "!"
-        Message(self.font, moved_text, self.center).draw(self.screen)
-        return location
+        suggestion_dialogue = SuggestionDialogue(self.font, GUIConstants.PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], card_deck)
+        self.screen.draw(suggestion_dialogue)
+        response = suggestion_dialogue.getResponse(self.screen)
+        self.notepad.unblock()
+        self.clearDialogues()
+        return response
+        """
+
+    def quit(self):
+        self.notepad.quit()
+        self.screen.close()
+        pygame.quit()
