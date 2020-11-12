@@ -9,6 +9,7 @@ import asyncio
 
 player = pl.Player()
 
+
 class Client():
     def __init__(self):
         self.running = False
@@ -77,7 +78,9 @@ class Client():
         reader, writer = await asyncio.open_connection(
             host,port
         )
+
         await self.handle_server(reader, writer)
+
 
 client = Client()
 asyncio.run(client.run("73.243.41.224", 87))
