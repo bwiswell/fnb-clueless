@@ -63,6 +63,7 @@ moveDict = {
            }
 hasAccused = False
 movedBySuggestion = False
+isTurn = True
 NAME = 0
 LOCATION = 1
 
@@ -80,25 +81,90 @@ def determineValidMoves():
                     moveList.remove(loc[LOCATION])
     print(moveList)
 
-while True:
+def updateGUI():
+    # TODO: add the following line back in when I am ready to get server updates
     #playerLocs = info.getCurrentLocations()
+    # TODO: remove this line when server update is used instead
     playerLocs = [
                   (player.name, player.location),
                   (player2.name, player2.location),
                   (player3.name, player3.location),
                   (player4.name, player4.location)
                  ]
+    print(playerLocs) # TODO: remove this print eventually
     gui.updateGUI(playerLocs)
-    print(playerLocs)
-    player.location = playerLocs[findPlayerIndex(player.name)][LOCATION]
-    moveList = moveDict[player.location]
-    actionList = ["move", "accuse", "suggest", "endturn"]
-    print(moveList)
-    determineValidMoves()
-    print(moveList)
+    return playerLocs
 
-    action = gui.getPlayerAction(actionList)
-    move = gui.getPlayerMove(moveList)
-    print(action)
-    print(move)
-    player.location = move
+while True:
+    # TODO: wait for server update
+    # server will need to tell client whether this is a suggestion/accusation or actual turn
+    playerLocs = updateGUI()
+    player.location = playerLocs[findPlayerIndex(player.name)][LOCATION]
+    moveList = moveDict[player.location] # derermines potential move options
+    actionList = ["move", "accuse", "suggest"] # all potential actions
+    print(moveList) # TODO: remove this print eventually
+    determineValidMoves()
+    print(moveList) # TODO: remove this print eventually
+
+    if isTurn is True:
+        if hasAccused is True:
+            actionList.remove("accuse")
+            actionList.remove("suggest")
+            if len(moveList) == 0:
+                actionList.remove("move")
+                actionList.append("end turn")
+        else:
+            if movedBySuggestion is True:
+                movedBySuggestion = False
+                if len(moveList) == 0:
+                    moveList.append(player.location)
+                    actionList.append("end turn")
+            else:
+                if "hw" in player.location:
+                    actionList.remove("accuse")
+                    actionList.remove("suggest")
+                elif len(moveList) == 0:
+                    actionList.remove("move")
+                    actionList.remove("suggest")
+                    actionList.append("end turn")
+
+        # action list loop until all valid actions exhausted or turn is ended
+        while len(actionList) > 0:
+            print(actionList)
+            action = gui.getPlayerAction(actionList)
+            
+            # takes appropriate steps based on action
+            if action == "move":
+                actionList.remove("move")
+                player.location = gui.getPlayerMove(moveList)
+                playerLocs = updateGUI()
+                actionList.append("end turn")
+
+                if "hw" in player.location:
+                    if "accuse" in actionList:
+                        actionList.remove("accuse")
+                    if "suggest" in actionList:
+                        actionList.remove("suggest")
+                else:
+                    if hasAccused is False:
+                        actionList.append("accuse")
+                        actionList.append("suggest")
+
+            elif action == "suggest":
+                actionList.remove("suggest")
+                print("Making suggestion...")
+                # TODO: handle suggestion
+
+            elif action == "accuse":
+                hasAccused = True
+                actionList.remove("accuse")
+                actionList.remove("suggest")
+                print("Making accusation...")
+                # TODO: handle accusation
+
+            else:
+                actionList.remove("end turn")
+                print("Turn ending...")
+                break
+    else:
+        movedBySuggestion = True
