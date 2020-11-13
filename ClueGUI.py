@@ -103,7 +103,7 @@ class ClueGUI(Drawable):
         self.draw(self.screen)
 
     def postMessage(self, text, color=BLACK):
-        self.information_center.postMessage(text)
+        self.information_center.postMessage(text, color)
 
     def getPlayerAction(self, valid_actions):
         return self.getPlayerResponse(valid_actions, self.control_panel, PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE)
