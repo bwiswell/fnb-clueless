@@ -5,6 +5,8 @@ import Information as info
 import Wrapper as wrap
 from socket import *
 import asyncio
+from ClueEnums import Characters, Rooms, Weapons
+import random
 
 
 info1 = info.Information()
@@ -27,6 +29,22 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.clients = []
+        self.case_file, self.cards = initCaseFile()
+
+    def initCaseFile(self):
+        character_cards = [c for c in Characters]
+        weapon_cards = [w for w in Weapons]
+        room_cards = [r for r in Rooms]
+        case_character = random.choice(character_cards)
+        character_cards.remove(case_character)
+        case_weapon = random.choice(weapon_cards)
+        weapon_cards.remove(case_weapon)
+        case_croom = random.choice(room_cards)
+        room_cards.remove(case_room)
+        case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
+        cards = character_cards.append(weapon_cards).append(room_cards)
+        return case_file, cards
+
     # method called in order to begin the player 
     # turn sequence and starting the game    
     async def start_game(self, client):
@@ -64,6 +82,14 @@ class Game():
             
             await self.end_turn(client)
 
+    def assign_cards(self):
+        cards = []
+        for i in range(3):
+            rand_card = random.choice(self.cards)
+            self.cards.remove(rand_card)
+            cards.append(rand_card)
+        return cards
+
 class Server():
 
     def __init__(self):
@@ -76,14 +102,13 @@ class Server():
     # this method will create a new player based on connection 
     # anytime someone connects it will create their thread and 
     # set the char with all initial info
-
     def register_player(self, writer, name):
         player_count = self.counter
         print("Server:The player count is: " + str(player_count))
         if player_count < self.max_players:
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
-            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0))
+            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0), character=Characters(client.number), cards=self.game.assign_cards())
             info1.storeAllPlayers.append(character)
             client.character = character
             self.counter += 1
