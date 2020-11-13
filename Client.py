@@ -63,10 +63,9 @@ class Client():
             elif(data_var.id == 100):
                 lobby.close()
                 self.info = data_var.data.gameInfo
-                new_player = data_var.data.indviPlayer
-                new_player.name = player.name
+                print("Client Name: " + str(data_var.data.indviPlayer.name))
                 # send player start message?
-                self.gui = ClueGUI.ClueGUI(new_player,self.info.storeAllPlayers)
+                self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
             else:
                 pass
             

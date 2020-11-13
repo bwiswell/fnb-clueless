@@ -77,14 +77,13 @@ class Server():
     # anytime someone connects it will create their thread and 
     # set the char with all initial info
 
-    def register_player(self, writer):
-        
+    def register_player(self, writer, name):
         player_count = self.counter
         print("Server:The player count is: " + str(player_count))
         if player_count < self.max_players:
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
-            character = Player(number=client.number, location=info1.startLocations.pop(0))
+            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0))
             info1.storeAllPlayers.append(character)
             client.character = character
             self.counter += 1
@@ -94,7 +93,10 @@ class Server():
 
     async def handle_client(self, reader, writer):
         buf = 2048
-        client, game = self.register_player(writer)
+        data = await reader.read(buf)
+        msg = pickle.loads(data)
+        print("Server:player name: " + str(msg.data.player.name))
+        client, game = self.register_player(writer, msg.data.player.name)
         print("Server:player num: " + str(client.number))
         
         # send player its turn number after intialization.
