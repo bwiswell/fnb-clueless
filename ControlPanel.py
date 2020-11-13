@@ -2,65 +2,70 @@ import math
 
 import pygame
 
-import GUIConstants
+from Constants import WHITE, MID_GRAY, BLACK, RED, BORDER_RADIUS, ACTION_OPTION_TEXT
 
-from Dialogues import Button
+from ClueEnums import Actions
 
-class ControlPanel(pygame.Surface):
-    def __init__(self, size, position, player_sprite, cards, font):
-        pygame.Surface.__init__(self, size)
-        self.position = position
-        self.fill(GUIConstants.MID_GRAY)
+from Drawable import Selectable, GrayOut, Button
+
+class ControlPanel(Selectable):
+    def __init__(self, size, position, player, player_sprite, cards, font):
+        Selectable.__init__(self, size, position)
+        self.fill(MID_GRAY)
 
         # Player data (image and name) sizes and positions
         player_image = player_sprite.image
-        player_name = font.render(player_sprite.name, True, GUIConstants.BLACK)
+        player_name = font.render(player.name, True, BLACK)
+        player_character = font.render(player.character.text, True, BLACK)
+        player_info = pygame.Surface((max(player_name.get_width(), player_character.get_width()), player_name.get_height() + player_character.get_height()), pygame.SRCALPHA)
+        player_info.blit(player_name, (player_info.get_width() // 2 - player_name.get_width() // 2, 0))
+        player_info.blit(player_character, (player_info.get_width() // 2 - player_character.get_width() // 2, player_name.get_height()))
 
         image_width = size[0] // 4
-        image_height = math.floor((player_image.get_size()[1] / player_image.get_size()[0]) * image_width)
         data_width = image_width * 2
-        data_height = image_height * 2
+        data_height = (player_image.get_height() // player_image.get_width()) * image_width
 
         left_data = pygame.Rect(0, 0, data_width, data_height)
         right_data = pygame.Rect(data_width, 0, data_width, data_height)
 
-        player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - image_height // 2)
-        player_name_pos = (right_data.centerx - player_name.get_size()[0] // 2, right_data.centery - player_name.get_size()[1] // 2)
+        player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - data_height // 2)
+        player_info_pos = (right_data.centerx - player_info.get_width() // 2, right_data.centery - player_info.get_height() // 2)
 
         # Render player data
-        pygame.draw.rect(self, GUIConstants.BLACK, left_data, GUIConstants.BORDER_RADIUS)
-        pygame.draw.rect(self, GUIConstants.BLACK, right_data, GUIConstants.BORDER_RADIUS)
-        self.blit(pygame.transform.smoothscale(player_image, (image_width, image_height)), player_image_pos)
-        self.blit(player_name, player_name_pos)
+        pygame.draw.rect(self, BLACK, left_data, BORDER_RADIUS)
+        pygame.draw.rect(self, BLACK, right_data, BORDER_RADIUS)
+        self.blit(pygame.transform.smoothscale(player_image, (image_width, data_height)), player_image_pos)
+        self.blit(player_info, player_info_pos)
 
         # Player cards sizes and positions
-        card_width = (size[0] - GUIConstants.BORDER_RADIUS * 4) // 3
+        card_width = (size[0] - BORDER_RADIUS * 4) // 3
         card_height = 4 * (card_width // 3)
-        card_slot_width = card_width + GUIConstants.BORDER_RADIUS * 2
-        card_slot_height = card_height + GUIConstants.BORDER_RADIUS * 2
+        card_slot_width = card_width + BORDER_RADIUS * 2
+        card_slot_height = card_height + BORDER_RADIUS * 2
 
         card_slot_y = data_height
         left_slot = pygame.Rect(0, card_slot_y, card_slot_width, card_slot_height)
         center_slot = pygame.Rect(card_slot_width, card_slot_y, card_slot_width, card_slot_height)
         right_slot = pygame.Rect(card_slot_width * 2, card_slot_y, card_slot_width, card_slot_height)
 
-        card_y = card_slot_y + GUIConstants.BORDER_RADIUS
-        left_card_pos = (left_slot.x + GUIConstants.BORDER_RADIUS, card_y)
-        center_card_pos = (center_slot.x + GUIConstants.BORDER_RADIUS, card_y)
-        right_card_pos = (right_slot.x + GUIConstants.BORDER_RADIUS, card_y)
+        card_y = card_slot_y + BORDER_RADIUS
+        left_card_pos = (left_slot.x + BORDER_RADIUS, card_y)
+        center_card_pos = (center_slot.x + BORDER_RADIUS, card_y)
+        right_card_pos = (right_slot.x + BORDER_RADIUS, card_y)
 
         # Render player cards
-        pygame.draw.rect(self, GUIConstants.BLACK, left_slot, GUIConstants.BORDER_RADIUS)
-        pygame.draw.rect(self, GUIConstants.BLACK, center_slot, GUIConstants.BORDER_RADIUS)
-        pygame.draw.rect(self, GUIConstants.BLACK, right_slot, GUIConstants.BORDER_RADIUS)
-        #self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
-        #self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
-        #self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
+        pygame.draw.rect(self, BLACK, left_slot, BORDER_RADIUS)
+        pygame.draw.rect(self, BLACK, center_slot, BORDER_RADIUS)
+        pygame.draw.rect(self, BLACK, right_slot, BORDER_RADIUS)
+        self.blit(pygame.transform.smoothscale(cards[0], (card_width, card_height)), left_card_pos)
+        self.blit(pygame.transform.smoothscale(cards[1], (card_width, card_height)), center_card_pos)
+        self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
 
         # Button sizes and positions
         button_y = card_slot_y + card_slot_height
         button_height = (size[1] - button_y) // 4
-        self.buttons = self.initButtons((size[0], button_height), button_y, font)
+        self.buttons = []
+        self.initButtons((size[0], button_height), button_y, font)
 
         # Render buttons
         for button in self.buttons:
@@ -68,17 +73,29 @@ class ControlPanel(pygame.Surface):
 
     # Helper method to initialize the action buttons
     def initButtons(self, size, start_y, font):
-        buttons = []
         x = size[0] // 2
         y = start_y + size[1] // 2
-        for action_text,action_id in zip(GUIConstants.ACTION_OPTION_TEXT,GUIConstants.ACTION_OPTIONS):
-            buttons.append(Button(font, action_text, (x, y), action_id, size))
+        for index,action_text in enumerate(ACTION_OPTION_TEXT):
+            text_obj = font.render(action_text, True, BLACK)
+            self.buttons.append(Button(text_obj, (x, y), Actions(index), size))
             y += size[1]
-        return buttons        
+
+    def disallow(self, valid_actions, screen):
+        for button in self.buttons:
+            if button.return_value not in valid_actions:
+                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
+                GrayOut(button.size, button_true_pos).draw(screen)
+
+    def select(self, action, screen):
+        for button in self.buttons:
+            if button.return_value == action:
+                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
+                button_rect = pygame.Rect(button_true_pos, button.size)
+                screen.drawRect(button_rect, BLACK, BORDER_RADIUS * 4)
 
     # Click detection methods for the action buttons
-    def getClicked(self, position):
-        adj_pos = (position[0] - self.position[0], position[1] - self.position[1])
+    def getClicked(self, click_pos):
+        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
         for button in self.buttons:
             if button.rect.collidepoint(adj_pos):
                 return button.return_value
