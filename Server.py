@@ -60,7 +60,8 @@ class Game():
         #send out msg to all players that game is starting and allow player 1 to move
 
         await asyncio.gather(*writes)
-
+        
+        print("server client number: " + str(client.number))
         if client.number == 0:
             msg = wrap.HeaderNew(wrap.MsgStartTurn())
             print("server->client: " + str(msg))
@@ -83,7 +84,7 @@ class Game():
             self.info.updateCurrentLocation(data)
             locations = self.info.getCurrentLocations()
             msg = wrap.MsgPassInformation(self.info)
-            broadcastMsg(msg)
+            self.broadcastMsg(msg)
             print("server:" + str(locations))
             
     def assign_cards(self):
@@ -163,13 +164,13 @@ class Server():
             elif(msg.id == 107):
                 # suggest stuff
                 suggestion = msg.data.suggestion
-                disprov_card, disprov_player = self.game.info.checkSuggestion(self.game.active_player, suggestion, client.character.name)
+                disprov_card, disprov_player = self.game.info.checkSuggestion(self.game.active_player, suggestion)
                 # Need to broadcast an update
-                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
                 game.broadcastMsg(msg)
 
                 # Send some response back to the suggesting player
-                msg = wrap.HeaderNew(wrap.MsgSuggestResp(disprov_card, disprov_player,self.game.active_player,))
+                msg = wrap.HeaderNew(wrap.MsgSuggestResp(disprov_card, disprov_player,self.game.active_player, suggestion, client.character.name))
                 game.broadcastMsg(msg)
                 # Continue active player's turn\
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
@@ -180,7 +181,7 @@ class Server():
                 accusation = msg.data.accusation
                 won = self.game.info.checkAccusation(self.game.active_player, accusation)
                 # Need to broadcast an update
-                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
                 game.broadcastMsg(msg)
                 if won:
                     msg = wrap.HeaderNew(wrap.MsgGameWon(client.character.name, accusation))

@@ -1,4 +1,5 @@
 from ClueEnums import Locations
+import ClueEnums
 
 studyList = [Locations.HW1, Locations.HW3, Locations.KITCHEN, Locations.LOUNGE, Locations.CONSERVATORY]
 hall1List = [Locations.STUDY, Locations.HALL]
