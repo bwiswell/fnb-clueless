@@ -1,3 +1,5 @@
+from ctypes import windll, c_int
+
 import pygame
 
 from Errors import NoPossibleActionError
@@ -136,15 +138,15 @@ class ClueGUI(Drawable):
         return response
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
-    def getPlayerSuggestion(self):
-        return self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE)
+    def getPlayerSuggestion(self, location):
+        return self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE, location)
 
-    def getPlayerAccusation(self):
-        return self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE)
+    def getPlayerAccusation(self, location):
+        return self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE, location)
 
-    def getSuggestionOrAccusation(self, text):
+    def getSuggestionOrAccusation(self, text, location):
         pygame.event.pump()
-        suggestion_dialogue = SuggestionDialogue(self.font, text, self.center, self.gui_size[0], self.card_deck)
+        suggestion_dialogue = SuggestionDialogue(self.font, text, self.center, self.gui_size[0], self.card_deck, location)
         suggestion_dialogue.draw(self.screen)
         response = suggestion_dialogue.getResponse(self.screen)
         self.clear()

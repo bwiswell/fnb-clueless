@@ -29,7 +29,7 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.clients = []
-        self.case_file, self.cards = self.initCaseFile()
+        self.info.case_file, self.cards = self.initCaseFile()
 
     def initCaseFile(self):
         character_cards = [c for c in Characters]
@@ -62,17 +62,17 @@ class Game():
         await asyncio.gather(*writes)
 
         if client.number == 0:
-            msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+            msg = wrap.HeaderNew(wrap.MsgStartTurn())
             await client.sendMsg(msg)
 
     # Ends current players turn and sends server updated info class
     async def end_turn(self, client):
         player_count = len(self.clients)
         self.active_player = (client.number + 1) % player_count
-
         next_player = self.clients[self.active_player]
         msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
         await next_player.sendMsg(msg)
+
     # method to updated player location for GUI to eventually see and use to
     # move the char then ends the turn
     async def move(self, client, data):
@@ -81,16 +81,22 @@ class Game():
             print("server: " + str(data.name))
             self.info.updateCurrentLocation(data)
             locations = self.info.getCurrentLocations()
-            msg = wrap.MsgUpdateGame(self.info)
+            msg = wrap.MsgPassInformation(self.info)
+            broadcastMsg(msg)
             print("server:" + str(locations))
             
-            await self.end_turn(client)
-
     def assign_cards(self):
         cards = random.sample(self.cards, 3)
         for card in cards:
             self.cards.remove(card)
         return cards
+
+    async def broadcastMsg(self,msg):
+        writes = []
+        for client in self.clients:      
+            writes.append(client.sendMsg(msg))
+
+        await asyncio.gather(*writes)
 
 class Server():
 
@@ -141,16 +147,59 @@ class Server():
 
             if(msg.id == 1000):
                 await game.start_game(client)
+
             elif(msg.id == 1234):
                 print("Normal Message no object message")
+
             elif(msg.id == 102):
                 playerData = msg.data.player
                 await game.move(client, playerData)
+
+                # Continue active player's turn
+                msg = wrap.HeaderNew(wrap.MsgContinueTurn())
+                client.sendMsg(msg)
+
+            elif(msg.id == 107):
+                # suggest stuff
+                suggestion = msg.data.suggestion
+                disprov_card, disprov_player = self.game.info.checkSuggestion(self.game.active_player, suggestion, client.character.name)
+                # Need to broadcast an update
+                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+                game.broadcastMsg(msg)
+
+                # Send some response back to the suggesting player
+                msg = wrap.HeaderNew(wrap.MsgSuggestResp(disprov_card, disprov_player,self.game.active_player,))
+                game.broadcastMsg(msg)
+                # Continue active player's turn\
+                msg = wrap.HeaderNew(wrap.MsgContinueTurn())
+                client.sendMsg(msg)
+                
+            elif(msg.id == 108):
+                # accuse stuff
+                accusation = msg.data.accusation
+                won = self.game.info.checkAccusation(self.game.active_player, accusation)
+                # Need to broadcast an update
+                msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+                game.broadcastMsg(msg)
+                if won:
+                    msg = wrap.HeaderNew(wrap.MsgGameWon(client.character.name, accusation))
+                    game.broadcastMsg(msg)
+                else:
+                    msg = wrap.HeaderNew(wrap.MsgGameLost(client.character.name,self.game.active_player,accusation))
+                    game.broadcastMsg(msg)
+
+                # Continue active player's turn
+                msg = wrap.HeaderNew(wrap.MsgContinueTurn())
+                client.sendMsg(msg)
+
+            elif(msg.id == 109):
+                await game.end_turn(client)
+
             elif(msg.id == 104):
-                print("here")
                 print("server: " + str(msg.data.player.name))
                 client.name = msg.data.player.name
                 print(client.name)
+            
             
             if msg == "exit":
                 print("Exiting server...")

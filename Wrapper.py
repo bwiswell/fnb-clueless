@@ -24,8 +24,8 @@ class MsgLobbyReady():
     def __str__(self):
         return "msg: start game"
 # wrapper used to pass player objects
-class MsgPassPlayer():
-    def __init__(self,player):
+class MsgMovePlayer():
+    def __init__(self, player):
         self.player = player
 
 # used to pass player numbers/positions
@@ -42,18 +42,66 @@ class MsgPassInformation():
 class MsgUpdatePlayer():
     def __init__(self,player):
         self.player = player
+
+class MsgStartTurn():
+    def __init__(self):
+        pass
+
+class MsgContinueTurn():
+    def __init__(self):
+        pass
+
+class MsgSuggest():
+    def __init__(self, suggestion):
+        self.suggestion = suggestion
+
+class MsgSuggestResp():
+    def __init__(self, disprov_card, disprov_player, playerNum, suggestion, name):
+        self.suggestion = suggestion
+        self.disprov_card = disprov_card 
+        self.disprov_player = disprov_player 
+        self.playerNum = playerNum
+        self.name = name
+
+class MsgAccuse():
+    def __init__(self, accusation):
+        self.accusation = accusation
+
+class MsgEndTurn():
+    def __init__(self):
+        pass
+
+class MsgGameWon():
+    def __init__(self,name,accusation):
+        self.name = name
+        self.accusation = accusation
+
+class MsgGameLost():
+    def __init__(self,name,playerNum,accusation):
+        self.name = name
+        self.playerNum = playerNum
+        self.accusation = accusation
+
     
 class HeaderNew:
     # dict of keys based on classes to give ids to check later
     ids = {
         MsgGameStart: 100,
         MsgPlayerReadyResp: 101,
-        MsgPassPlayer: 102,
+        MsgMovePlayer: 102,
         MsgPassPlayerNum: 103,
         MsgUpdatePlayer: 104,
+        MsgStartTurn: 105,
+        MsgContinueTurn: 106,
+        MsgSuggest: 107,
+        MsgAccuse: 108,
+        MsgEndTurn: 109,
+        MsgSuggestResp: 201,
         MsgUpdateGame: 500,
         MsgPassInformation: 501,
         MsgLobbyReady: 1000,
+        MsgGameLost: 6666,
+        MsgGameWon: 7777,
     }
     
     def __init__(self, data):

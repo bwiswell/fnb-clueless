@@ -100,4 +100,67 @@ class Lobby(Drawable):
 
     def close(self):
         self.screen.close()
+        offset = caption.get_height() * 3
+        for i in range(10):
+            background.blit(caption, (offset * i - offset * 14, offset * i))
+            background.blit(caption, (offset * i - offset * 7, offset * i))
+            background.blit(caption, (offset * i, offset * i))
+            background.blit(caption, (offset * i + offset * 7, offset * i))
+
+        self.blit(background, (0, 0))
+        self.draw(self.screen)
+
+    def getPlayerName(self):
+        input_dialogue = InputDialogue(self.font, NAME_PROMPT, self.center, 8)
+        input_dialogue.draw(self.screen)
+        name = input_dialogue.getResponse(self.screen)
+        self.draw(self.screen)
+        return name
+
+    def getLobbyType(self):
+        new_button = Button(self.font.render("New Game", True, BLACK), self.top_pos, size=self.button_size)
+        new_button.draw(self.screen)
+        join_button = Button(self.font.render("Join Game", True, BLACK), self.bottom_pos, size=self.button_size)
+        join_button.draw(self.screen)
+        while True:
+            pygame.event.pump()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if new_button.rect.collidepoint(event.pos):
+                        self.draw(self.screen)
+                        return LobbyButtons.NEW
+                    elif join_button.rect.collidepoint(event.pos):
+                        self.draw(self.screen)
+                        return LobbyButtons.JOIN
+
+    def getStart(self, room_code):
+        room_code_title_obj = self.font.render("Room Code:", True, BLACK)
+        room_code_obj = self.font.render(room_code, True, BLACK)
+        room_code_text_size = (max(room_code_title_obj.get_width(), room_code_obj.get_width()), self.font.get_height() * 2)
+        room_code_text = pygame.Surface(room_code_text_size)
+        room_code_text.fill(GRAY)
+        room_code_text.blit(room_code_title_obj, (room_code_text_size[0] // 2 - room_code_title_obj.get_width() // 2, 0))
+        room_code_text.blit(room_code_obj, (room_code_text_size[0] // 2 - room_code_obj.get_width() // 2, self.font.get_height()))
+        room_code_button = Button(room_code_text, self.top_pos, size=self.button_size)
+        room_code_button.draw(self.screen)
+        start_button = Button(self.font.render("Start Game", True, BLACK), self.bottom_pos, size=self.button_size)
+        start_button.draw(self.screen)
+        while True:
+            pygame.event.pump()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN and start_button.rect.collidepoint(event.pos):
+                    return
+
+    def getRoomCode(self):
+        input_dialogue = InputDialogue(self.font, ROOM_CODE_PROMPT, self.center, 4)
+        input_dialogue.draw(self.screen)
+        code = input_dialogue.getResponse(self.screen)
+        self.draw(self.screen)
+        return code
+
+    def showWaitingMessage(self):
+        Button(self.font.render(START_WAIT_MESSAGE, True, BLACK), self.center, size=(self.size[0] // 2, self.button_size[1])).draw(self.screen)
+
+    def close(self):
+        self.screen.close()
         

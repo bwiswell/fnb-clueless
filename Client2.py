@@ -33,42 +33,7 @@ player4.character = Characters.CNLMUSTARD
 lobby.getStart("FNBC")
 lobby.close()
 gui = ClueGUI.ClueGUI(player, [player, player2, player3, player4])
-
-studyList = [Locations.HW1, Locations.HW3, Locations.KITCHEN, Locations.LOUNGE, Locations.CONSERVATORY]
-hall1List = [Locations.STUDY, Locations.HALL]
-hallList = [Locations.HW1, Locations.HW2, Locations.HW4]
-hall2List = [Locations.HALL, Locations.LOUNGE]
-loungeList = [Locations.HW2, Locations.HW5, Locations.STUDY, Locations.CONSERVATORY, Locations.KITCHEN]
-
-hall3List = [Locations.STUDY, Locations.LIBRARY]
-hall4List = [Locations.HALL, Locations.BILLIARD]
-hall5List = [Locations.LOUNGE, Locations.DINING]
-
-libraryList = [Locations.HW3, Locations.HW6, Locations.HW8]
-hall6List = [Locations.LIBRARY, Locations.BILLIARD]
-billiardRoomList = [Locations.HW4, Locations.HW6, Locations.HW7, Locations.HW9]
-hall7List = [Locations.BILLIARD, Locations.DINING]
-diningRoom = [Locations.HW5, Locations.HW7, Locations.HW10]
-
-hall8List = [Locations.LIBRARY, Locations.CONSERVATORY]
-hall9List = [Locations.BILLIARD, Locations.BALLROOM]
-hall10List = [Locations.DINING, Locations.KITCHEN]
-
-conservatoryList = [Locations.HW8, Locations.HW11, Locations.STUDY, Locations.LOUNGE, Locations.KITCHEN]
-hall11List = [Locations.CONSERVATORY, Locations.BALLROOM]
-ballroomList = [Locations.HW9, Locations.HW11, Locations.HW12]
-hall12List = [Locations.BALLROOM, Locations.KITCHEN]
-kitchenList = [Locations.HW10, Locations.HW12, Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY]
-
-cornerRooms = [Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY, Locations.KITCHEN]
-
-moveDict = {
-            Locations.HW1:hall1List, Locations.HW2:hall2List, Locations.HW3:hall3List, Locations.HW4:hall4List, Locations.HW5:hall5List, Locations.HW6:hall6List,
-            Locations.HW7:hall7List, Locations.HW8:hall8List, Locations.HW9:hall9List, Locations.HW10:hall10List, Locations.HW11:hall11List, Locations.HW12:hall12List,
-            Locations.STUDY:studyList, Locations.HALL:hallList, Locations.LOUNGE:loungeList,
-            Locations.LIBRARY:libraryList, Locations.BILLIARD:billiardRoomList, Locations.DINING:diningRoom,
-            Locations.CONSERVATORY:conservatoryList, Locations.BALLROOM:ballroomList, Locations.KITCHEN:kitchenList
-           }
+           
 hasAccused = False
 movedBySuggestion = False
 isTurn = True
@@ -110,7 +75,7 @@ while True:
     player.location = playerLocs[findPlayerIndex(player.character)][LOCATION]
 
     if isTurn is True:
-        moveList = moveDict[player.location]  # derermines potential move options
+        moveList = MOVEDICT[player.location]  # derermines potential move options
         actionList = [Actions.MOVE, Actions.ACCUSE, Actions.SUGGEST]  # all potential actions
         print(moveList)  # TODO: remove this print eventually
         determineValidMoves()

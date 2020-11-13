@@ -7,9 +7,7 @@ class Information:
         self.storeAllPlayers = []
         self.currentLocation = []
         self.startLocations = [Locations.HW2, Locations.HW11, Locations.HW8, Locations.HW5]
-        self.WEAPON_LIST = ["Candlestick", "Knife", "Ropes", "Revolver", "Lead", "Wrench"]
-        self.ROOMNAME_LIST = ["Study", "Lounge", "Ballroom", "Library", "Billiard Room", "Hall", "Dining Room", "Conservatory", "Kitchen"]
-
+        self.case_file = None
 
     # when a move option occurs this will update the list of current player locations
     def updateCurrentLocation(self,incomingPlayer):
@@ -30,3 +28,28 @@ class Information:
     # getter to get all player locations
     def getCurrentLocations(self):
         return self.currentLocation
+
+    def teleport(self, suggesting_player, suggestion):
+        location = self.storeAllPlayers[suggesting_player].location
+        suggested_player_char = suggestion["player"]
+        for player in self.storeAllPlayers:
+            if player.character == suggested_player_char:
+                player.location = location
+
+    def checkSuggestion(self, suggesting_player, suggestion):
+        self.teleport(suggesting_player, suggestion)
+        player_index = (suggesting_player + 1) % len(self.storeAllPlayers)
+        suggestion_cards = suggestion.values()
+        while player_index != suggesting_player:
+            current_player = self.storeAllPlayers[player_index]
+            for card in current_player.cards:
+                if card in suggestion_cards:
+                    return card, current_player
+            player_index = (player_index + 1) % len(self.storeAllPlayers)
+        return None, None
+
+    def checkAccusation(self, accusing_player, accusation):
+        self.teleport(accusing_player, accusation)
+        return accusation["player"] == self.case_file["player"] and
+            accusation["weapon"] == self.case_file["weapon"] and
+            accusation["location"] == self.case_file["location"]

@@ -4,6 +4,8 @@ import pygame
 
 from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
 
+import ClueEnums
+
 from Drawable import CenteredDrawable, Button
 
 class Dialogue(CenteredDrawable):
@@ -162,7 +164,7 @@ class Slot(pygame.Surface):
 # through each category of card until "confirm" or "cancel" is selected. On "confirm",
 # the name of each selected card is returned. Otherwise, False is returned.
 class SuggestionDialogue(Dialogue):
-    def __init__(self, font, text, center, screen_width, card_deck):
+    def __init__(self, font, text, center, screen_width, card_deck, location):
         text_object = font.render(text, True, BLACK)
         dialogue_width = screen_width // 3
         slot_width = dialogue_width // 3
@@ -170,7 +172,9 @@ class SuggestionDialogue(Dialogue):
         text_pos = (dialogue_width // 2 - text_object.get_width() // 2, slot_y_offset // 2 - text_object.get_height() // 2)
         player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
         weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
-        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.room_cards)
+        self.location = location
+        location_as_room = ClueEnums.getLocationAsRoom(location)
+        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", [card_deck.card_dict[location_as_room]])
         self.slots = [player_slot, location_slot, weapon_slot]
         slot_height = player_slot.size[1]
         dialogue_height = slot_height + slot_y_offset * 2
@@ -191,6 +195,7 @@ class SuggestionDialogue(Dialogue):
         selection = {}
         for slot in self.slots:
             selection[slot.category] = slot.current_card.id
+        selection["location"] = self.location
         return selection
 
     # Detect clicks until the player selects "confirm" or "cancel"

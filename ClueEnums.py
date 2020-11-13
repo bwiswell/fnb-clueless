@@ -50,6 +50,11 @@ def isRoom(location):
             return True
     return False
 
+def getLocationAsRoom(location):
+    for room in Rooms:
+        if location.text == room.text:
+            return room
+
 class Weapons(EnumText):
     CANDLESTICK = "candlestick"
     REVOLVER = "revolver"

@@ -50,16 +50,16 @@ class ClueMap(Selectable):
         return self.player_sprites[character]
 
     # Update the player assets to reflect current positions
-    def updateLocations(self, player_locations):
+    def updateLocations(self, players):
         for location in self.locations.values():
             location.clearPlayers()
-        for character,location in player_locations:
-            self.locations[location].addPlayer(self.player_sprites[character])
+        for player in players:
+            self.locations[player.location].addPlayer(self.player_sprites[player.character])
 
-    def update(self, player_locations):
+    def update(self, players):
         self.clue_map.blit(self.background, (0, 0))
-        if player_locations is not None:
-            self.updateLocations(player_locations)
+        if players is not None:
+            self.updateLocations(players)
         for location in self.locations.values():
             location.update()
             location.draw(self.clue_map)
@@ -72,6 +72,17 @@ class ClueMap(Selectable):
                 grayed_area = value.collision_box
                 GrayOut(grayed_area.size, grayed_area.topleft).draw(screen)
 
+    def select(self, move, screen):
+        location = self.locations[move]
+        screen.drawRect(location.collision_box, BLACK, BORDER_RADIUS * 4)
+
+    # Check for a clicked room or hallway and return its name
+    def getClicked(self, click_pos):
+        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
+        for loc_id,location in self.locations.items():
+            if location.collision_box.collidepoint(adj_pos):
+                return loc_id
+        return None
     def select(self, move, screen):
         location = self.locations[move]
         screen.drawRect(location.collision_box, BLACK, BORDER_RADIUS * 4)
