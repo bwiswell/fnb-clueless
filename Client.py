@@ -177,7 +177,8 @@ class Client():
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgAccuse(accusation)))
             return data_string
         else:
-            
+            data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgEndTurn()))
+            return data_string
 
         
     # method to connect the client to the server.

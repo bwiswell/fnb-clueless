@@ -52,7 +52,7 @@ class ThreadedScreen():
     # Method to safely close the display window
     def close(self):
         pygame.display.quit()
-            self.lock.release()
+        self.lock.release()
 
     # Method to draw a rectangle on the display. The lock must be
     # acquired before any drawing can occur. The lock is released after
