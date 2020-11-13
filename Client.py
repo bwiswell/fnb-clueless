@@ -47,31 +47,32 @@ class Client():
             # based on msg.id
             data = await reader.read(buf)
             data_var = pickle.loads(data)
-            # playerUpdate = data_var
-            # self.info = playerUpdate
             print("Received message from server: " + str(data_var.id))
-            # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
+                # Player number received from server
                 print(f"Client Player Number: {data_var.data.playerNum}")
                 self.myNumber = data_var.data.playerNum
-                # checking player position and if 0 starting game using button
-                # Then start GUI after wrtiting to server
                 if(data_var.data.playerNum == 0):
+                    # Player 1, give start button (now called getStart())
                     lobby.getStart("FNBC")
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
                 else:
-                    lobby.showWaitingMessage()
-                # send player message not payer 1
-                # will update all locations now generally happens at end of turn/ start of next players turn       
+                    # Not player 1, wait for game to start
+                    lobby.showWaitingMessage()   
+
+            # General location update message (new locations in storeAllPlayers)   
             elif( data_var.id == 501):
                 self.info = data_var.data.info
                 self.gui.updateGUI(self.info.storeAllPlayers)
 
+            # Game start message
             elif(data_var.id == 100):
                 lobby.close()
                 self.info = data_var.data.gameInfo
                 self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
+
+            # Turn start message for this client's player
             elif(data_var.id == 105):
                 self.gui.postMessage("Your turn has begun!", GREEN)
                 self.suggested = False
@@ -95,6 +96,7 @@ class Client():
                 msg = self.handleAction(action)
                 writer.write(msg)
                 
+            # Turn continue message for this client's player
             elif(data_var.id == 106):
                 if (ClueEnums.isRoom(self.info.storeAllPlayers[self.myNumber].location)):
                     # According to the project description, one suggestion per turn
@@ -111,7 +113,6 @@ class Client():
                         self.actionList.remove(Actions.ACCUSE)
 
                 if (len(self.actionList) == 0 or Actions.MOVE not in self.actionList):
-
                     self.actionList.append(Actions.ENDTURN)
 
                 action = self.gui.getPlayerAction(self.actionList)
@@ -119,6 +120,9 @@ class Client():
                 msg = self.handleAction(action)
                 writer.write(msg)
 
+            # Suggestion response message (somebody, maybe this client, made a suggestion
+            # and now the server is broadcasting to all clients what the suggestion was and
+            # if it was correct)
             elif(data_var.id == 201):
                 suggestion_text = data_var.data.name + " suggested that it was "
                 suggestion_text += data_var.data.suggestion["player"].text
@@ -130,13 +134,17 @@ class Client():
                     disproven_text += "not "
                 disproven_text += "disproven."
                 self.gui.postMessage(disproven_text)
+                # If this client made the suggestion, then this player gets to see which card
+                # and which player disproved it (if any)
                 if data_var.data.disprov_card is not None and data_var.data.playerNum == self.myNumber:
                     disproven_text = data_var.data.disprov_player.name + " disproved your suggestion with the "
                     disproven_text += data_var.data.disprov_card.text + " card."
                     self.gui.postMessage(disproven_text)
 
+            # Game lost message (somebody, maybe this client, made an incorrect accusation
+            # and now the server is broadcasting to all clients what the accusation was
+            # and that it was incorrect)
             elif(data_var.id == 6666):
-                # Somebody lost the game
                 accusation_text = data_var.data.name + " accused "
                 accusation_text += data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
@@ -144,17 +152,22 @@ class Client():
                 self.gui.postMessage(accusation_text)
                 lost_text = data_var.data.name + " lost the game!"
                 self.gui.postMessage(lost_text)
+                # If this client made the accusation, then set the lost flag to True
                 if data_var.data.playerNum == self.myNumber:
                     self.lost = True
 
+            # Game won message (somebody, maybe this client, made a correct accusation and
+            # now the server is broadcasting to all clients what the accusation was and
+            # that it was correct and ended the game
             elif(data_var.id == 7777):
-                # Somebody won the game
                 won_message = data_var.data.name + " won!"
                 self.gui.postMessage(won_message)
                 accusation_text = "It was " + data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
                 self.gui.postMessage(accusation_text)
+
+                # Give players time to see the won message and then quit the game
                 time.sleep(3)
                 self.gui.quit()
                 self.running = False
@@ -162,28 +175,34 @@ class Client():
             else:
                 pass
 
-        # send move
+        # Close server connection
         writer.close()
         await writer.wait_closed()
     
+    # Handle any player action and return the response message to be sent back to the
+    # server
     def handleAction(self, action):
+        # Handle a move action
         if action == Actions.MOVE:
             player = self.info.storeAllPlayers[self.myNumber]
             move = self.gui.getPlayerMove(self.validMoves)
             player.location = move
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgMovePlayer(player)))
             return data_string
+        # Handle a suggest action
         elif action == Actions.SUGGEST:
             self.suggested = True
             location = self.info.storeAllPlayers[self.myNumber].location
             suggestion = self.gui.getPlayerSuggestion(location)
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgSuggest(suggestion)))
             return data_string
+        # Handle an accuse action
         elif action == Actions.ACCUSE:
             location = self.info.storeAllPlayers[self.myNumber].location
-            accusation = self.gui.getPlayerAccusation(location)
+            accusation = self.gui.getPlayerAccusation()
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgAccuse(accusation)))
             return data_string
+        # Handle an end turn action
         else:
             self.gui.postMessage("Your turn has ended.", RED)
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgEndTurn()))

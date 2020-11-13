@@ -5,6 +5,7 @@ from ClueEnums import Characters, Weapons, Rooms
 
 CARD_DIM = (300, 400)
 path = os.path.dirname(os.path.realpath(__file__)) + "\\assets\\"
+CHARACTER_FILENAMES = ["Red.png", "Green.png", "Blue.png", "Yellow.png", "White.png", "Purple.png"]
 
 def loadandscale(path, w, h):
 	img = pygame.image.load(path)
@@ -13,22 +14,15 @@ def loadandscale(path, w, h):
 
 # def initCards(num_players)
 # def initCards(player_objects) where player_objects is a list of players that have a player.character attribute
-def initCards():
+def initCards(n_characters):
     cards = {}
 
+    player_cards = []
     #Players
-    Blue = Card(loadandscale(path + 'Blue.png', CARD_DIM[0], CARD_DIM[1]), Characters.MRSPEACOCK)
-    cards[Characters.MRSPEACOCK] = Blue
-    Red = Card(loadandscale(path + 'Red.png', CARD_DIM[0], CARD_DIM[1]), Characters.MSSCARLET)
-    cards[Characters.MSSCARLET] = Red
-    Green = Card(loadandscale(path + 'Green.png', CARD_DIM[0], CARD_DIM[1]), Characters.REVGREEN)
-    cards[Characters.REVGREEN] = Green
-    Purple = Card(loadandscale(path + 'Purple.png', CARD_DIM[0], CARD_DIM[1]), Characters.PROFPLUM)
-    cards[Characters.PROFPLUM] = Purple
-    White = Card(loadandscale(path + 'White.png', CARD_DIM[0], CARD_DIM[1]), Characters.MRSWHITE)
-    cards[Characters.MRSWHITE] = White
-    Yellow = Card(loadandscale(path + 'Yellow.png', CARD_DIM[0], CARD_DIM[1]), Characters.CNLMUSTARD)
-    cards[Characters.CNLMUSTARD] = Yellow
+    for i in range(n_characters):
+        character_card = Card(loadandscale(path + CHARACTER_FILENAMES[i], CARD_DIM[0], CARD_DIM[1]), Characters(i))
+        cards[Characters(i)] = character_card
+        player_cards.append(character_card)
 
     #Weapons
     Candle = Card(loadandscale(path + 'CandleStick.png', CARD_DIM[0], CARD_DIM[1]), Weapons.CANDLESTICK)
@@ -64,7 +58,6 @@ def initCards():
     Kitchen = Card(loadandscale(path + 'Kitchen.png', CARD_DIM[0], CARD_DIM[1]), Rooms.KITCHEN)
     cards[Rooms.KITCHEN] = Kitchen
 
-    player_cards = [Purple, Blue, Green, Red, Yellow, White]
     weapon_cards = [Candle, Knife, Ropes, Revolver, Lead, Wrench]
     room_cards = [Study, Lounge, Ballroom, Library, BilliardsRoom, Hall, DiningRoom, Conservatory, Kitchen]
 

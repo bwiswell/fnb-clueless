@@ -113,7 +113,7 @@ class ConfirmationDialogue(Dialogue):
 # Simple class that takes a list of cards, displays one, and has up and down arrows
 # the player can interact with to scroll through the cards in the list
 class Slot(pygame.Surface):
-    def __init__(self, width, position, category, cards):
+    def __init__(self, width, position, category, cards, tickable=True):
         height = 5 * (width // 3)
         self.size = (width, height)
         pygame.Surface.__init__(self, self.size)
@@ -124,6 +124,7 @@ class Slot(pygame.Surface):
         self.num_cards = len(self.cards)
         self.current_index = 0
         self.current_card = self.cards[self.current_index]
+        self.tickable = tickable
 
         card_width = 4 * (width // 5)
         card_height = 4 * (card_width // 3)
@@ -139,8 +140,9 @@ class Slot(pygame.Surface):
         self.down = pygame.Rect(half_x_margin, height - half_y_margin, card_width, half_y_margin)
 
         self.fill(WHITE)
-        pygame.draw.polygon(self, BLACK, up_points)
-        pygame.draw.polygon(self, BLACK, down_points)
+        if self.tickable:
+            pygame.draw.polygon(self, BLACK, up_points)
+            pygame.draw.polygon(self, BLACK, down_points)
         self.drawCard()
 
     # Draw the currently selected card
@@ -164,17 +166,18 @@ class Slot(pygame.Surface):
 # through each category of card until "confirm" or "cancel" is selected. On "confirm",
 # the name of each selected card is returned. Otherwise, False is returned.
 class SuggestionDialogue(Dialogue):
-    def __init__(self, font, text, center, screen_width, card_deck, location):
+    def __init__(self, font, text, center, screen_width, card_deck, location=None):
         text_object = font.render(text, True, BLACK)
-        dialogue_width = screen_width // 3
+        dialogue_width = max(screen_width // 3, text_object.get_width())
         slot_width = dialogue_width // 3
         slot_y_offset = text_object.get_height() * 2
         text_pos = (dialogue_width // 2 - text_object.get_width() // 2, slot_y_offset // 2 - text_object.get_height() // 2)
         player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
+        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.room_cards)
+        if location is not None:
+            location_as_room = ClueEnums.getLocationAsRoom(location)
+            location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", [card_deck.card_dict[location_as_room]], False)
         weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
-        self.location = location
-        location_as_room = ClueEnums.getLocationAsRoom(location)
-        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", [card_deck.card_dict[location_as_room]])
         self.slots = [player_slot, location_slot, weapon_slot]
         slot_height = player_slot.size[1]
         dialogue_height = slot_height + slot_y_offset * 2

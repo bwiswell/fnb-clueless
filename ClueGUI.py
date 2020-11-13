@@ -72,7 +72,7 @@ class ClueGUI(Drawable):
         self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
 
         # Cards
-        self.card_deck = Card.initCards()
+        self.card_deck = Card.initCards(len(all_players))
 
         # Control Panel
         player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
@@ -141,10 +141,10 @@ class ClueGUI(Drawable):
     def getPlayerSuggestion(self, location):
         return self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE, location)
 
-    def getPlayerAccusation(self, location):
-        return self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE, location)
+    def getPlayerAccusation(self):
+        return self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE)
 
-    def getSuggestionOrAccusation(self, text, location):
+    def getSuggestionOrAccusation(self, text, location=None):
         pygame.event.pump()
         suggestion_dialogue = SuggestionDialogue(self.font, text, self.center, self.gui_size[0], self.card_deck, location)
         suggestion_dialogue.draw(self.screen)

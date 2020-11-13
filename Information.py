@@ -53,8 +53,7 @@ class Information:
             player_index = (player_index + 1) % len(self.storeAllPlayers)
         return None, None
 
-    def checkAccusation(self, accusing_player, accusation):
-        self.teleport(accusing_player, accusation)
+    def checkAccusation(self, accusation):
         return accusation["player"] == self.case_file["player"] and \
             accusation["weapon"] == self.case_file["weapon"] and \
             accusation["location"] == self.case_file["location"]

@@ -28,28 +28,12 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.clients = []
-        self.info.case_file, self.cards = self.initCaseFile()
-
-    def initCaseFile(self):
-        character_cards = [c for c in Characters]
-        weapon_cards = [w for w in Weapons]
-        room_cards = [r for r in Rooms]
-        case_character = random.choice(character_cards)
-        character_cards.remove(case_character)
-        case_weapon = random.choice(weapon_cards)
-        weapon_cards.remove(case_weapon)
-        case_room = random.choice(room_cards)
-        room_cards.remove(case_room)
-        case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
-        character_cards.extend(weapon_cards)
-        character_cards.extend(room_cards)
-        print(case_file)
-        return case_file, character_cards
 
     # method called in order to begin the player 
     # turn sequence and starting the game    
     async def start_game(self, client):
         print("game started")
+        self.assign_cards_and_case()
         writes = []
         for cl in self.clients:      
             msg = wrap.HeaderNew(wrap.MsgGameStart(cl.character,self.info))
@@ -86,11 +70,27 @@ class Game():
             await self.broadcastMsg(msg)
             print("server:" + str(locations))
             
-    def assign_cards(self):
-        cards = random.sample(self.cards, 3)
-        for card in cards:
-            self.cards.remove(card)
-        return cards
+    def assign_cards_and_case(self):
+        character_cards = []
+        for i in range(len(self.clients)):
+            character_cards.append(Characters(i))
+        weapon_cards = [w for w in Weapons]
+        room_cards = [r for r in Rooms]
+        case_character = random.choice(character_cards)
+        character_cards.remove(case_character)
+        case_weapon = random.choice(weapon_cards)
+        weapon_cards.remove(case_weapon)
+        case_room = random.choice(room_cards)
+        room_cards.remove(case_room)
+        self.info.case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
+        character_cards.extend(weapon_cards)
+        character_cards.extend(room_cards)
+        for player,client in zip(self.info.storeAllPlayers, self.clients):
+            cards = random.sample(character_cards, 3)
+            for card in cards:
+                character_cards.remove(card)
+            player.cards = cards
+            client.character.cards = cards
 
     async def broadcastMsg(self,msg):
         writes = []
@@ -118,7 +118,7 @@ class Server():
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
             character = Player(name=name, number=client.number, location=self.game.info.startLocations.pop(0), 
-                            character=Characters(client.number), cards=self.game.assign_cards())
+                            character=Characters(client.number))
             self.game.info.storeAllPlayers.append(character)
             client.character = character
             self.counter += 1
@@ -179,7 +179,7 @@ class Server():
             elif(msg.id == 108):
                 # accuse stuff
                 accusation = msg.data.accusation
-                won = self.game.info.checkAccusation(self.game.active_player, accusation)
+                won = self.game.info.checkAccusation(accusation)
                 # Need to broadcast an update
                 msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
                 await game.broadcastMsg(msg)
