@@ -70,7 +70,7 @@ class MultiLineTextScroller(Drawable):
         lines = self.text.split("\n")
         for i in range(len(lines)):
             color = BLACK
-            if len(self.colors != 0):
+            if len(self.colors) != 0:
                 color = self.colors[i]
             if i != 0:
                 pos = (0, pos[1] + self.line_height)
