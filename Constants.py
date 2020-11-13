@@ -7,12 +7,12 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 # Lobby information
-LOBBY_SIZE = (800, 600)
-START_MESSAGE = "Waiting for the game to start..."
-START_BUTTON_TEXT = "Start Game"
+LOBBY_SIZE = (700, 700)
+NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
+ROOM_CODE_PROMPT = "Please enter a 4 character room code."
+START_WAIT_MESSAGE = "Waiting for the game to start..."
 
 # GUI dialogue and message text
-NAME_PROMPT = "Please enter a character name between 1 and 8 characters."
 GAME_START_MESSAGE = "The game has started!"
 PICK_ACTION_MESSAGE = "It's your turn - select an action!"
 ACTION_CONF = "Are you sure you want to "

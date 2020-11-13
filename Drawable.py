@@ -1,6 +1,6 @@
 import pygame
 
-from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
+from Constants import WHITE, GRAY, BLACK, RED, BORDER_RADIUS
 
 class Drawable(pygame.Surface):
     def __init__(self, size, position, transparent=False):
@@ -50,6 +50,9 @@ class Button(CenteredDrawable):
     def __init__(self, text_obj, center, return_value=None, size=None):
         if size is None:
             size = (text_obj.get_width() + BORDER_RADIUS * 4, text_obj.get_height() + BORDER_RADIUS * 4)
+        width = max(size[0], text_obj.get_width())
+        height = max(size[1], text_obj.get_height())
+        size = (width, height)
         CenteredDrawable.__init__(self, size, center)
         self.fill(GRAY)
         pygame.draw.rect(self, BLACK, self.get_rect(), BORDER_RADIUS)

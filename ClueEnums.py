@@ -65,3 +65,7 @@ class Actions(EnumText):
     SUGGEST = "suggest"
     ACCUSE = "accuse"
     ENDTURN = "end turn"
+
+class LobbyButtons(Enum):
+    NEW = 0
+    JOIN = 1

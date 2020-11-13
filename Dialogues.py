@@ -6,15 +6,6 @@ from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
 
 from Drawable import CenteredDrawable, Button
 
-# Simple class to render a text message on a white background with a black border
-class GUIMessage(CenteredDrawable):
-    def __init__(self, font, text, center):
-        text_object = font.render(text, True, BLACK)
-        CenteredDrawable.__init__(self, (text_object.get_width() + BORDER_RADIUS * 8, text_object.get_height() + BORDER_RADIUS * 8), center)
-        pygame.draw.rect(self, BLACK, self.get_rect(), BORDER_RADIUS)
-        self.blit(text_object, (BORDER_RADIUS * 4, BORDER_RADIUS * 4))
-        self.position = (self.position[0], 0)
-
 class Dialogue(CenteredDrawable):
     def __init__(self, size, center):
         CenteredDrawable.__init__(self, size, center)
@@ -31,9 +22,8 @@ class InputDialogue(Dialogue):
         self.font = font
         self.input_text = ""
         text_object = font.render(text, True, BLACK)
-        text_rect = text_object.get_rect()
-        text_width = text_rect.size[0]
-        text_height = text_rect.size[1]
+        text_width = text_object.get_width()
+        text_height = text_object.get_height()
         dialogue_height = text_height * 3
         Dialogue.__init__(self, (text_width + BORDER_RADIUS * 2, dialogue_height + BORDER_RADIUS * 2), center)
         self.fill(BLACK)
