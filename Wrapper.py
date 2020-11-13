@@ -9,6 +9,7 @@ class MsgGameStart:
         self.indviPlayer = indviPlayer
         self.gameInfo = gameInfo
         self.clientMessage = " Game is starting"
+        print("Server -> client 100")
 # Not implimented    
 class MsgPlayerReadyResp:
     def __init__(self):
@@ -27,16 +28,19 @@ class MsgLobbyReady():
 class MsgMovePlayer():
     def __init__(self, player):
         self.player = player
+        print("client -> server 102")
 
 # used to pass player numbers/positions
 class MsgPassPlayerNum():
     def __init__(self,num,indviPlayer):
         self.indviPlayer = indviPlayer
         self.playerNum = num
+        print("server -> client 103")
 
 # used to update the info class / can be replaced with MsgUpdateGame??
 class MsgPassInformation():
     def __init__(self,info):
+        print("server -> client: 501")
         self.info = info
 # wrapper to update players
 class MsgUpdatePlayer():
@@ -45,15 +49,18 @@ class MsgUpdatePlayer():
 
 class MsgStartTurn():
     def __init__(self):
+        print("server -> client 105")
         pass
 
 class MsgContinueTurn():
     def __init__(self):
+        print("server -> client 106")
         pass
 
 class MsgSuggest():
     def __init__(self, suggestion):
         self.suggestion = suggestion
+        print("client -> server 107")
 
 class MsgSuggestResp():
     def __init__(self, disprov_card, disprov_player, playerNum, suggestion, name):
@@ -62,13 +69,16 @@ class MsgSuggestResp():
         self.disprov_player = disprov_player 
         self.playerNum = playerNum
         self.name = name
+        print("server -> client 201")
 
 class MsgAccuse():
     def __init__(self, accusation):
         self.accusation = accusation
+        print("client -> server 108")
 
 class MsgEndTurn():
     def __init__(self):
+        print("client -> server 109")
         pass
 
 class MsgGameWon():
@@ -106,6 +116,6 @@ class HeaderNew:
     
     def __init__(self, data):
         self.id = self.ids.get(type(data), 0)
-        print(self.id)
+        # print(self.id)
         self.data = data
 

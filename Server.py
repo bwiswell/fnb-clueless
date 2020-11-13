@@ -9,8 +9,6 @@ from ClueEnums import Characters, Rooms, Weapons
 import random
 
 
-info1 = info.Information()
-
 class PlayerClient:
     def __init__(self, number, writer):
         self.number = number
@@ -55,7 +53,7 @@ class Game():
         print("game started")
         writes = []
         for client in self.clients:      
-            msg = wrap.HeaderNew(wrap.MsgGameStart(client.character,info1))
+            msg = wrap.HeaderNew(wrap.MsgGameStart(client.character,self.info))
             writes.append(client.sendMsg(msg))
         #send out msg to all players that game is starting and allow player 1 to move
 
@@ -120,7 +118,7 @@ class Server():
         if player_count < self.max_players:
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
-            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0), 
+            character = Player(name=name, number=client.number, location=self.game.info.startLocations.pop(0), 
                             character=Characters(client.number), cards=self.game.assign_cards())
             self.game.info.storeAllPlayers.append(character)
             client.character = character
@@ -202,7 +200,7 @@ class Server():
             elif(msg.id == 104):
                 print("server: " + str(msg.data.player.name))
                 client.name = msg.data.player.name
-                print(client.name)
+                print("updating PLayer name: " + client.name)
             
             
             if msg == "exit":
