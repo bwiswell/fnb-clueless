@@ -193,7 +193,6 @@ class SuggestionDialogue(Dialogue):
         selection = {}
         for slot in self.slots:
             selection[slot.category] = slot.current_card.id
-        selection["location"] = self.location
         return selection
 
     # Detect clicks until the player selects "confirm" or "cancel"

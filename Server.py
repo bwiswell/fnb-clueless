@@ -32,11 +32,8 @@ class Game():
 
     def initCaseFile(self):
         character_cards = [c for c in Characters]
-        print("Num Char Cards: " + str(len(character_cards)))
         weapon_cards = [w for w in Weapons]
-        print("Num Weapon Cards: " + str(len(weapon_cards)))
         room_cards = [r for r in Rooms]
-        print("Num Room Cards: " + str(len(room_cards)))
         case_character = random.choice(character_cards)
         character_cards.remove(case_character)
         case_weapon = random.choice(weapon_cards)
@@ -46,6 +43,7 @@ class Game():
         case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
         character_cards.extend(weapon_cards)
         character_cards.extend(room_cards)
+        print(case_file)
         return case_file, character_cards
 
     # method called in order to begin the player 
@@ -53,9 +51,9 @@ class Game():
     async def start_game(self, client):
         print("game started")
         writes = []
-        for client in self.clients:      
-            msg = wrap.HeaderNew(wrap.MsgGameStart(client.character,self.info))
-            writes.append(client.sendMsg(msg))
+        for cl in self.clients:      
+            msg = wrap.HeaderNew(wrap.MsgGameStart(cl.character,self.info))
+            writes.append(cl.sendMsg(msg))
         #send out msg to all players that game is starting and allow player 1 to move
 
         await asyncio.gather(*writes)

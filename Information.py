@@ -1,4 +1,5 @@
 import Player as pl
+import ClueEnums
 from ClueEnums import Locations
 
 class Information:
