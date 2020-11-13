@@ -50,7 +50,7 @@ class Client():
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
                     lobby.close()
-                    self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer(),self.info.storeAllPlayers())
+                    self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
                 else:
                     pass
                 # send player message not payer 1
@@ -64,7 +64,7 @@ class Client():
                 lobby.close()
                 self.info = data_var.data.gameInfo()
                 # send player start message?
-                self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer(),self.info.currentLocation())
+                self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
             else:
                 pass
             
