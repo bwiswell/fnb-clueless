@@ -37,36 +37,6 @@ gui = ClueGUI.ClueGUI(player, [player, player2, player3, player4])
 hasAccused = False
 movedBySuggestion = False
 isTurn = True
-CHARACTER = 0
-LOCATION = 1
-
-def findPlayerIndex(character):
-    for i in range(len(playerLocs)):
-        if playerLocs[i][CHARACTER] == character:
-            return i
-
-def determineValidMoves():
-    if ClueEnums.isRoom(player.location):
-        for p,loc in playerLocs:
-            print(loc)
-            if not ClueEnums.isRoom(loc):
-                if loc in moveList:
-                    moveList.remove(loc)
-    print(moveList)
-
-def updateGUI():
-    # TODO: add the following line back in when I am ready to get server updates
-    #playerLocs = info.getCurrentLocations()
-    # TODO: remove this line when server update is used instead
-    playerLocs = [
-                  (player.character, player.location),
-                  (player2.character, player2.location),
-                  (player3.character, player3.location),
-                  (player4.character, player4.location)
-                 ]
-    print(playerLocs) # TODO: remove this print eventually
-    gui.updateGUI(playerLocs)
-    return playerLocs
 
 while True:
     # TODO: wait for server update
@@ -75,7 +45,7 @@ while True:
     player.location = playerLocs[findPlayerIndex(player.character)][LOCATION]
 
     if isTurn is True:
-        moveList = MOVEDICT[player.location]  # derermines potential move options
+         # derermines potential move options
         actionList = [Actions.MOVE, Actions.ACCUSE, Actions.SUGGEST]  # all potential actions
         print(moveList)  # TODO: remove this print eventually
         determineValidMoves()

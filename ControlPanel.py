@@ -99,21 +99,4 @@ class ControlPanel(Selectable):
         for button in self.buttons:
             if button.rect.collidepoint(adj_pos):
                 return button.return_value
-        return Noneon.return_value not in valid_actions:
-                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
-                GrayOut(button.size, button_true_pos).draw(screen)
-
-    def select(self, action, screen):
-        for button in self.buttons:
-            if button.return_value == action:
-                button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
-                button_rect = pygame.Rect(button_true_pos, button.size)
-                screen.drawRect(button_rect, BLACK, BORDER_RADIUS * 4)
-
-    # Click detection methods for the action buttons
-    def getClicked(self, click_pos):
-        adj_pos = (click_pos[0] - self.position[0], click_pos[1] - self.position[1])
-        for button in self.buttons:
-            if button.rect.collidepoint(adj_pos):
-                return button.return_value
         return None
