@@ -45,8 +45,8 @@ class Game():
         case_room = random.choice(room_cards)
         room_cards.remove(case_room)
         case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
-        character_cards.append(weapon_cards)
-        character_cards.append(room_cards)
+        character_cards.extend(weapon_cards)
+        character_cards.extend(room_cards)
         return case_file, character_cards
 
     # method called in order to begin the player 
@@ -87,11 +87,9 @@ class Game():
             await self.end_turn(client)
 
     def assign_cards(self):
-        cards = []
-        for i in range(3):
-            rand_card = random.choice(self.cards)
-            self.cards.remove(rand_card)
-            cards.append(rand_card)
+        cards = random.sample(self.cards, 3)
+        for card in cards:
+            self.cards.remove(card)
         return cards
 
 class Server():

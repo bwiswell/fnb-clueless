@@ -1,11 +1,12 @@
 import Player as pl
+from ClueEnums import Locations
 
 class Information:
     def __init__(self):
         # Intial data to be updated or pulled
         self.storeAllPlayers = []
         self.currentLocation = []
-        self.startLocations = ["hw2", "hw11", "hw8", "hw5"]
+        self.startLocations = [Locations.HW2, Locations.HW11, Locations.HW8, Locations.HW5]
         self.WEAPON_LIST = ["Candlestick", "Knife", "Ropes", "Revolver", "Lead", "Wrench"]
         self.ROOMNAME_LIST = ["Study", "Lounge", "Ballroom", "Library", "Billiard Room", "Hall", "Dining Room", "Conservatory", "Kitchen"]
 
