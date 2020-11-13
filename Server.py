@@ -81,10 +81,12 @@ class Game():
         if client.number == self.active_player:
             print("server: " +str(data.location))
             print("server: " + str(data.name))
-            self.info.updateCurrentLocation(data)
+            print("length of store players: " + str(len(self.info.storeAllPlayers)))
+            self.info.updatePlayer(data)
+            
             locations = self.info.getCurrentLocations()
-            msg = wrap.MsgPassInformation(self.info)
-            self.broadcastMsg(msg)
+            msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+            await self.broadcastMsg(msg)
             print("server:" + str(locations))
             
     def assign_cards(self):
@@ -120,7 +122,7 @@ class Server():
             self.game.clients.append(client)
             character = Player(name=name, number=client.number, location=info1.startLocations.pop(0), 
                             character=Characters(client.number), cards=self.game.assign_cards())
-            info1.storeAllPlayers.append(character)
+            self.game.info.storeAllPlayers.append(character)
             client.character = character
             self.counter += 1
             return client, self.game
@@ -159,7 +161,7 @@ class Server():
 
                 # Continue active player's turn
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
-                client.sendMsg(msg)
+                await client.sendMsg(msg)
 
             elif(msg.id == 107):
                 # suggest stuff
@@ -167,14 +169,14 @@ class Server():
                 disprov_card, disprov_player = self.game.info.checkSuggestion(self.game.active_player, suggestion)
                 # Need to broadcast an update
                 msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
-                game.broadcastMsg(msg)
+                await game.broadcastMsg(msg)
 
                 # Send some response back to the suggesting player
                 msg = wrap.HeaderNew(wrap.MsgSuggestResp(disprov_card, disprov_player,self.game.active_player, suggestion, client.character.name))
-                game.broadcastMsg(msg)
+                await game.broadcastMsg(msg)
                 # Continue active player's turn\
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
-                client.sendMsg(msg)
+                await client.sendMsg(msg)
                 
             elif(msg.id == 108):
                 # accuse stuff
@@ -182,17 +184,17 @@ class Server():
                 won = self.game.info.checkAccusation(self.game.active_player, accusation)
                 # Need to broadcast an update
                 msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
-                game.broadcastMsg(msg)
+                await game.broadcastMsg(msg)
                 if won:
                     msg = wrap.HeaderNew(wrap.MsgGameWon(client.character.name, accusation))
-                    game.broadcastMsg(msg)
+                    await game.broadcastMsg(msg)
                 else:
                     msg = wrap.HeaderNew(wrap.MsgGameLost(client.character.name,self.game.active_player,accusation))
-                    game.broadcastMsg(msg)
+                    await game.broadcastMsg(msg)
 
                 # Continue active player's turn
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
-                client.sendMsg(msg)
+                await client.sendMsg(msg)
 
             elif(msg.id == 109):
                 await game.end_turn(client)

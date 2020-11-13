@@ -29,6 +29,10 @@ class Information:
     def getCurrentLocations(self):
         return self.currentLocation
 
+    def updatePlayer(self,incomingPlayer):
+        self.storeAllPlayers[incomingPlayer.number] = incomingPlayer
+
+
     def teleport(self, suggesting_player, suggestion):
         location = self.storeAllPlayers[suggesting_player].location
         suggested_player_char = suggestion["player"]
