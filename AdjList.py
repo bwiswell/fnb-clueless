@@ -1,11 +1,11 @@
 from ClueEnums import Locations
 import ClueEnums
 
-studyList = [Locations.HW1, Locations.HW3, Locations.KITCHEN, Locations.LOUNGE, Locations.CONSERVATORY]
+studyList = [Locations.HW1, Locations.HW3, Locations.KITCHEN]
 hall1List = [Locations.STUDY, Locations.HALL]
 hallList = [Locations.HW1, Locations.HW2, Locations.HW4]
 hall2List = [Locations.HALL, Locations.LOUNGE]
-loungeList = [Locations.HW2, Locations.HW5, Locations.STUDY, Locations.CONSERVATORY, Locations.KITCHEN]
+loungeList = [Locations.HW2, Locations.HW5, Locations.CONSERVATORY]
 
 hall3List = [Locations.STUDY, Locations.LIBRARY]
 hall4List = [Locations.HALL, Locations.BILLIARD]
@@ -21,11 +21,11 @@ hall8List = [Locations.LIBRARY, Locations.CONSERVATORY]
 hall9List = [Locations.BILLIARD, Locations.BALLROOM]
 hall10List = [Locations.DINING, Locations.KITCHEN]
 
-conservatoryList = [Locations.HW8, Locations.HW11, Locations.STUDY, Locations.LOUNGE, Locations.KITCHEN]
+conservatoryList = [Locations.HW8, Locations.HW11, Locations.LOUNGE]
 hall11List = [Locations.CONSERVATORY, Locations.BALLROOM]
 ballroomList = [Locations.HW9, Locations.HW11, Locations.HW12]
 hall12List = [Locations.BALLROOM, Locations.KITCHEN]
-kitchenList = [Locations.HW10, Locations.HW12, Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY]
+kitchenList = [Locations.HW10, Locations.HW12, Locations.STUDY]
 
 cornerRooms = [Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY, Locations.KITCHEN]
 
@@ -42,5 +42,5 @@ def determineValidMoves(player, players):
     if ClueEnums.isRoom(player.location):
         for p in players:
             if not ClueEnums.isRoom(p.location) and p.location in valid_moves:
-                valid_moves.remove(loc)
+                valid_moves.remove(p.location)
     return valid_moves

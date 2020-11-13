@@ -7,6 +7,7 @@ from socket import *
 import asyncio
 from ClueEnums import Characters, Rooms, Weapons
 import random
+import time
 
 
 class PlayerClient:
@@ -70,7 +71,7 @@ class Game():
         player_count = len(self.clients)
         self.active_player = (client.number + 1) % player_count
         next_player = self.clients[self.active_player]
-        msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
+        msg = wrap.HeaderNew(wrap.MsgStartTurn())
         await next_player.sendMsg(msg)
 
     # method to updated player location for GUI to eventually see and use to
@@ -128,7 +129,7 @@ class Server():
             return None
 
     async def handle_client(self, reader, writer):
-        buf = 2048
+        buf = 4096
         data = await reader.read(buf)
         msg = pickle.loads(data)
         print("Server:player name: " + str(msg.data.player.name))
@@ -168,10 +169,11 @@ class Server():
                 # Need to broadcast an update
                 msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
                 await game.broadcastMsg(msg)
-
+                time.sleep(0.2)
                 # Send some response back to the suggesting player
                 msg = wrap.HeaderNew(wrap.MsgSuggestResp(disprov_card, disprov_player,self.game.active_player, suggestion, client.character.name))
                 await game.broadcastMsg(msg)
+                time.sleep(0.2)
                 # Continue active player's turn\
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
                 await client.sendMsg(msg)
@@ -183,6 +185,7 @@ class Server():
                 # Need to broadcast an update
                 msg = wrap.HeaderNew(wrap.MsgPassInformation(self.game.info))
                 await game.broadcastMsg(msg)
+                time.sleep(0.2)
                 if won:
                     msg = wrap.HeaderNew(wrap.MsgGameWon(client.character.name, accusation))
                     await game.broadcastMsg(msg)
@@ -191,6 +194,7 @@ class Server():
                     await game.broadcastMsg(msg)
 
                 # Continue active player's turn
+                time.sleep(0.2)
                 msg = wrap.HeaderNew(wrap.MsgContinueTurn())
                 await client.sendMsg(msg)
 

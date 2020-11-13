@@ -107,8 +107,9 @@ class Client():
                     if Actions.ACCUSE in self.actionList:
                         self.actionList.remove(Actions.ACCUSE)
 
-                if (len(self.actionList) == 0):
-                    self.actionList = [Actions.ENDTURN]
+                if (len(self.actionList) == 0 or Actions.MOVE not in self.actionList):
+
+                    self.actionList.append(Actions.ENDTURN)
 
                 action = self.gui.getPlayerAction(self.actionList)
                 self.actionList.remove(action)
@@ -170,6 +171,7 @@ class Client():
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgMovePlayer(player)))
             return data_string
         elif action == Actions.SUGGEST:
+            self.suggested = True
             location = self.info.storeAllPlayers[self.myNumber].location
             suggestion = self.gui.getPlayerSuggestion(location)
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgSuggest(suggestion)))
