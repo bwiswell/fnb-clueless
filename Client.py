@@ -42,18 +42,13 @@ class Client():
             print("Received message: " + str(data_var))
             # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
-<<<<<<< HEAD
                 print(f"Client:msg ID: {data_var.data.playerNum}")
-=======
-                print(data_var.data.playerNum)
->>>>>>> FNBC-32
                 # checking player position and if 0 starting game using button
                 # Then start GUI after wrtiting to server
                 if(data_var.data.playerNum == 0):
                     lobby.giveStartButton()
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
-<<<<<<< HEAD
                     # lobby.close()
                     # self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
                 else:
@@ -75,20 +70,6 @@ class Client():
                 pass
             
             #here we will impliment from the GUI player actions ie)move,suggest,accuse
-=======
-                    lobby.close()
-                    self.gui = ClueGUI.ClueGUI(player,[player])
-
-                else:
-                    pass
-                   # send player message not payer 1
-            # will update all locations now generally happens at end of turn/ start of next players turn
-            elif( data_var.id == 501):
-                self.info = data_var.data.info
-            else:
-                pass
-
->>>>>>> FNBC-32
             # player.name = "Rob"
             # player.location = "Right"
 
