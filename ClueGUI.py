@@ -81,7 +81,7 @@ class ClueGUI(Drawable):
         self.information_center = InformationCenter(self.information_center_size, self.information_center_pos, self.font, self.screen)
 
         # Initial GUI render
-        self.updateGUI([(player.character, player.location) for player in all_players])
+        self.updateGUI(all_players)
         self.postMessage(GAME_START_MESSAGE)
 
     # Get a font size appropriate to the screen size
@@ -97,8 +97,8 @@ class ClueGUI(Drawable):
         self.draw(self.screen)
         self.control_panel.draw(self.screen)
 
-    def updateGUI(self, player_locations):
-        self.clue_map.update(player_locations)
+    def updateGUI(self, players):
+        self.clue_map.update(players)
         self.clue_map.draw(self)
         self.draw(self.screen)
 

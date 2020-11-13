@@ -23,6 +23,7 @@ class Client():
         self.actionList = []
         self.lost = False
         self.myNumber = None
+        self.suggested = False
 
     async def handle_server(self,reader,writer):
         # start the lobby
@@ -47,10 +48,10 @@ class Client():
             data_var = pickle.loads(data)
             # playerUpdate = data_var
             # self.info = playerUpdate
-            print("Received message from server: " + str(data_var))
+            print("Received message from server: " + str(data_var.id))
             # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
-                print(f"Client:msg ID: {data_var.data.playerNum}")
+                print(f"Client Player Number: {data_var.data.playerNum}")
                 self.myNumber = data_var.data.playerNum
                 # checking player position and if 0 starting game using button
                 # Then start GUI after wrtiting to server
@@ -69,12 +70,10 @@ class Client():
             elif(data_var.id == 100):
                 lobby.close()
                 self.info = data_var.data.gameInfo
-                print("Client Name: " + str(data_var.data.indviPlayer.name))
-                # send player start message?
                 self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
             elif(data_var.id == 105):
                 self.gui.postMessage("Your turn has begun!")
-                print("client: " + str(data_var))
+                self.suggested = False
                 self.validMoves = AdjList.determineValidMoves(self.info.storeAllPlayers[self.myNumber], self.info.storeAllPlayers)
 
                 if (self.lost and len(self.validMoves) == 0):
@@ -97,7 +96,8 @@ class Client():
                 
             elif(data_var.id == 106):
                 if (ClueEnums.isRoom(self.info.storeAllPlayers[self.myNumber].location)):
-                    if (Actions.SUGGEST not in self.actionList and not self.lost):
+                    # According to the project description, one suggestion per turn
+                    if (Actions.SUGGEST not in self.actionList and not self.lost and not self.suggested):
                         self.actionList.append(Actions.SUGGEST)
                     if (Actions.ACCUSE not in self.actionList and not self.lost):
                         self.actionList.append(Actions.ACCUSE)
