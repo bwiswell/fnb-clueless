@@ -1,6 +1,5 @@
 import Player as pl
 
-
 class Wrapper:
     def __init__(self):
         print("hello")

@@ -2,35 +2,32 @@ import os
 
 import pygame
 
-import GUIConstants
-
-character_assets = []
-font = None
-
-# Loads all character assets from file and initializes the font
-def initCharacterAssets():
-    global character_assets, font
-    asset_path = os.path.dirname(os.path.realpath(__file__)) + GUIConstants.CHARACTER_ASSET_FILE_PATH
-    character_sheet = pygame.image.load(asset_path)
-    for i in range(GUIConstants.NUM_CHARACTERS):
-        character = pygame.Surface(GUIConstants.CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
-        character_asset_pos = (0, GUIConstants.CHARACTER_ASSET_SIZE[1] * i)
-        character_asset_rect = pygame.Rect(character_asset_pos, GUIConstants.CHARACTER_ASSET_SIZE)
-        character.blit(character_sheet, (0, 0), character_asset_rect)
-        character_assets.append(character)
-    font = pygame.font.SysFont(None, GUIConstants.CHARACTER_NAME_FONT_SIZE)
+from Constants import WHITE, CHARACTER_ASSET_FILE_PATH, NUM_CHARACTERS, CHARACTER_ASSET_SIZE, CHARACTER_NAME_FONT_SIZE
 
 # Basic player Sprite class consisting of a player image and username caption
 class PlayerSprite(pygame.Surface):
-    def __init__(self, index, name):
-        pygame.Surface.__init__(self, GUIConstants.CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
+    def __init__(self, text_obj, character_image):
+        pygame.Surface.__init__(self, CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
         self.convert()
-        self.name = name
 
-        self.image = pygame.Surface(GUIConstants.CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
-        self.image.blit(character_assets[index], (0, -6))
+        self.image = pygame.Surface(CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
+        self.image.blit(character_image, (0, -6))
         
-        self.blit(character_assets[index], (0, 0))
-        text_object = font.render(name, True, GUIConstants.WHITE)
-        text_x = self.get_width() // 2 - text_object.get_width() // 2
-        self.blit(text_object, (text_x, 0))
+        self.blit(character_image, (0, 0))
+        self.blit(text_obj, (self.get_width() // 2 - text_obj.get_width() // 2, 0))
+
+# Loads all player sprites
+def initPlayerSprites(players):
+    font = pygame.font.SysFont(None, CHARACTER_NAME_FONT_SIZE)
+    asset_path = os.path.dirname(os.path.realpath(__file__)) + CHARACTER_ASSET_FILE_PATH
+    asset_sheet = pygame.image.load(asset_path)
+    player_sprites = {}
+
+    for player in players:
+        image = pygame.Surface(CHARACTER_ASSET_SIZE, pygame.SRCALPHA)
+        asset_rect = pygame.Rect((0, CHARACTER_ASSET_SIZE[1] * player.character.value), CHARACTER_ASSET_SIZE)
+        image.blit(asset_sheet, (0, 0), asset_rect)
+        text_obj = font.render(player.name, True, WHITE)
+        player_sprites[player.character] = PlayerSprite(text_obj, image)
+
+    return player_sprites
