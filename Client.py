@@ -46,13 +46,13 @@ class Client():
                 # checking player position and if 0 starting game using button
                 # Then start GUI after wrtiting to server
                 if(data_var.data.playerNum == 0):
-                    lobby.giveStartButton()
+                    lobby.getStart("FNBC")
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
                     # lobby.close()
                     # self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
                 else:
-                    pass
+                    lobby.showWaitingMessage()
                 # send player message not payer 1
                 # will update all locations now generally happens at end of turn/ start of next players turn       
             elif( data_var.id == 501):

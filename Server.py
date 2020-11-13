@@ -29,21 +29,25 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.clients = []
-        self.case_file, self.cards = initCaseFile()
+        self.case_file, self.cards = self.initCaseFile()
 
     def initCaseFile(self):
         character_cards = [c for c in Characters]
+        print("Num Char Cards: " + str(len(character_cards)))
         weapon_cards = [w for w in Weapons]
+        print("Num Weapon Cards: " + str(len(weapon_cards)))
         room_cards = [r for r in Rooms]
+        print("Num Room Cards: " + str(len(room_cards)))
         case_character = random.choice(character_cards)
         character_cards.remove(case_character)
         case_weapon = random.choice(weapon_cards)
         weapon_cards.remove(case_weapon)
-        case_croom = random.choice(room_cards)
+        case_room = random.choice(room_cards)
         room_cards.remove(case_room)
         case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
-        cards = character_cards.append(weapon_cards).append(room_cards)
-        return case_file, cards
+        character_cards.append(weapon_cards)
+        character_cards.append(room_cards)
+        return case_file, character_cards
 
     # method called in order to begin the player 
     # turn sequence and starting the game    
@@ -108,7 +112,8 @@ class Server():
         if player_count < self.max_players:
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
-            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0), character=Characters(client.number), cards=self.game.assign_cards())
+            character = Player(name=name, number=client.number, location=info1.startLocations.pop(0), 
+                            character=Characters(client.number), cards=self.game.assign_cards())
             info1.storeAllPlayers.append(character)
             client.character = character
             self.counter += 1
