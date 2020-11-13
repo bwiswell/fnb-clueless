@@ -18,12 +18,18 @@ class Game():
     # turn sequence and starting the game    
     async def start_game(self, player):
         print("gmae started")
-        # for player in self.players:
-        #     #send out msg to all players that game is starting and allow player 1 to move
-        #     pass
+        writes = []
+        for player1 in self.players:      
+            msg = wrap.HeaderNew(wrap.MsgGameStart(player1.number,info1))
+            writes.append(player1.writer.write(msg))
+            #send out msg to all players that game is starting and allow player 1 to move
+
+        await asyncio.gather(writes)
+
         if player.number == 0:
             msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
             await player.sendServerMsg(msg)
+
     # Ends current players turn and sends server updated info class
     async def end_turn(self, player):
         player_count = len(self.players)
@@ -62,7 +68,7 @@ class Server():
     def register_player(self, writer):
         
         player_count = self.counter
-        print("THe player count is: " + str(player_count))
+        print("The player count is: " + str(player_count))
         if player_count < self.max_players:
             new_player = Player(number=player_count, writer=writer, 
                         location=info1.startLocations.pop(0))
@@ -103,7 +109,6 @@ class Server():
                 player.name = msg.data.player.name
                 print(player.name)
             
-
             if msg == "exit":
                 print("Exiting server...")
                 self.running = False

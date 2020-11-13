@@ -51,16 +51,24 @@ class Client():
                     writer.write(data_string)
                     lobby.close()
                     self.gui = ClueGUI.ClueGUI(player,[player])
-
                 else:
                     pass
-                   # send player message not payer 1
-            # will update all locations now generally happens at end of turn/ start of next players turn       
+                # send player message not payer 1
+                # will update all locations now generally happens at end of turn/ start of next players turn       
             elif( data_var.id == 501):
                 self.info = data_var.data.info
+                #impliment method here to take in self.info and return list of (name, location) tuples to feed below
+                #gui.upddateGUI()
+
+            elif(data_var.id == 100):
+                lobby.close()
+                self.info = data_var.data.gameInfo()
+                # send player start message?
+                self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer(),self.info.currentLocation())
             else:
                 pass
             
+            #here we will impliment from the GUI player actions ie)move,suggest,accuse
             # player.name = "Rob"
             # player.location = "Right"
 

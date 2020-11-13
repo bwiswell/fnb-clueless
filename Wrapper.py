@@ -5,9 +5,11 @@ class Wrapper:
     def __init__(self):
         print("hello")
 # Not implimented    
-class MsgPlayerReady:
-    def __init__(self):
-        pass #stuff
+class MsgGameStart:
+    def __init__(self,indviPlayer,gameInfo):
+        self.indviPlayer = indviPlayer
+        self.gameInfo = gameInfo
+        self.clientMessage = " Game is starting"
 # Not implimented    
 class MsgPlayerReadyResp:
     def __init__(self):
@@ -20,6 +22,8 @@ class MsgUpdateGame():
 class MsgLobbyReady():
     def __init__(self):
         self.start = "start_game"
+    def __str__(self):
+        return "msg: start game"
 # wrapper used to pass player objects
 class MsgPassPlayer():
     def __init__(self,player):
@@ -42,7 +46,7 @@ class MsgUpdatePlayer():
 class HeaderNew:
     # dict of keys based on classes to give ids to check later
     ids = {
-        MsgPlayerReady: 100,
+        MsgGameStart: 100,
         MsgPlayerReadyResp: 101,
         MsgPassPlayer: 102,
         MsgPassPlayerNum: 103,
