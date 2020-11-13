@@ -55,12 +55,12 @@ class Game():
     # move the char then ends the turn
     async def move(self, client, data):
         if client.number == self.active_player:
-            print(data.location)
-            print(data.name)
+            print("server: " +str(data.location))
+            print("server: " + str(data.name))
             self.info.updateCurrentLocation(data)
             locations = self.info.getCurrentLocations()
             msg = wrap.MsgUpdateGame(self.info)
-            print(locations)
+            print("server:" + str(locations))
             
             await self.end_turn(client)
 
@@ -80,7 +80,7 @@ class Server():
     def register_player(self, writer):
         
         player_count = self.counter
-        print("The player count is: " + str(player_count))
+        print("Server:The player count is: " + str(player_count))
         if player_count < self.max_players:
             client = PlayerClient(number=player_count, writer=writer)
             self.game.clients.append(client)
@@ -95,10 +95,10 @@ class Server():
     async def handle_client(self, reader, writer):
         buf = 2048
         client, game = self.register_player(writer)
-        print("player num: " + str(client.number))
+        print("Server:player num: " + str(client.number))
         
         # send player its turn number after intialization.
-        msg = wrap.HeaderNew(wrap.MsgPassPlayerNum(client.number))
+        msg = wrap.HeaderNew(wrap.MsgPassPlayerNum(client.number,))
         await client.sendMsg(msg)
 
         # waits to read/ get data from client will then sort the msg wrapper
@@ -106,7 +106,7 @@ class Server():
         while self.running and client is not None:
             data = await reader.read(buf)
             msg = pickle.loads(data)
-            print("here " + str(msg.id))
+            print("Server recieved " + str(msg.id))
             print("Received message: " + str(msg.data))
 
             if(msg.id == 1000):
@@ -118,7 +118,7 @@ class Server():
                 await game.move(client, playerData)
             elif(msg.id == 104):
                 print("here")
-                print(msg.data.player.name)
+                print("server: " + str(msg.data.player.name))
                 client.name = msg.data.player.name
                 print(client.name)
             

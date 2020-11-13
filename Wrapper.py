@@ -31,7 +31,8 @@ class MsgPassPlayer():
 
 # used to pass player numbers/positions
 class MsgPassPlayerNum():
-    def __init__(self,num):
+    def __init__(self,num,indviPlayer):
+        self.indviPlayer = indviPlayer
         self.playerNum = num
 
 # used to update the info class / can be replaced with MsgUpdateGame??

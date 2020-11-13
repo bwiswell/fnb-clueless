@@ -42,15 +42,15 @@ class Client():
             print("Received message: " + str(data_var))
             # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
-                print(data_var.data.playerNum)
+                print(f"Client:msg ID: {data_var.data.playerNum}"))
                 # checking player position and if 0 starting game using button
                 # Then start GUI after wrtiting to server
                 if(data_var.data.playerNum == 0):
                     lobby.giveStartButton()
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
-                    lobby.close()
-                    self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
+                    # lobby.close()
+                    # self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
                 else:
                     pass
                 # send player message not payer 1
@@ -62,7 +62,7 @@ class Client():
 
             elif(data_var.id == 100):
                 lobby.close()
-                self.info = data_var.data.gameInfo()
+                self.info = data_var.data.gameInfo
                 # send player start message?
                 self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.currentLocation)
             else:
