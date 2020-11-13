@@ -98,7 +98,7 @@ class Server():
         print("Server:player num: " + str(client.number))
         
         # send player its turn number after intialization.
-        msg = wrap.HeaderNew(wrap.MsgPassPlayerNum(client.number,))
+        msg = wrap.HeaderNew(wrap.MsgPassPlayerNum(client.number,client.character))
         await client.sendMsg(msg)
 
         # waits to read/ get data from client will then sort the msg wrapper

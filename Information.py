@@ -5,7 +5,7 @@ class Information:
         # Intial data to be updated or pulled
         self.storeAllPlayers = []
         self.currentLocation = []
-        self.startLocations = ["hw2", "hw11","hw5"]
+        self.startLocations = ["hw2", "hw11"]
         self.WEAPON_LIST = ["Candlestick", "Knife", "Ropes", "Revolver", "Lead", "Wrench"]
         self.ROOMNAME_LIST = ["Study", "Lounge", "Ballroom", "Library", "Billiard Room", "Hall", "Dining Room", "Conservatory", "Kitchen"]
 
