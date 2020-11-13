@@ -44,6 +44,12 @@ class Rooms(EnumText):
     BALLROOM = "ballroom"
     KITCHEN = "kitchen"
 
+def isRoom(location):
+    for room in Rooms:
+        if location.text == room.text:
+            return True
+    return False
+
 class Weapons(EnumText):
     CANDLESTICK = "candlestick"
     REVOLVER = "revolver"

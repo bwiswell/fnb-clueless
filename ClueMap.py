@@ -66,9 +66,9 @@ class ClueMap(Selectable):
         self.clue_map.blit(self.overlay, (0, 0))
         self.blit(pygame.transform.smoothscale(self.clue_map, self.size), (0, 0))
 
-    def disallow(self, valid_moves, screen):
+    def highlight(self, valid_moves, screen):
         for key,value in self.locations.items():
-            if key not in valid_moves:
+            if key in valid_moves:
                 grayed_area = value.collision_box
                 GrayOut(grayed_area.size, grayed_area.topleft).draw(screen)
 

@@ -1,3 +1,4 @@
+  
 import os
 import json
 
@@ -39,9 +40,15 @@ class RoomSprite(LocationSprite):
     def __init__(self, image, position, collision_box, caption):
         size = (ROOM_SIZE[0] + V_WALL_WIDTH, ROOM_CAPTION_OFFSET[1] + caption.get_height())
         LocationSprite.__init__(self, image, position, size, collision_box)
+        self.caption = caption
+        self.players = []
+
+    # Empties the list of players currently in the room
+    def clearPlayers(self):
         self.players = []
 
     # Adds a player to the room if there are less than 4 currently
+    # in it
     def addPlayer(self, player):
         self.players.append(player)
 

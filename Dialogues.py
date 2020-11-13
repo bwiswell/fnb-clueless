@@ -29,14 +29,14 @@ class InputDialogue(Dialogue):
         self.fill(BLACK)
         half_height = dialogue_height // 2
         self.half_size = (text_width, half_height)
-        self.input_surface_pos = (GUIConstants.BORDER_RADIUS, GUIConstants.BORDER_RADIUS + half_height)
+        self.input_surface_pos = (BORDER_RADIUS, BORDER_RADIUS + half_height)
         input_width = text_width // 2
         input_x = (text_width - input_width) // 2
         y_margins = text_height // 3
         self.input_y = half_height - (text_height + y_margins)
-        self.input_rect = pygame.Rect(input_x - GUIConstants.BORDER_RADIUS, self.input_y - GUIConstants.BORDER_RADIUS, input_width + 2 * GUIConstants.BORDER_RADIUS, text_height + 2 * GUIConstants.BORDER_RADIUS)
+        self.input_rect = pygame.Rect(input_x - BORDER_RADIUS, self.input_y - BORDER_RADIUS, input_width + 2 * BORDER_RADIUS, text_height + 2 * BORDER_RADIUS)
         text_surface = pygame.Surface(self.half_size)
-        text_surface.fill(GUIConstants.WHITE)
+        text_surface.fill(WHITE)
         text_surface.blit(text_object, (0, y_margins))
         self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
         self.max_characters = max_characters
@@ -49,10 +49,10 @@ class InputDialogue(Dialogue):
     # Render the text currently entered by the player
     def drawInput(self):
         input_surface = pygame.Surface(self.half_size)
-        input_surface.fill(GUIConstants.WHITE)
-        input_object = self.font.render(self.input_text, True, GUIConstants.BLACK)
-        pygame.draw.rect(input_surface, GUIConstants.GRAY, self.input_rect)
-        pygame.draw.rect(input_surface, GUIConstants.BLACK, self.input_rect, GUIConstants.BORDER_RADIUS)
+        input_surface.fill(WHITE)
+        input_object = self.font.render(self.input_text, True, BLACK)
+        pygame.draw.rect(input_surface, GRAY, self.input_rect)
+        pygame.draw.rect(input_surface, BLACK, self.input_rect, BORDER_RADIUS)
         input_x = self.input_rect.x + (self.input_rect.size[0] // 2 - input_object.get_size()[0] // 2)
         input_surface.blit(input_object, (input_x, self.input_y))
         self.blit(input_surface, self.input_surface_pos)
@@ -81,12 +81,12 @@ class InputDialogue(Dialogue):
 # within the "cancel" button, and None if the click is anywhere else
 class ConfirmationDialogue(Dialogue):
     def __init__(self, font, text, center):
-        text_object = font.render(text, True, GUIConstants.BLACK)
+        text_object = font.render(text, True, BLACK)
         text_rect = text_object.get_rect()
         dialogue_height = text_rect.size[1] * 3
         Dialogue.__init__(self, (text_rect.size[0] + BORDER_RADIUS * 2, dialogue_height + BORDER_RADIUS * 2), center)
         text_surface = pygame.Surface((text_rect.size[0], dialogue_height))
-        text_surface.fill(GUIConstants.WHITE)
+        text_surface.fill(WHITE)
         x_margins = text_rect.size[0] // 3
         y_margins = dialogue_height // 4
         text_surface.blit(text_object, (0, y_margins - text_rect.size[1] // 2))

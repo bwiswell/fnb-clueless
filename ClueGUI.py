@@ -6,8 +6,8 @@ from Errors import NoPossibleActionError
 
 from Constants import GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
 from Constants import GAME_START_MESSAGE
-from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE
-from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE
+from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE
+from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, MOVE_MESSAGE
 from Constants import PICK_SUGGESTION_MESSAGE, PICK_ACCUSATION_MESSAGE
 
 from Drawable import Drawable
@@ -106,17 +106,17 @@ class ClueGUI(Drawable):
         self.information_center.postMessage(text)
 
     def getPlayerAction(self, valid_actions):
-        return self.getPlayerResponse(valid_actions, self.control_panel, PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE)
+        return self.getPlayerResponse(valid_actions, self.control_panel, PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE)
 
     def getPlayerMove(self, valid_moves):
-        return self.getPlayerResponse(valid_moves, self.clue_map, PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE)
+        return self.getPlayerResponse(valid_moves, self.clue_map, PICK_MOVE_MESSAGE, MOVE_CONF, MOVE_MESSAGE)
 
     # Helper function to get an action/move selection and display the appropriate confirmation dialogue
-    def getPlayerResponse(self, valid_actions, click_area, pick_text, conf_text, invalid_text, success_text):
+    def getPlayerResponse(self, valid_actions, click_area, pick_text, conf_text, success_text):
         if len(valid_actions) == 0:
             raise NoPossibleActionError
         self.postMessage(pick_text)
-        click_area.disallow(valid_actions, self.screen)
+        click_area.highlight(valid_actions, self.screen)
         done = False
         response = ""
         while not done:
@@ -126,25 +126,23 @@ class ClueGUI(Drawable):
                     response = click_area.getClicked(event.pos)
                     if response in valid_actions:
                         click_area.select(response, self.screen)
-                        conf_text += response.text + "?"
-                        conf_dialogue = ConfirmationDialogue(self.font, conf_text, self.center)
+                        response_conf_text = conf_text + response.text + "?"
+                        conf_dialogue = ConfirmationDialogue(self.font, response_conf_text, self.center)
                         conf_dialogue.draw(self.screen)
                         done = conf_dialogue.getResponse()
                         self.clear()
                         if not done:
-                            click_area.disallow(valid_actions, self.screen)
-                    else:
-                        self.postMessage(invalid_text)
+                            click_area.highlight(valid_actions, self.screen)
         success_text += response.text + "!"
         self.postMessage(success_text)
         return response
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
     def getPlayerSuggestion(self):
-        self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE)
+        return self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE)
 
     def getPlayerAccusation(self):
-        self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE)
+        return self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE)
 
     def getSuggestionOrAccusation(self, text):
         pygame.event.pump()
@@ -153,7 +151,6 @@ class ClueGUI(Drawable):
         response = suggestion_dialogue.getResponse(self.screen)
         self.clear()
         return response
-
 
     def quit(self):
         self.information_center.quit()

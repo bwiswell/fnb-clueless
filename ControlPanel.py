@@ -80,7 +80,7 @@ class ControlPanel(Selectable):
             self.buttons.append(Button(text_obj, (x, y), Actions(index), size))
             y += size[1]
 
-    def disallow(self, valid_actions, screen):
+    def highlight(self, valid_actions, screen):
         for button in self.buttons:
             if button.return_value not in valid_actions:
                 button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])

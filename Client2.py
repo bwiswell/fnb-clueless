@@ -3,6 +3,9 @@ import ClueGUI
 import Information
 import Player
 
+import ClueEnums
+from ClueEnums import Locations, Rooms, Actions, Characters, Weapons
+
 player = Player.Player()
 player2 = Player.Player()
 player3 = Player.Player()
@@ -14,71 +17,76 @@ info = Information.Information()
 lobby = Lobby.Lobby()
 # get name from lobby
 player.name = lobby.getPlayerName()
-player.location = "study"
+player.location = Locations.STUDY
+player.character = Characters.MSSCARLET
+player.cards = [Rooms.KITCHEN, Characters.PROFPLUM, Weapons.CANDLESTICK]
 player2.name = "Rob"
-player2.location = "kitchen"
+player2.location = Locations.KITCHEN
+player2.character = Characters.REVGREEN
 player3.name = "Ben"
-player3.location = "lounge"
+player3.location = Locations.LOUNGE
+player3.character = Characters.MRSPEACOCK
 player4.name = "Frank"
-player4.location = "conservatory"
+player4.location = Locations.CONSERVATORY
+player4.character = Characters.CNLMUSTARD
 
-lobby.giveStartButton()
+lobby.getStart("FNBC")
 lobby.close()
 gui = ClueGUI.ClueGUI(player, [player, player2, player3, player4])
 
-studyList = ["hw1", "hw3", "kitchen", "lounge", "conservatory"]
-hall1List = ["study", "hall"]
-hallList = ["hw1", "hw2", "hw4"]
-hall2List = ["hall", "lounge"]
-loungeList = ["hw2", "hw5", "study", "conservatory", "kitchen"]
+studyList = [Locations.HW1, Locations.HW3, Locations.KITCHEN, Locations.LOUNGE, Locations.CONSERVATORY]
+hall1List = [Locations.STUDY, Locations.HALL]
+hallList = [Locations.HW1, Locations.HW2, Locations.HW4]
+hall2List = [Locations.HALL, Locations.LOUNGE]
+loungeList = [Locations.HW2, Locations.HW5, Locations.STUDY, Locations.CONSERVATORY, Locations.KITCHEN]
 
-hall3List = ["study", "library"]
-hall4List = ["hall", "billiard room"]
-hall5List = ["lounge", "dining room"]
+hall3List = [Locations.STUDY, Locations.LIBRARY]
+hall4List = [Locations.HALL, Locations.BILLIARD]
+hall5List = [Locations.LOUNGE, Locations.DINING]
 
-libraryList = ["hw3", "hw6", "hw8"]
-hall6List = ["library", "billiard room"]
-billiardRoomList = ["hw4", "hw6", "hw7", "hw9"]
-hall7List = ["billiard room", "dining room"]
-diningRoom = ["hw5", "hw7", "hw10"]
+libraryList = [Locations.HW3, Locations.HW6, Locations.HW8]
+hall6List = [Locations.LIBRARY, Locations.BILLIARD]
+billiardRoomList = [Locations.HW4, Locations.HW6, Locations.HW7, Locations.HW9]
+hall7List = [Locations.BILLIARD, Locations.DINING]
+diningRoom = [Locations.HW5, Locations.HW7, Locations.HW10]
 
-hall8List = ["library", "conservatory"]
-hall9List = ["billiard room", "ballroom"]
-hall10List = ["dining room", "kitchen"]
+hall8List = [Locations.LIBRARY, Locations.CONSERVATORY]
+hall9List = [Locations.BILLIARD, Locations.BALLROOM]
+hall10List = [Locations.DINING, Locations.KITCHEN]
 
-conservatoryList = ["hw8", "hw11", "study", "lounge", "kitchen"]
-hall11List = ["conservatory", "ballroom"]
-ballroomList = ["hw9", "hw11", "hw12"]
-hall12List = ["ballroom", "kitchen"]
-kitchenList = ["hw10", "hw12", "study", "lounge", "conservatory"]
+conservatoryList = [Locations.HW8, Locations.HW11, Locations.STUDY, Locations.LOUNGE, Locations.KITCHEN]
+hall11List = [Locations.CONSERVATORY, Locations.BALLROOM]
+ballroomList = [Locations.HW9, Locations.HW11, Locations.HW12]
+hall12List = [Locations.BALLROOM, Locations.KITCHEN]
+kitchenList = [Locations.HW10, Locations.HW12, Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY]
 
-cornerRooms = ["study", "lounge", "conservatory", "kitchen"]
+cornerRooms = [Locations.STUDY, Locations.LOUNGE, Locations.CONSERVATORY, Locations.KITCHEN]
 
 moveDict = {
-            "hw1":hall1List, "hw2":hall2List, "hw3":hall3List, "hw4":hall4List, "hw5":hall5List, "hw6":hall6List,
-            "hw7":hall7List, "hw8":hall8List, "hw9":hall9List, "hw10":hall10List, "hw11":hall11List, "hw12":hall12List,
-            "study":studyList, "hall":hallList, "lounge":loungeList,
-            "library":libraryList, "billiard room":billiardRoomList, "dining room":diningRoom,
-            "conservatory":conservatoryList, "ballroom":ballroomList, "kitchen":kitchenList
+            Locations.HW1:hall1List, Locations.HW2:hall2List, Locations.HW3:hall3List, Locations.HW4:hall4List, Locations.HW5:hall5List, Locations.HW6:hall6List,
+            Locations.HW7:hall7List, Locations.HW8:hall8List, Locations.HW9:hall9List, Locations.HW10:hall10List, Locations.HW11:hall11List, Locations.HW12:hall12List,
+            Locations.STUDY:studyList, Locations.HALL:hallList, Locations.LOUNGE:loungeList,
+            Locations.LIBRARY:libraryList, Locations.BILLIARD:billiardRoomList, Locations.DINING:diningRoom,
+            Locations.CONSERVATORY:conservatoryList, Locations.BALLROOM:ballroomList, Locations.KITCHEN:kitchenList
            }
 hasAccused = False
 movedBySuggestion = False
 isTurn = True
-NAME = 0
+CHARACTER = 0
 LOCATION = 1
 
-def findPlayerIndex(name):
+def findPlayerIndex(character):
     for i in range(len(playerLocs)):
-        if playerLocs[i][NAME] == name:
+        if playerLocs[i][CHARACTER] == character:
             return i
 
 def determineValidMoves():
-    if "hw" not in player.location:
-        for loc in playerLocs:
+    if ClueEnums.isRoom(player.location):
+        for p,loc in playerLocs:
             print(loc)
-            if "hw" in loc[LOCATION]:
-                if loc[LOCATION] in moveList:
-                    moveList.remove(loc[LOCATION])
+            if not ClueEnums.isRoom(loc):
+                if loc in moveList:
+                    moveList.remove(loc)
     print(moveList)
 
 def updateGUI():
@@ -86,10 +94,10 @@ def updateGUI():
     #playerLocs = info.getCurrentLocations()
     # TODO: remove this line when server update is used instead
     playerLocs = [
-                  (player.name, player.location),
-                  (player2.name, player2.location),
-                  (player3.name, player3.location),
-                  (player4.name, player4.location)
+                  (player.character, player.location),
+                  (player2.character, player2.location),
+                  (player3.character, player3.location),
+                  (player4.character, player4.location)
                  ]
     print(playerLocs) # TODO: remove this print eventually
     gui.updateGUI(playerLocs)
@@ -99,34 +107,34 @@ while True:
     # TODO: wait for server update
     # server will need to tell client whether this is a suggestion/accusation or actual turn
     playerLocs = updateGUI()
-    player.location = playerLocs[findPlayerIndex(player.name)][LOCATION]
+    player.location = playerLocs[findPlayerIndex(player.character)][LOCATION]
 
     if isTurn is True:
         moveList = moveDict[player.location]  # derermines potential move options
-        actionList = ["move", "accuse", "suggest"]  # all potential actions
+        actionList = [Actions.MOVE, Actions.ACCUSE, Actions.SUGGEST]  # all potential actions
         print(moveList)  # TODO: remove this print eventually
         determineValidMoves()
         print(moveList)  # TODO: remove this print eventually
         if hasAccused is True:
-            actionList.remove("accuse")
-            actionList.remove("suggest")
+            actionList.remove(Actions.ACCUSE)
+            actionList.remove(Actions.SUGGEST)
             if len(moveList) == 0:
-                actionList.remove("move")
-                actionList.append("end turn")
+                actionList.remove(Actions.MOVE)
+                actionList.append(Actions.ENDTURN)
         else:
             if movedBySuggestion is True:
                 movedBySuggestion = False
                 if len(moveList) == 0:
                     moveList.append(player.location)
-                    actionList.append("end turn")
+                    actionList.append(Actions.ENDTURN)
             else:
-                if "hw" in player.location:
-                    actionList.remove("accuse")
-                    actionList.remove("suggest")
+                if not ClueEnums.isRoom(player.location):
+                    actionList.remove(Actions.ACCUSE)
+                    actionList.remove(Actions.SUGGEST)
                 elif len(moveList) == 0:
-                    actionList.remove("move")
-                    actionList.remove("suggest")
-                    actionList.append("end turn")
+                    actionList.remove(Actions.MOVE)
+                    actionList.remove(Actions.SUGGEST)
+                    actionList.append(Actions.ENDTURN)
 
         # action list loop until all valid actions exhausted or turn is ended
         while len(actionList) > 0:
@@ -134,37 +142,39 @@ while True:
             action = gui.getPlayerAction(actionList)
             
             # takes appropriate steps based on action
-            if action == "move":
-                actionList.remove("move")
+            if action == Actions.MOVE:
+                actionList.remove(Actions.MOVE)
                 player.location = gui.getPlayerMove(moveList)
                 playerLocs = updateGUI()
-                actionList.append("end turn")
+                actionList.append(Actions.ENDTURN)
 
-                if "hw" in player.location:
-                    if "accuse" in actionList:
-                        actionList.remove("accuse")
-                    if "suggest" in actionList:
-                        actionList.remove("suggest")
+                if not ClueEnums.isRoom(player.location):
+                    if Actions.ACCUSE in actionList:
+                        actionList.remove(Actions.ACCUSE)
+                    if Actions.SUGGEST in actionList:
+                        actionList.remove(Actions.SUGGEST)
                 else:
                     if hasAccused is False:
-                        actionList.append("accuse")
-                        actionList.append("suggest")
+                        actionList.append(Actions.ACCUSE)
+                        actionList.append(Actions.SUGGEST)
 
-            elif action == "suggest":
-                actionList.remove("suggest")
+            elif action == Actions.SUGGEST:
+                actionList.remove(Actions.SUGGEST)
                 print("Making suggestion...")
+                suggestion = gui.getPlayerSuggestion()
                 # TODO: handle suggestion
 
-            elif action == "accuse":
+            elif action == Actions.ACCUSE:
                 hasAccused = True
-                actionList.remove("accuse")
-                if "suggest" in actionList:
-                    actionList.remove("suggest")
+                actionList.remove(Actions.ACCUSE)
+                if Actions.SUGGEST in actionList:
+                    actionList.remove(Actions.SUGGEST)
                 print("Making accusation...")
+                accusation = gui.getPlayerAccusation()
                 # TODO: handle accusation
 
             else:
-                actionList.remove("end turn")
+                actionList.remove(Actions.ENDTURN)
                 print("Turn ending...")
                 break
     else:

@@ -28,7 +28,7 @@ class Selectable(Drawable):
     def __init__(self, size, position):
         Drawable.__init__(self, size, position)
 
-    def disallow(self, valid_actions, screen):
+    def highlight(self, valid_actions, screen):
         raise NotImplementedError
 
     def select(self, action, screen):
