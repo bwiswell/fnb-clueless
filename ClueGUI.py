@@ -4,7 +4,7 @@ import pygame
 
 from Errors import NoPossibleActionError
 
-from Constants import GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
+from Constants import BLACK, GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
 from Constants import GAME_START_MESSAGE
 from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE
 from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, MOVE_MESSAGE
@@ -102,7 +102,7 @@ class ClueGUI(Drawable):
         self.clue_map.draw(self)
         self.draw(self.screen)
 
-    def postMessage(self, text):
+    def postMessage(self, text, color=BLACK):
         self.information_center.postMessage(text)
 
     def getPlayerAction(self, valid_actions):

@@ -16,8 +16,8 @@ class InformationCenter:
         self.key_listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
         self.key_listener.start()
 
-    def postMessage(self, text):
-        self.message_queue.addLine(text)
+    def postMessage(self, text, color):
+        self.message_queue.addLine(text, color)
 
     # Mouse listener methods
     def on_move(self, x, y):

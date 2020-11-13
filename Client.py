@@ -10,6 +10,7 @@ import ClueEnums
 from ClueEnums import Actions
 import AdjList
 import time
+from Constants import RED, GREEN
 
 player = pl.Player()
 
@@ -72,7 +73,7 @@ class Client():
                 self.info = data_var.data.gameInfo
                 self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
             elif(data_var.id == 105):
-                self.gui.postMessage("Your turn has begun!")
+                self.gui.postMessage("Your turn has begun!", GREEN)
                 self.suggested = False
                 self.validMoves = AdjList.determineValidMoves(self.info.storeAllPlayers[self.myNumber], self.info.storeAllPlayers)
 
@@ -99,6 +100,8 @@ class Client():
                     # According to the project description, one suggestion per turn
                     if (Actions.SUGGEST not in self.actionList and not self.lost and not self.suggested):
                         self.actionList.append(Actions.SUGGEST)
+                    elif (Actions.SUGGEST in self.actionList and self.lost):
+                        self.actionList.remove(Actions.SUGGEST)
                     if (Actions.ACCUSE not in self.actionList and not self.lost):
                         self.actionList.append(Actions.ACCUSE)
                 else:
@@ -182,6 +185,7 @@ class Client():
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgAccuse(accusation)))
             return data_string
         else:
+            self.gui.postMessage("Your turn has ended.", RED)
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgEndTurn()))
             return data_string
 

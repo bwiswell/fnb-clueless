@@ -24,6 +24,8 @@ class MultiLineTextScroller(Drawable):
         # Text information
         # The text to be displayed
         self.text = ""
+        # The colors to draw lines in
+        self.colors = []
         # The surface to render the text to
         self.text_surface = pygame.Surface((size[0] - BORDER_RADIUS * 2, size[1] * 100))
         # The area in which the text is displayed
@@ -49,7 +51,8 @@ class MultiLineTextScroller(Drawable):
     def deleteChar(self):
         self.text = self.text[:-1]
 
-    def addLine(self, line):
+    def addLine(self, line, color=BLACK):
+        self.colors.append(color)
         if self.text == "":
             self.text += line
         else:
@@ -66,12 +69,15 @@ class MultiLineTextScroller(Drawable):
         pos = (0, 0)
         lines = self.text.split("\n")
         for i in range(len(lines)):
+            color = BLACK
+            if len(self.colors != 0):
+                color = self.colors[i]
             if i != 0:
                 pos = (0, pos[1] + self.line_height)
             words = lines[i].split(" ")
             for word in words:
                 word += " "
-                word_object = self.font.render(word, True, BLACK)
+                word_object = self.font.render(word, True, color)
                 if pos[0] + word_object.get_width() > self.text_box.width:
                     pos = (0, pos[1] + self.line_height)
                 self.text_surface.blit(word_object, pos)
