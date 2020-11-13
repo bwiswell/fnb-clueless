@@ -9,39 +9,52 @@ import asyncio
 
 info1 = info.Information()
 
+class PlayerClient:
+    def __init__(self, number, writer):
+        self.number = number
+        self.writer = writer
+        self.name = ''
+        self.character = None
+
+    # method to send server any msg type usinga wrapper
+    async def sendMsg(self,msg):
+        data_string = pickle.dumps(msg)
+        self.writer.write(data_string)
+        await self.writer.drain()
+
 class Game():
     def __init__(self):
         self.info = info.Information()
         self.active_player = 0
-        self.players = []
+        self.clients = []
     # method called in order to begin the player 
     # turn sequence and starting the game    
-    async def start_game(self, player):
-        print("gmae started")
+    async def start_game(self, client):
+        print("game started")
         writes = []
-        for player1 in self.players:      
-            msg = wrap.HeaderNew(wrap.MsgGameStart(player1.number,info1))
-            writes.append(player1.writer.write(msg))
+        for client in self.clients:      
+            msg = wrap.HeaderNew(wrap.MsgGameStart(client.character,info1))
+            writes.append(client.sendMsg(msg))
             #send out msg to all players that game is starting and allow player 1 to move
 
-        await asyncio.gather(writes)
+        await asyncio.gather(*writes)
 
-        if player.number == 0:
+        if client.number == 0:
             msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
-            await player.sendServerMsg(msg)
+            await client.sendMsg(msg)
 
     # Ends current players turn and sends server updated info class
-    async def end_turn(self, player):
-        player_count = len(self.players)
-        self.active_player = (player.number + 1) % player_count
+    async def end_turn(self, client):
+        player_count = len(self.clients)
+        self.active_player = (client.number + 1) % player_count
 
-        next_player = self.players[self.active_player]
+        next_player = self.clients[self.active_player]
         msg = wrap.HeaderNew(wrap.MsgPassInformation(self.info))
-        await next_player.sendServerMsg(msg)
+        await next_player.sendMsg(msg)
     # method to updated player location for GUI to eventually see and use to
     # move the char then ends the turn
-    async def move(self, player, data):
-        if player.number == self.active_player:
+    async def move(self, client, data):
+        if client.number == self.active_player:
             print(data.location)
             print(data.name)
             self.info.updateCurrentLocation(data)
@@ -49,14 +62,13 @@ class Game():
             msg = wrap.MsgUpdateGame(self.info)
             print(locations)
             
-            await self.end_turn(player)
+            await self.end_turn(client)
 
 class Server():
 
     def __init__(self):
         
         self.running = False
-        self.players = []
         self.max_players = 4
         self.counter = 0
         self.game = Game()
@@ -70,44 +82,45 @@ class Server():
         player_count = self.counter
         print("The player count is: " + str(player_count))
         if player_count < self.max_players:
-            new_player = Player(number=player_count, writer=writer, 
-                        location=info1.startLocations.pop(0))
-            self.game.players.append(new_player)
-            info1.storeAllPlayers.append(new_player)
+            client = PlayerClient(number=player_count, writer=writer)
+            self.game.clients.append(client)
+            character = Player(number=client.number, location=info1.startLocations.pop(0))
+            info1.storeAllPlayers.append(character)
+            client.character = character
             self.counter += 1
-            return new_player, self.game
+            return client, self.game
         else:
             return None
 
     async def handle_client(self, reader, writer):
         buf = 2048
-        player, game = self.register_player(writer)
-        print("player num: " + str(player.number))
+        client, game = self.register_player(writer)
+        print("player num: " + str(client.number))
         
         # send player its turn number after intialization.
-        msg = pickle.dumps(wrap.HeaderNew(wrap.MsgPassPlayerNum(player.number)))
-        writer.write(msg)
+        msg = wrap.HeaderNew(wrap.MsgPassPlayerNum(client.number))
+        await client.sendMsg(msg)
 
         # waits to read/ get data from client will then sort the msg wrapper
         # based on msg.id and determine what tasks need to be done
-        while self.running and player is not None:
+        while self.running and client is not None:
             data = await reader.read(buf)
             msg = pickle.loads(data)
             print("here " + str(msg.id))
             print("Received message: " + str(msg.data))
 
             if(msg.id == 1000):
-                await game.start_game(player)
+                await game.start_game(client)
             elif(msg.id == 1234):
                 print("Normal Message no object message")
             elif(msg.id == 102):
                 playerData = msg.data.player
-                await game.move(player, playerData)
+                await game.move(client, playerData)
             elif(msg.id == 104):
                 print("here")
                 print(msg.data.player.name)
-                player.name = msg.data.player.name
-                print(player.name)
+                client.name = msg.data.player.name
+                print(client.name)
             
             if msg == "exit":
                 print("Exiting server...")

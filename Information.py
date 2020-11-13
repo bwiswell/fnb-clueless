@@ -5,14 +5,14 @@ class Information:
         # Intial data to be updated or pulled
         self.storeAllPlayers = []
         self.currentLocation = []
-        self.startLocations = ["hw2", "hw11", "hw8", "hw5"]
+        self.startLocations = ["hw2", "hw11"]
         self.WEAPON_LIST = ["Candlestick", "Knife", "Ropes", "Revolver", "Lead", "Wrench"]
         self.ROOMNAME_LIST = ["Study", "Lounge", "Ballroom", "Library", "Billiard Room", "Hall", "Dining Room", "Conservatory", "Kitchen"]
 
 
     # when a move option occurs this will update the list of current player locations
     def updateCurrentLocation(self,incomingPlayer):
-        player = pl.Player()
+
         player = incomingPlayer
         if(self.currentLocation.__len__() != 0):
             for index, pair in enumerate(self.currentLocation):
@@ -30,3 +30,4 @@ class Information:
     # getter to get all player locations
     def getCurrentLocations(self):
         return self.currentLocation
+
