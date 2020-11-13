@@ -47,7 +47,7 @@ class Client():
             data_var = pickle.loads(data)
             # playerUpdate = data_var
             # self.info = playerUpdate
-            print("Received message: " + str(data_var))
+            print("Received message from server: " + str(data_var))
             # take msg.id and do the task for the corrsponding wrapper
             if (data_var.id == 103):
                 print(f"Client:msg ID: {data_var.data.playerNum}")
@@ -73,6 +73,8 @@ class Client():
                 # send player start message?
                 self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
             elif(data_var.id == 105):
+                self.gui.postMessage("Your turn has begun!")
+                print("client: " + str(data_var))
                 self.validMoves = AdjList.determineValidMoves(self.info.storeAllPlayers[self.myNumber], self.info.storeAllPlayers)
 
                 if (self.lost and len(self.validMoves) == 0):
@@ -90,8 +92,9 @@ class Client():
 
                 action = self.gui.getPlayerAction(self.actionList)
                 self.actionList.remove(action)
-                # msg = self.handleAction(action)
-                # writer.write(msg)
+                msg = self.handleAction(action)
+                writer.write(msg)
+                
             elif(data_var.id == 106):
                 if (ClueEnums.isRoom(self.info.storeAllPlayers[self.myNumber].location)):
                     if (Actions.SUGGEST not in self.actionList and not self.lost):
@@ -117,16 +120,16 @@ class Client():
                 suggestion_text += data_var.data.suggestion["player"].text
                 suggestion_text += " in the " + data_var.data.suggestion["location"].text
                 suggestion_text += " with the " + data_var.data.suggestion["weapon"].text + "!"
-                gui.postMessage(suggestion_text)
+                self.gui.postMessage(suggestion_text)
                 disproven_text = data_var.data.name + " was "
                 if data_var.data.disprov_card is None:
                     disproven_text += "not "
                 disproven_text += "disproven."
-                gui.postMessage(disproven_text)
+                self.gui.postMessage(disproven_text)
                 if data_var.data.disprov_card is not None and data_var.data.playerNum == self.myNumber:
                     disproven_text = data_var.data.disprov_player.name + " disproved your suggestion with the "
                     disproven_text += data_var.data.disprov_card.text + " card."
-                    gui.postMessage(disproven_text)
+                    self.gui.postMessage(disproven_text)
 
             elif(data_var.id == 6666):
                 # Somebody lost the game
@@ -134,22 +137,22 @@ class Client():
                 accusation_text += data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
-                gui.postMessage(accusation_text)
+                self.gui.postMessage(accusation_text)
                 lost_text = data_var.data.name + " lost the game!"
-                gui.postMessage(lost_text)
+                self.gui.postMessage(lost_text)
                 if data_var.data.playerNum == self.myNumber:
                     self.lost = True
 
             elif(data_var.id == 7777):
                 # Somebody won the game
                 won_message = data_var.data.name + " won!"
-                gui.postMessage(won_message)
+                self.gui.postMessage(won_message)
                 accusation_text = "It was " + data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
-                gui.postMessage(accusation_text)
+                self.gui.postMessage(accusation_text)
                 time.sleep(3)
-                gui.quit()
+                self.gui.quit()
                 self.running = False
 
             else:

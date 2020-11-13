@@ -57,12 +57,13 @@ class Game():
         for client in self.clients:      
             msg = wrap.HeaderNew(wrap.MsgGameStart(client.character,info1))
             writes.append(client.sendMsg(msg))
-            #send out msg to all players that game is starting and allow player 1 to move
+        #send out msg to all players that game is starting and allow player 1 to move
 
         await asyncio.gather(*writes)
 
         if client.number == 0:
             msg = wrap.HeaderNew(wrap.MsgStartTurn())
+            print("server->client: " + str(msg))
             await client.sendMsg(msg)
 
     # Ends current players turn and sends server updated info class
