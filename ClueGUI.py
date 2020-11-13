@@ -8,7 +8,7 @@ from Constants import GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
 from Constants import GAME_START_MESSAGE
 from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, INVALID_ACTION, ACTION_MESSAGE
 from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, INVALID_MOVE, MOVE_MESSAGE
-from Constants import PICK_SUGGESTION_MESSAGE
+from Constants import PICK_SUGGESTION_MESSAGE, PICK_ACCUSATION_MESSAGE
 
 from Drawable import Drawable
 from ThreadedScreen import ThreadedScreen
@@ -22,6 +22,8 @@ from Dialogues import ConfirmationDialogue, SuggestionDialogue
 
 # updateGUI(player_locations)           player_locations is a list of (name, location) tuples used to update the GUI.
 
+# postMessage(text)                     text is a message to display in the message log on the GUI
+
 # getPlayerAction(valid_actions)        valid_actions is a list of actions that are available for the current
 #                                       player. Returns a string (after 2 factor confirmation) that represents 
 #                                       the desired action
@@ -32,6 +34,10 @@ from Dialogues import ConfirmationDialogue, SuggestionDialogue
 #                                       moves for the current player. locations IDs should be entirely lowercase.
 #                                       Returns a lowercase location ID (after 2 factor confirmation) that represents 
 #                                       the desired move
+
+# getPlayerSuggestion()                 gets a suggestion from the player
+
+# getPlayerAccusation()                 gets an accusation from the player. essentially an alias for getPlayerSuggestion
 
 # quit()                                must be called to safely exit keylistener and mouselistener threads
 #                                       as well as pygame
@@ -134,12 +140,19 @@ class ClueGUI(Drawable):
 
     # In progress - gets a player, location, and weapon card from a dialogue for a suggestion/accusation
     def getPlayerSuggestion(self):
+        self.getSuggestionOrAccusation(PICK_SUGGESTION_MESSAGE)
+
+    def getPlayerAccusation(self):
+        self.getSuggestionOrAccusation(PICK_ACCUSATION_MESSAGE)
+
+    def getSuggestionOrAccusation(self, text):
         pygame.event.pump()
-        suggestion_dialogue = SuggestionDialogue(self.font, PICK_SUGGESTION_MESSAGE, self.center, self.gui_size[0], self.card_deck)
+        suggestion_dialogue = SuggestionDialogue(self.font, text, self.center, self.gui_size[0], self.card_deck)
         suggestion_dialogue.draw(self.screen)
         response = suggestion_dialogue.getResponse(self.screen)
         self.clear()
         return response
+
 
     def quit(self):
         self.information_center.quit()

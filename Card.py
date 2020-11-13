@@ -83,20 +83,3 @@ class CardDeck:
         self.player_cards = player_cards
         self.weapon_cards = weapon_cards
         self.room_cards = room_cards
-
-"""
-
-    #method to draw the card onto a specified area
-    def draw(self, screen):
-        screen.blit(self, self.position)
-        pygame.display.update()
-
-
-    # organize cards into respective folders and use the below 
-    # method to load all the images
-    def loadImg(self, images):
-        images[]
-
-        for image in os.listdir('images'):
-            images.append(pygame.image.load(image))
-"""

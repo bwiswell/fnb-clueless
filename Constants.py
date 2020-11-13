@@ -23,6 +23,7 @@ MOVE_CONF = "Are you sure you want to move to the "
 INVALID_MOVE = "Pick a valid move to make!"
 MOVE_MESSAGE = "You moved to the "
 PICK_SUGGESTION_MESSAGE = "Pick a player card, weapon card, and location card to make a suggestion!"
+PICK_ACCUSATION_MESSAGE = "Pick a player card, weapon card, and location card to make an accusation!"
 
 # GUI font information
 GUI_FONT_SIZES = [16, 24, 32, 40, 48]
