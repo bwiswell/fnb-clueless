@@ -7,7 +7,7 @@ class Information:
         self.storeAllPlayers = []
         self.currentLocation = []
         self.startLocations = [Locations.HW2, Locations.HW11, Locations.HW8, Locations.HW5]
-        self.case_file = None
+        self.case_file = {}
 
     # when a move option occurs this will update the list of current player locations
     def updateCurrentLocation(self,incomingPlayer):
@@ -17,7 +17,7 @@ class Information:
                 if pair[0] == player.name:
                     print((pair[0],player.location))
                     self.currentLocation[index] = (pair[0],player.location)
-                    print(currentLocation)
+                    print(self.currentLocation)
                 else:
                     self.currentLocation.append((player.name,player.location))
                     print(self.currentLocation.__len__())
@@ -50,6 +50,6 @@ class Information:
 
     def checkAccusation(self, accusing_player, accusation):
         self.teleport(accusing_player, accusation)
-        return accusation["player"] == self.case_file["player"] and
-            accusation["weapon"] == self.case_file["weapon"] and
+        return accusation["player"] == self.case_file["player"] and \
+            accusation["weapon"] == self.case_file["weapon"] and \
             accusation["location"] == self.case_file["location"]
