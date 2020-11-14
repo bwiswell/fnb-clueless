@@ -198,6 +198,8 @@ class Client():
         if action == Actions.MOVE:
             player = self.info.storeAllPlayers[self.myNumber]
             move = self.gui.getPlayerMove(self.validMoves)
+            if ClueEnums.isRoom(move) is True:
+                self.suggested = False
             player.location = move
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgMovePlayer(player)))
             return data_string
