@@ -85,11 +85,11 @@ class Client():
                 elif (len(self.validMoves) == 0 and ClueEnums.isRoom(self.info.storeAllPlayers[self.myNumber].location)):
                     self.actionList = [Actions.ACCUSE, Actions.SUGGEST, Actions.ENDTURN]
                 elif (len(self.validMoves) == 0):
-                    self.actionList = [Actions.ENDTURN]
+                    self.actionList = [Actions.ACCUSE, Actions.ENDTURN]
                 elif (ClueEnums.isRoom(self.info.storeAllPlayers[self.myNumber].location)):
                     self.actionList = [Actions.MOVE, Actions.ACCUSE, Actions.SUGGEST]
                 else:
-                    self.actionList = [Actions.MOVE]
+                    self.actionList = [Actions.MOVE, Actions.ACCUSE]
 
                 action = self.gui.getPlayerAction(self.actionList)
                 self.actionList.remove(action)
@@ -104,13 +104,9 @@ class Client():
                         self.actionList.append(Actions.SUGGEST)
                     elif (Actions.SUGGEST in self.actionList and self.lost):
                         self.actionList.remove(Actions.SUGGEST)
-                    if (Actions.ACCUSE not in self.actionList and not self.lost):
-                        self.actionList.append(Actions.ACCUSE)
                 else:
                     if Actions.SUGGEST in self.actionList:
                         self.actionList.remove(Actions.SUGGEST)
-                    if Actions.ACCUSE in self.actionList:
-                        self.actionList.remove(Actions.ACCUSE)
 
                 if (len(self.actionList) == 0 or Actions.MOVE not in self.actionList):
                     self.actionList.append(Actions.ENDTURN)
