@@ -33,7 +33,6 @@ class Information:
     def updatePlayer(self,incomingPlayer):
         self.storeAllPlayers[incomingPlayer.number] = incomingPlayer
 
-
     def teleport(self, suggesting_player, suggestion):
         location = self.storeAllPlayers[suggesting_player].location
         suggested_player_char = suggestion["player"]
@@ -54,7 +53,11 @@ class Information:
         return None, None
 
     def checkAccusation(self, accusing_player, accusation):
-        self.teleport(accusing_player, accusation)
-        return accusation["player"] == self.case_file["player"] and \
-            accusation["weapon"] == self.case_file["weapon"] and \
-            accusation["location"] == self.case_file["location"]
+        #self.teleport(accusing_player, accusation)
+        location = self.storeAllPlayers[accusing_player].location
+        won =  accusation["player"] == self.case_file["player"] and \
+               accusation["weapon"] == self.case_file["weapon"] and \
+               accusation["location"] == self.case_file["location"]
+        if ClueEnums.isRoom(location) is False:
+            self.storeAllPlayers[accusing_player].location = Locations.STUDY
+        return won
