@@ -92,6 +92,9 @@ class MsgGameLost():
         self.playerNum = playerNum
         self.accusation = accusation
 
+class MsgGameLostAll():
+    def __init__(self, caseFile):
+        self.caseFile = caseFile
     
 class HeaderNew:
     # dict of keys based on classes to give ids to check later
@@ -111,6 +114,7 @@ class HeaderNew:
         MsgPassInformation: 501,
         MsgLobbyReady: 1000,
         MsgGameLost: 6666,
+        MsgGameLostAll: 6667,
         MsgGameWon: 7777,
     }
     

@@ -28,6 +28,7 @@ class Game():
         self.info = info.Information()
         self.active_player = 0
         self.clients = []
+        self.lost = 0
 
     # method called in order to begin the player 
     # turn sequence and starting the game    
@@ -83,6 +84,7 @@ class Game():
         case_room = random.choice(room_cards)
         room_cards.remove(case_room)
         self.info.case_file = {"player" : case_character, "weapon" : case_weapon, "location" : case_room}
+        print(self.info.case_file)
         character_cards.extend(weapon_cards)
         character_cards.extend(room_cards)
         for player,client in zip(self.info.storeAllPlayers, self.clients):
@@ -190,6 +192,11 @@ class Server():
                 else:
                     msg = wrap.HeaderNew(wrap.MsgGameLost(client.character.name,self.game.active_player,accusation))
                     await game.broadcastMsg(msg)
+                    time.sleep(0.2)
+                    self.game.lost += 1
+                    if (self.game.lost == len(self.game.clients)):
+                        msg = wrap.HeaderNew(wrap.MsgGameLostAll(self.game.info.case_file))
+                        await game.broadcastMsg(msg)
 
                 # Continue active player's turn
                 time.sleep(0.2)
@@ -203,7 +210,6 @@ class Server():
                 print("server: " + str(msg.data.player.name))
                 client.name = msg.data.player.name
                 print("updating PLayer name: " + client.name)
-            
             
             if msg == "exit":
                 print("Exiting server...")
@@ -223,4 +229,4 @@ class Server():
             await server.serve_forever()
 
 server = Server()
-asyncio.run(server.run("0.0.0.0", 87))
+asyncio.run(server.run("0.0.0.0", 25565))

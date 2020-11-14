@@ -152,6 +152,22 @@ class Client():
                 if data_var.data.playerNum == self.myNumber:
                     self.lost = True
 
+            # Game lost all message (every client has made an incorrect accusation and now
+            # the server is broadcasting to all clients that the game is over)
+            elif(data_var.id == 6667):
+                lost_text = "Everybody has made an incorrect accusation - nobody wins!"
+                self.gui.postMessage(lost_text, RED)
+                case_file_text = "You should have guessed that is was "
+                case_file_text += data_var.data.caseFile["player"].text + " in the "
+                case_file_text += data_var.data.caseFile["location"].text + " with the "
+                case_file_text += data_var.data.caseFile["weapon"].text + "!"
+                self.gui.postMessage(case_file_text, RED)
+
+                # Give players time to see the lost message and then quit the game
+                time.sleep(3)
+                self.gui.quit()
+                self.running = False
+
             # Game won message (somebody, maybe this client, made a correct accusation and
             # now the server is broadcasting to all clients what the accusation was and
             # that it was correct and ended the game
