@@ -220,4 +220,4 @@ class Client():
 
 
 client = Client()
-asyncio.run(client.run("73.243.41.224", 87))
+asyncio.run(client.run("71.204.206.17", 25565))
