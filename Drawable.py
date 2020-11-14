@@ -14,6 +14,13 @@ class Drawable(pygame.Surface):
         self.rect = pygame.Rect(position, size)
         self.center = self.rect.center
 
+    def resizeDrawable(self, size):
+        self.resize(size)
+        self.fill(WHITE)
+        self.size = size
+        self.rect = pygame.Rect(self.position, size)
+        self.center = self.rect.center
+
     def update(self):
         # Make some changes to the Drawable object
         pass

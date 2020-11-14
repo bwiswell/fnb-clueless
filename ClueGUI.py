@@ -1,10 +1,12 @@
 from ctypes import windll, c_int
+import time
+from queue import Queue
 
 import pygame
 
 from Errors import NoPossibleActionError
 
-from Constants import BLACK, GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
+from Constants import WHITE, BLACK, GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
 from Constants import GAME_START_MESSAGE
 from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE
 from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, MOVE_MESSAGE
@@ -15,8 +17,11 @@ from ThreadedScreen import ThreadedScreen
 from ClueMap import ClueMap
 from ControlPanel import ControlPanel
 from InformationCenter import InformationCenter
+from Client import Client
 import Card
 from Dialogues import ConfirmationDialogue, SuggestionDialogue
+from ClientRequest import ClientRequests
+from Lobby import Lobby
 
 # Main GUI class. Provides several methods for client-GUI interaction:
 
@@ -42,47 +47,56 @@ from Dialogues import ConfirmationDialogue, SuggestionDialogue
 # quit()                                must be called to safely exit keylistener and mouselistener threads
 #                                       as well as pygame
 
-class ClueGUI(Drawable):
-    def __init__(self, player, all_players):
-        self.screen = ThreadedScreen()
+class ClueGUI():
+    def __init__(self):
+        windll.shcore.SetProcessDpiAwareness(c_int(1))
+        pygame.init()
+        self.screen = None
+
+        # Lobby
+        self.lobby = None
 
         # GUI element sizes and positions
-        self.gui_size = self.screen.get_size()
-        self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
-        self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
-        control_height = self.gui_size[1] // 2
-        self.control_size = (self.gui_size[0] - self.map_size[0], control_height)
-        self.control_pos = (self.map_size[0], 0)
-        self.information_center_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
-        self.information_center_pos = (self.map_size[0], self.gui_size[1] - self.information_center_size[1])
+        self.gui_size = None
+        self.center = None
+        self.map_size = None
+        self.control_size = None
+        self.control_pos = None
+        self.information_center_size = None
+        self.information_center_pos = None
 
-        Drawable.__init__(self, self.map_size, (0, 0))
-        self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
+        self.surface = None
 
-        # Initialize and font
-        font_size = self.getFontSize()
-        self.font = pygame.font.SysFont(None, font_size)
+        # Font
+        self.font = None
 
         # Clue Map
-        self.clue_map = ClueMap(self.map_size)
-        self.clue_map.initPlayerSprites(all_players)
+        self.clue_map = None
 
         # Player information
-        self.player = player
-        self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
+        self.player = None
+        self.player_sprite = None
 
         # Cards
-        self.card_deck = Card.initCards(len(all_players))
+        self.card_deck = None
 
         # Control Panel
-        player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
-        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player, self.player_sprite, player_cards, self.font)
-        self.control_panel.draw(self.screen)
-        self.information_center = InformationCenter(self.information_center_size, self.information_center_pos, self.font, self.screen)
+        self.control_panel = None
+        
+        # Information Center
+        self.information_center = None
 
-        # Initial GUI render
-        self.updateGUI(all_players)
-        self.postMessage(GAME_START_MESSAGE)
+        # Game control
+        self.running = True
+
+        # Client requests
+        self.request_queue = Queue()
+
+        # Client
+        self.client = Client(self.request_queue)
+        self.client.start()
+
+        self.run()
 
     # Get a font size appropriate to the screen size
     def getFontSize(self):
@@ -92,15 +106,42 @@ class ClueGUI(Drawable):
                 return GUI_FONT_SIZES[i]
         return GUI_FONT_SIZES[len(GUI_FONT_SIZES) - 1]
 
+    def initSizes(self):
+        self.gui_size = self.screen.get_size()
+        self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
+        self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
+        control_height = self.gui_size[1] // 2
+        self.control_size = (self.gui_size[0] - self.map_size[0], control_height)
+        self.control_pos = (self.map_size[0], 0)
+        self.information_center_size = (self.gui_size[0] - self.map_size[0], self.gui_size[1] - control_height)
+        self.information_center_pos = (self.map_size[0], self.gui_size[1] - self.information_center_size[1])
+
+    def initGUI(self, player, player_list):
+        self.screen = ThreadedScreen()
+        self.initSizes()
+        self.surface = Drawable(self.map_size, (0, 0))
+        self.font = pygame.font.SysFont(None, self.getFontSize())
+        self.clue_map = ClueMap(self.map_size)
+        self.clue_map.initPlayerSprites(player_list)
+        self.player = player
+        self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
+        self.card_deck = Card.initCards(len(player_list))
+        player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
+        self.control_panel = ControlPanel(self.control_size, self.control_pos, self.player, self.player_sprite, player_cards, self.font)
+        self.control_panel.draw(self.screen)
+        self.information_center = InformationCenter(self.information_center_size, self.information_center_pos, self.font, self.screen)
+        self.updateGUI(player_list)
+        self.postMessage(GAME_START_MESSAGE)
+
     # Clear any dialogues or highlights currently shown
     def clear(self):
-        self.draw(self.screen)
+        self.surface.draw(self.screen)
         self.control_panel.draw(self.screen)
 
     def updateGUI(self, players):
         self.clue_map.update(players)
-        self.clue_map.draw(self)
-        self.draw(self.screen)
+        self.clue_map.draw(self.surface)
+        self.surface.draw(self.screen)
 
     def postMessage(self, text, color=BLACK):
         self.information_center.postMessage(text, color)
@@ -152,7 +193,66 @@ class ClueGUI(Drawable):
         self.clear()
         return response
 
+    def startLobby(self):
+        self.lobby = Lobby()
+
+    def getPlayerName(self):
+        return self.lobby.getPlayerName()
+
+    def giveStartButton(self):
+        self.lobby.getStart("FNBC")
+        return True
+
+    def quitLobby(self):
+        self.lobby.close()
+
+    def run(self):
+        while self.running:
+            time.sleep(0.1)
+            if self.screen is not None:
+                pygame.event.pump()
+            if not self.request_queue.empty():
+                request = self.request_queue.get()
+                print(request)
+                self.handleClientRequest(request)
+
+    def handleClientRequest(self, request):
+        response = None
+        if request.id == ClientRequests.LOBBYINIT:
+            self.startLobby()
+        elif request.id == ClientRequests.LOBBYNAME:
+            response = self.getPlayerName()
+        elif request.id == ClientRequests.LOBBYSTART:
+            response = self.giveStartButton()
+        elif request.id == ClientRequests.LOBBYQUIT:
+            self.quitLobby()
+        elif request.id == ClientRequests.GUIINIT:
+            self.initGUI(request.player, request.player_list)
+        elif request.id == ClientRequests.GUIUPDATE:
+            self.updateGUI(request.player_list)
+        elif request.id == ClientRequests.PLAYERACTION:
+            response = self.getPlayerAction(request.valid_actions)
+        elif request.id == ClientRequests.PLAYERMOVE:
+            response = self.getPlayerMove(request.valid_moves)
+        elif request.id == ClientRequests.PLAYERSUGGESTION:
+            response = self.getPlayerSuggestion(request.location)
+        elif request.id == ClientRequests.PLAYERACCUSATION:
+            response = self.getPlayerAccusation()
+        elif request.id == ClientRequests.GUIMESSAGE:
+            self.postMessage(request.message_text, request.message_color)
+        elif request.id == ClientRequests.GUIQUIT:
+            self.quit()
+        if response is not None:
+            self.client.response_lock.acquire()
+            try:
+                self.client.response = response
+            finally:
+                self.client.response_lock.release()
+
     def quit(self):
         self.information_center.quit()
         self.screen.close()
         pygame.quit()
+        self.running = False
+
+gui = ClueGUI()

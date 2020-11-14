@@ -1,5 +1,3 @@
-from ctypes import windll, c_int
-
 import pygame
 
 from Constants import BLACK, WHITE, GRAY, BLUE, LOBBY_SIZE, NAME_PROMPT, ROOM_CODE_PROMPT, START_WAIT_MESSAGE
@@ -12,8 +10,6 @@ from Dialogues import InputDialogue
 
 class Lobby(Drawable):
     def __init__(self):
-        windll.shcore.SetProcessDpiAwareness(c_int(1))
-        pygame.init()
         Drawable.__init__(self, LOBBY_SIZE, (0, 0))
         self.screen = ThreadedScreen(LOBBY_SIZE)
         pygame.display.set_caption("Clueless Lobby")
