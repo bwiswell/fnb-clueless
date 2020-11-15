@@ -1,6 +1,8 @@
+import os
+
 import pygame
 
-from Constants import BLACK, WHITE, GRAY, BLUE, LOBBY_SIZE, NAME_PROMPT, ROOM_CODE_PROMPT, START_WAIT_MESSAGE
+from Constants import BLACK, WHITE, GRAY, BLUE, GUI_FONT_PATH, LOBBY_SIZE, NAME_PROMPT, ROOM_CODE_PROMPT, START_WAIT_MESSAGE
 
 from ClueEnums import LobbyButtons
 
@@ -16,7 +18,8 @@ class Lobby(Drawable):
         icon = pygame.Surface((32, 32))
         icon.fill(WHITE)
         pygame.display.set_icon(icon)
-        self.font = pygame.font.SysFont(None, 24)
+        font_path = os.path.dirname(os.path.realpath(__file__)) + GUI_FONT_PATH
+        self.font = pygame.font.Font(font_path, 24)
         button_offset = LOBBY_SIZE[1] // 8
         self.button_size = (LOBBY_SIZE[0] // 4, LOBBY_SIZE[1] // 6)
         self.top_pos = (self.center[0], self.center[1] - button_offset)

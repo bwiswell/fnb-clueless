@@ -27,6 +27,7 @@ PICK_ACCUSATION_MESSAGE = "Pick a player card, weapon card, and location card to
 # GUI font information
 GUI_FONT_SIZES = [16, 24, 32, 40, 48]
 GUI_FONT_THRESHOLDS = [0, 1280, 1600, 1920, 2560]
+GUI_FONT_PATH = "\\assets\\Quikhand.ttf"
 
 # General display information
 BORDER_RADIUS = 1

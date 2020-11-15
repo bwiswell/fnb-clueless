@@ -1,12 +1,13 @@
 from ctypes import windll, c_int
 import time
 from queue import Queue
+import os
 
 import pygame
 
 from Errors import NoPossibleActionError
 
-from Constants import WHITE, BLACK, GUI_FONT_SIZES, GUI_FONT_THRESHOLDS
+from Constants import WHITE, BLACK, GUI_FONT_SIZES, GUI_FONT_THRESHOLDS, GUI_FONT_PATH
 from Constants import GAME_START_MESSAGE
 from Constants import PICK_ACTION_MESSAGE, ACTION_CONF, ACTION_MESSAGE
 from Constants import PICK_MOVE_MESSAGE, MOVE_CONF, MOVE_MESSAGE
@@ -106,7 +107,8 @@ class ClueGUI():
         self.center = (self.gui_size[0] // 2, self.gui_size[1] // 2)
         self.map_size = ((self.gui_size[1] // 7) * 9, self.gui_size[1])
         self.surface = Drawable(self.map_size, (0, 0))
-        self.font = pygame.font.SysFont(None, self.getFontSize())
+        font_path = os.path.dirname(os.path.realpath(__file__)) + GUI_FONT_PATH
+        self.font = pygame.font.Font(font_path, self.getFontSize())
         self.clue_map = ClueMap(self.map_size)
         self.clue_map.initPlayerSprites(player_list)
         self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
