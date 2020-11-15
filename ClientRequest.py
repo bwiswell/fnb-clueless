@@ -4,15 +4,16 @@ class ClientRequests(Enum):
     LOBBYINIT = 0
     LOBBYNAME = 1
     LOBBYSTART = 2
-    LOBBYQUIT = 3
-    GUIINIT = 4
-    GUIUPDATE = 5
-    PLAYERACTION = 6
-    PLAYERMOVE = 7
-    PLAYERSUGGESTION = 8
-    PLAYERACCUSATION = 9
-    GUIMESSAGE = 10
-    GUIQUIT = 11
+    LOBBYWAIT = 3
+    LOBBYQUIT = 4
+    GUIINIT = 5
+    GUIUPDATE = 6
+    PLAYERACTION = 7
+    PLAYERMOVE = 8
+    PLAYERSUGGESTION = 9
+    PLAYERACCUSATION = 10
+    GUIMESSAGE = 11
+    GUIQUIT = 12
 
 class ClientRequest:
     def __init__(self, request_id):
@@ -29,6 +30,10 @@ class NameRequest(ClientRequest):
 class StartRequest(ClientRequest):
     def __init__(self):
         ClientRequest.__init__(self, ClientRequests.LOBBYSTART)
+
+class WaitRequest(ClientRequest):
+    def __init__(self):
+        ClientRequest.__init__(self, ClientRequests.LOBBYWAIT)
 
 class LobbyQuitRequest(ClientRequest):
     def __init__(self):

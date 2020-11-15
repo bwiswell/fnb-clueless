@@ -30,6 +30,10 @@ GUI_FONT_THRESHOLDS = [0, 1280, 1600, 1920, 2560]
 
 # General display information
 BORDER_RADIUS = 1
+BORDER_DIAMETER = 2
+
+DIALOGUE_BORDER_RADIUS = 5
+DIALOGUE_BORDER_DIAMETER = 10
 
 # Map asset and size information
 BACKGROUND_ASSET_FILE_PATH = "\\assets\\background_asset.png"

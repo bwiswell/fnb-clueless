@@ -2,40 +2,16 @@ import math
 
 import pygame
 
-from Constants import WHITE, MID_GRAY, BLACK, RED, BORDER_RADIUS, ACTION_OPTION_TEXT
+from Constants import WHITE, MID_GRAY, BLACK, RED, BLUE, BORDER_RADIUS, BORDER_DIAMETER, ACTION_OPTION_TEXT
 
 from ClueEnums import Actions
 
 from Drawable import Selectable, GrayOut, Button
 
 class ControlPanel(Selectable):
-    def __init__(self, size, position, player, player_sprite, cards, font):
+    def __init__(self, size, position, cards, font):
         Selectable.__init__(self, size, position)
         self.fill(MID_GRAY)
-
-        # Player data (image and name) sizes and positions
-        player_image = player_sprite.image
-        player_name = font.render(player.name, True, BLACK)
-        player_character = font.render(player.character.text, True, BLACK)
-        player_info = pygame.Surface((max(player_name.get_width(), player_character.get_width()), player_name.get_height() + player_character.get_height()), pygame.SRCALPHA)
-        player_info.blit(player_name, (player_info.get_width() // 2 - player_name.get_width() // 2, 0))
-        player_info.blit(player_character, (player_info.get_width() // 2 - player_character.get_width() // 2, player_name.get_height()))
-
-        image_width = size[0] // 4
-        data_width = image_width * 2
-        data_height = (player_image.get_height() // player_image.get_width()) * image_width
-
-        left_data = pygame.Rect(0, 0, data_width, data_height)
-        right_data = pygame.Rect(data_width, 0, data_width, data_height)
-
-        player_image_pos = (left_data.centerx - image_width // 2, left_data.centery - data_height // 2)
-        player_info_pos = (right_data.centerx - player_info.get_width() // 2, right_data.centery - player_info.get_height() // 2)
-
-        # Render player data
-        pygame.draw.rect(self, BLACK, left_data, BORDER_RADIUS)
-        pygame.draw.rect(self, BLACK, right_data, BORDER_RADIUS)
-        self.blit(pygame.transform.smoothscale(player_image, (image_width, data_height)), player_image_pos)
-        self.blit(player_info, player_info_pos)
 
         # Player cards sizes and positions
         card_width = (size[0] - BORDER_RADIUS * 4) // 3
@@ -43,15 +19,13 @@ class ControlPanel(Selectable):
         card_slot_width = card_width + BORDER_RADIUS * 2
         card_slot_height = card_height + BORDER_RADIUS * 2
 
-        card_slot_y = data_height
-        left_slot = pygame.Rect(0, card_slot_y, card_slot_width, card_slot_height)
-        center_slot = pygame.Rect(card_slot_width, card_slot_y, card_slot_width, card_slot_height)
-        right_slot = pygame.Rect(card_slot_width * 2, card_slot_y, card_slot_width, card_slot_height)
+        left_slot = pygame.Rect(0, 0, card_slot_width, card_slot_height)
+        center_slot = pygame.Rect(card_slot_width, 0, card_slot_width, card_slot_height)
+        right_slot = pygame.Rect(card_slot_width * 2, 0, card_slot_width, card_slot_height)
 
-        card_y = card_slot_y + BORDER_RADIUS
-        left_card_pos = (left_slot.x + BORDER_RADIUS, card_y)
-        center_card_pos = (center_slot.x + BORDER_RADIUS, card_y)
-        right_card_pos = (right_slot.x + BORDER_RADIUS, card_y)
+        left_card_pos = (left_slot.x + BORDER_RADIUS, BORDER_RADIUS)
+        center_card_pos = (center_slot.x + BORDER_RADIUS, BORDER_RADIUS)
+        right_card_pos = (right_slot.x + BORDER_RADIUS, BORDER_RADIUS)
 
         # Render player cards
         pygame.draw.rect(self, BLACK, left_slot, BORDER_RADIUS)
@@ -62,10 +36,9 @@ class ControlPanel(Selectable):
         self.blit(pygame.transform.smoothscale(cards[2], (card_width, card_height)), right_card_pos)
 
         # Button sizes and positions
-        button_y = card_slot_y + card_slot_height
-        button_height = (size[1] - button_y) // 4
+        button_height = (size[1] - card_slot_height) // 4
         self.buttons = []
-        self.initButtons((size[0], button_height), button_y, font)
+        self.initButtons((size[0], button_height), card_slot_height, font)
 
         # Render buttons
         for button in self.buttons:
@@ -85,6 +58,11 @@ class ControlPanel(Selectable):
             if button.return_value not in valid_actions:
                 button_true_pos = (self.position[0] + button.position[0], self.position[1] + button.position[1])
                 GrayOut(button.size, button_true_pos).draw(screen)
+        tl = (self.position[0] + self.buttons[0].position[0] + BORDER_RADIUS, self.position[1] + self.buttons[0].position[1] + BORDER_RADIUS)
+        last = self.buttons[len(self.buttons) - 1]
+        br = (self.position[0] + last.position[0] + last.size[0] - BORDER_RADIUS, self.position[1] + last.position[1] + last.size[1] - BORDER_RADIUS)
+        size = (br[0] - tl[0], br[1] - tl[1])
+        screen.drawRect(pygame.Rect(tl, size), BLUE, BORDER_DIAMETER)
 
     def select(self, action, screen):
         for button in self.buttons:

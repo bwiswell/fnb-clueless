@@ -48,9 +48,9 @@ class GrayOut(Drawable):
         self.fill(GRAY)
 
 class CenteredDrawable(Drawable):
-    def __init__(self, size, center):
+    def __init__(self, size, center, transparent=False):
         position = (center[0] - size[0] // 2, center[1] - size[1] // 2)
-        Drawable.__init__(self, size, position)
+        Drawable.__init__(self, size, position, transparent)
         self.center = center
 
 class Button(CenteredDrawable):

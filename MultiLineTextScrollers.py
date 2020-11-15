@@ -1,3 +1,5 @@
+import time
+
 from pynput import mouse, keyboard
 
 import pygame
@@ -50,6 +52,7 @@ class MultiLineTextScroller(Drawable):
 
     def deleteChar(self):
         self.text = self.text[:-1]
+        self.update(True)
 
     def addLine(self, line, color=BLACK):
         self.colors.append(color)
@@ -107,9 +110,9 @@ class Notepad(MultiLineTextScroller):
         self.active = False
         self.update()
 
-    def update(self, jump_to_end=False):
+    def update(self, jump_to_end=False, override_cursor=False):
         cursor_pos = self.renderText(jump_to_end)
-        if self.active:
+        if self.active and not override_cursor:
             cursor = self.font.render("|", True, RED)
             self.text_surface.blit(cursor, (cursor_pos[0] - cursor.get_width(), cursor_pos[1]))
         text_rect = pygame.Rect((0, self.scroll_y), self.text_box.size)

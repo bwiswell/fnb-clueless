@@ -82,7 +82,7 @@ class Lobby(Drawable):
             pygame.event.pump()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN and start_button.rect.collidepoint(event.pos):
-                    return
+                    return True
 
     def getRoomCode(self):
         input_dialogue = InputDialogue(self.font, ROOM_CODE_PROMPT, self.center, 4)

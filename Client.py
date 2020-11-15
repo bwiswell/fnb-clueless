@@ -69,7 +69,7 @@ class Client(threading.Thread):
                     writer.write(data_string)
                 else:
                     # Not player 1, wait for game to start
-                    pass  
+                    self.request_queue.put(WaitRequest()) 
 
             # General location update message (new locations in storeAllPlayers)   
             elif( data_var.id == 501):
@@ -176,7 +176,7 @@ class Client(threading.Thread):
                 self.request_queue.put(MessageRequest(case_file_text, RED))
 
                 # Give players time to see the lost message and then quit the game
-                time.sleep(3)
+                time.sleep(5)
                 self.request_queue.put(GUIQuitRequest())
                 self.running = False
 
@@ -185,14 +185,14 @@ class Client(threading.Thread):
             # that it was correct and ended the game
             elif(data_var.id == 7777):
                 won_message = data_var.data.name + " won!"
-                self.request_queue.put(MessageRequest(won_message, BLACK))
+                self.request_queue.put(MessageRequest(won_message, GREEN))
                 accusation_text = "It was " + data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
-                self.request_queue.put(MessageRequest(accusation_text, BLACK))
+                self.request_queue.put(MessageRequest(accusation_text, GREEN))
 
                 # Give players time to see the won message and then quit the game
-                time.sleep(3)
+                time.sleep(5)
                 self.request_queue.put(GUIQuitRequest())
                 self.running = False
 
@@ -258,4 +258,4 @@ class Client(threading.Thread):
         await self.handle_server(reader, writer)
 
     def run(self):
-        asyncio.run(self.runClient("71.204.206.17", 25565))
+        asyncio.run(self.runClient("192.168.1.107", 25565))

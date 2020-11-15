@@ -2,7 +2,7 @@ from pynput import mouse, keyboard
 
 from MultiLineTextScrollers import MultiLineTextScroller, Notepad
 
-class InformationCenter:
+class InformationCenter():
     def __init__(self, size, position, font, screen):
         half_size = (size[0], size[1] // 2)
         self.message_queue = MultiLineTextScroller(half_size, position, font, "Messages", screen)
@@ -12,9 +12,9 @@ class InformationCenter:
         self.screen = screen
 
         self.mouse_listener = mouse.Listener(on_move=self.on_move, on_click=self.on_click, on_scroll=self.on_scroll)
-        #self.mouse_listener.start()
+        self.mouse_listener.start()
         self.key_listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
-        #self.key_listener.start()
+        self.key_listener.start()
 
     def postMessage(self, text, color):
         self.message_queue.addLine(text, color)
