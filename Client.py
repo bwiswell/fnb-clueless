@@ -11,6 +11,8 @@ from ClueEnums import Actions
 import AdjList
 import time
 from Constants import RED, GREEN
+import pygame
+import os
 
 player = pl.Player()
 
@@ -25,6 +27,30 @@ class Client():
         self.lost = False
         self.myNumber = None
         self.suggested = False
+        self.soundVolume = 0.01 # sound volume as fraction of 100 (0.01 --> 1%)
+        self.musicVolume = 0.03 # music volume as fraction of 100 (0.03 --> 3%)
+        self.repeat = -1 # music repeat setting (-1 means infinite repeat)
+        sound_path = os.path.dirname(os.path.realpath(__file__)) + "\\sounds\\"
+        pygame.init() # initializes pygame, TODO: remove when Ben says?
+
+        # initializes all game action sounds
+        self.suggest_sound = pygame.mixer.Sound(sound_path + 'Suggest.wav')
+        self.accuse_sound = pygame.mixer.Sound(sound_path + 'Accuse.wav')
+        self.move_sound = pygame.mixer.Sound(sound_path + 'Move.wav')
+        self.won_sound = pygame.mixer.Sound(sound_path + 'Won.wav')
+        self.lost_sound = pygame.mixer.Sound(sound_path + 'Lost.wav')
+
+        # sets all game action sound volumes
+        pygame.mixer.Sound.set_volume(self.suggest_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.accuse_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.move_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.won_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.lost_sound, self.soundVolume)
+
+        # initializes in game soundtrack and starts playing music
+        pygame.mixer.music.load(sound_path + "Clue-Less_Soundtrack.mp3")
+        pygame.mixer.music.set_volume(self.musicVolume)
+        pygame.mixer.music.play(self.repeat)
 
     async def handle_server(self,reader,writer):
         # start the lobby
@@ -141,6 +167,8 @@ class Client():
             # and now the server is broadcasting to all clients what the accusation was
             # and that it was incorrect)
             elif(data_var.id == 6666):
+                if data_var.data.name == player.name:
+                    pygame.mixer.Sound.play(self.lost_sound)
                 accusation_text = data_var.data.name + " accused "
                 accusation_text += data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
@@ -155,6 +183,7 @@ class Client():
             # Game lost all message (every client has made an incorrect accusation and now
             # the server is broadcasting to all clients that the game is over)
             elif(data_var.id == 6667):
+                pygame.mixer.Sound.play(self.lost_sound)
                 lost_text = "Everybody has made an incorrect accusation - nobody wins!"
                 self.gui.postMessage(lost_text, RED)
                 case_file_text = "You should have guessed that is was "
@@ -172,6 +201,8 @@ class Client():
             # now the server is broadcasting to all clients what the accusation was and
             # that it was correct and ended the game
             elif(data_var.id == 7777):
+                if data_var.data.name == player.name:
+                    pygame.mixer.Sound.play(self.won_sound)
                 won_message = data_var.data.name + " won!"
                 self.gui.postMessage(won_message)
                 accusation_text = "It was " + data_var.data.accusation["player"].text
@@ -196,6 +227,7 @@ class Client():
     def handleAction(self, action):
         # Handle a move action
         if action == Actions.MOVE:
+            pygame.mixer.Sound.play(self.move_sound)
             player = self.info.storeAllPlayers[self.myNumber]
             move = self.gui.getPlayerMove(self.validMoves)
             if ClueEnums.isRoom(move) is True:
@@ -205,6 +237,7 @@ class Client():
             return data_string
         # Handle a suggest action
         elif action == Actions.SUGGEST:
+            pygame.mixer.Sound.play(self.suggest_sound)
             self.suggested = True
             location = self.info.storeAllPlayers[self.myNumber].location
             suggestion = self.gui.getPlayerSuggestion(location)
@@ -212,6 +245,7 @@ class Client():
             return data_string
         # Handle an accuse action
         elif action == Actions.ACCUSE:
+            pygame.mixer.Sound.play(self.accuse_sound)
             location = self.info.storeAllPlayers[self.myNumber].location
             accusation = self.gui.getPlayerAccusation()
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgAccuse(accusation)))
