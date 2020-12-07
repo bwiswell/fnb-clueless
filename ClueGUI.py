@@ -113,7 +113,7 @@ class ClueGUI():
         self.clue_map.initPlayerSprites(player_list)
         self.player_sprite = self.clue_map.getPlayerSprite(self.player.character)
         self.initPanelSizes()
-        self.player_info_display = PlayerInfoDisplay(self.player_info_size, self.player_info_pos, self.player_sprite, self.player, self.font, self.screen)
+        self.player_info_display = PlayerInfoDisplay(self.player_info_size, self.player_info_pos, list(self.clue_map.player_sprites.values()), self.player, self.font, self.screen)
         self.card_deck = Card.initCards(len(player_list))
         player_cards = [self.card_deck.card_dict[card_name] for card_name in self.player.cards]
         self.control_panel = ControlPanel(self.control_size, self.control_pos, player_cards, self.font)
@@ -126,6 +126,7 @@ class ClueGUI():
     def clear(self):
         self.surface.draw(self.screen)
         self.control_panel.draw(self.screen)
+        self.information_center.draw()
 
     def updateGUI(self, players):
         self.clue_map.update(players)
@@ -163,6 +164,7 @@ class ClueGUI():
                         self.clear()
                         if not done:
                             click_area.highlight(valid_actions, self.screen)
+                self.information_center.handle_event(event)
         success_text += response.text + "!"
         self.postMessage(success_text)
         return response
@@ -179,7 +181,8 @@ class ClueGUI():
         while self.running:
             time.sleep(0.1)
             if self.screen is not None:
-                pygame.event.pump()
+                for event in pygame.event.get():
+                    self.information_center.handle_event(event)
             if not self.request_queue.empty():
                 request = self.request_queue.get()
                 print("Client->GUI Request: " + request.id.name)
@@ -213,6 +216,8 @@ class ClueGUI():
             self.postMessage(request.message_text, request.message_color)
         elif request.id == ClientRequests.GUIQUIT:
             self.running = False
+        elif request.id == ClientRequests.NEXTPLAYER:
+            self.player_info_display.next_player()
         if response is not None:
             self.client.response_lock.acquire()
             try:

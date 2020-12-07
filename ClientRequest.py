@@ -14,6 +14,7 @@ class ClientRequests(Enum):
     PLAYERACCUSATION = 10
     GUIMESSAGE = 11
     GUIQUIT = 12
+    NEXTPLAYER = 13
 
 class ClientRequest:
     def __init__(self, request_id):
@@ -78,3 +79,7 @@ class MessageRequest(ClientRequest):
 class GUIQuitRequest(ClientRequest):
     def __init__(self):
         ClientRequest.__init__(self, ClientRequests.GUIQUIT)
+
+class NextPlayerRequest(ClientRequest):
+    def __init__(self):
+        ClientRequest.__init__(self, ClientRequests.NEXTPLAYER)

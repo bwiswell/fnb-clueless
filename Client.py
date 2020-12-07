@@ -6,7 +6,7 @@ import Information as info
 import Lobby
 import asyncio
 import ClueEnums
-from ClueEnums import Actions
+from ClueEnums import Actions, LobbyButtons
 import AdjList
 import time
 from Constants import RED, GREEN, BLACK
@@ -32,7 +32,6 @@ class Client(threading.Thread):
         self.musicVolume = 0.03 # music volume as fraction of 100 (0.03 --> 3%)
         self.repeat = -1 # music repeat setting (-1 means infinite repeat)
         sound_path = os.path.dirname(os.path.realpath(__file__)) + "\\sounds\\"
-        pygame.init() # initializes pygame, TODO: remove when Ben says?
 
         # initializes all game action sounds
         self.suggest_sound = pygame.mixer.Sound(sound_path + 'Suggest.wav')
@@ -41,16 +40,9 @@ class Client(threading.Thread):
         self.won_sound = pygame.mixer.Sound(sound_path + 'Won.wav')
         self.lost_sound = pygame.mixer.Sound(sound_path + 'Lost.wav')
 
-        # sets all game action sound volumes
-        pygame.mixer.Sound.set_volume(self.suggest_sound, self.soundVolume)
-        pygame.mixer.Sound.set_volume(self.accuse_sound, self.soundVolume)
-        pygame.mixer.Sound.set_volume(self.move_sound, self.soundVolume)
-        pygame.mixer.Sound.set_volume(self.won_sound, self.soundVolume)
-        pygame.mixer.Sound.set_volume(self.lost_sound, self.soundVolume)
-
         # initializes in game soundtrack and starts playing music
         pygame.mixer.music.load(sound_path + "Clue-Less_Soundtrack.mp3")
-        pygame.mixer.music.set_volume(self.musicVolume)
+        self.change_volume()
         pygame.mixer.music.play(self.repeat)
 
         # GUI request queue
@@ -59,6 +51,20 @@ class Client(threading.Thread):
         # GUI response
         self.response = None
         self.response_lock = threading.Lock()
+
+    def change_volume(self, dv=0):
+        if dv < 0 and self.soundVolume > 0:
+            self.soundVolume -= 0.01
+            self.musicVolume -= 0.01
+        elif dv > 0 and self.musicVolume < 1:
+            self.soundVolume += 0.01
+            self.musicVolume += 0.01
+        pygame.mixer.Sound.set_volume(self.suggest_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.accuse_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.move_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.won_sound, self.soundVolume)
+        pygame.mixer.Sound.set_volume(self.lost_sound, self.soundVolume)
+        pygame.mixer.music.set_volume(self.musicVolume)
 
     async def handle_server(self,reader,writer):
         # start the lobby
@@ -89,12 +95,29 @@ class Client(threading.Thread):
                 self.myNumber = data_var.data.playerNum
                 if(data_var.data.playerNum == 0):
                     # Player 1, give start button (now called getStart())
-                    self.request_queue.put(StartRequest())
-                    response = self.getGUIResponse()
+                    start = False
+                    while not start:
+                        self.request_queue.put(StartRequest())
+                        response = self.getGUIResponse()
+                        if response == LobbyButtons.VOLUP:
+                            self.change_volume(1)
+                        elif response == LobbyButtons.VOLDOWN:
+                            self.change_volume(-1)
+                        else:
+                            start = True
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
                 else:
-                    # Not player 1, wait for game to start
+                    start = False
+                    while not start:
+                        self.request_queue.put(StartRequest())
+                        response = self.getGUIResponse()
+                        if response == LobbyButtons.VOLUP:
+                            self.change_volume(1)
+                        elif response == LobbyButtons.VOLDOWN:
+                            self.change_volume(-1)
+                        else:
+                            start = True
                     self.request_queue.put(WaitRequest()) 
 
             # General location update message (new locations in storeAllPlayers)   
@@ -107,6 +130,12 @@ class Client(threading.Thread):
                 self.request_queue.put(LobbyQuitRequest())
                 self.info = data_var.data.gameInfo
                 self.request_queue.put(GUIInitRequest(data_var.data.indviPlayer,self.info.storeAllPlayers))
+
+            # Next player's turn
+            elif(data_var.id == 110):
+                player_name = data_var.data.name
+                self.request_queue.put(MessageRequest("It's " + player_name + "'s turn!", BLACK))
+                self.request_queue.put(NextPlayerRequest())
 
             # Turn start message for this client's player
             elif(data_var.id == 105):
@@ -292,4 +321,4 @@ class Client(threading.Thread):
         await self.handle_server(reader, writer)
 
     def run(self):
-        asyncio.run(self.runClient("192.168.1.107", 25565))
+        asyncio.run(self.runClient("192.168.1.106", 25565))

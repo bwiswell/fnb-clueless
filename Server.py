@@ -54,6 +54,9 @@ class Game():
         player_count = len(self.clients)
         self.active_player = (client.number + 1) % player_count
         next_player = self.clients[self.active_player]
+        msg = wrap.HeaderNew(wrap.MsgNextTurn(next_player.name))
+        await self.broadcastMsg(msg)
+        time.sleep(0.2)
         msg = wrap.HeaderNew(wrap.MsgStartTurn())
         await next_player.sendMsg(msg)
 
@@ -122,6 +125,7 @@ class Server():
             character = Player(name=name, number=client.number, location=self.game.info.startLocations.pop(0), 
                             character=Characters(client.number))
             self.game.info.storeAllPlayers.append(character)
+            client.name = name
             client.character = character
             self.counter += 1
             return client, self.game

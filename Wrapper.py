@@ -81,6 +81,10 @@ class MsgEndTurn():
         print("client -> server 109")
         pass
 
+class MsgNextTurn():
+    def __init__(self,name):
+        self.name = name
+
 class MsgGameWon():
     def __init__(self,name,accusation):
         self.name = name
@@ -109,6 +113,7 @@ class HeaderNew:
         MsgSuggest: 107,
         MsgAccuse: 108,
         MsgEndTurn: 109,
+        MsgNextTurn: 110,
         MsgSuggestResp: 201,
         MsgUpdateGame: 500,
         MsgPassInformation: 501,

@@ -8,10 +8,10 @@ from Constants import GRAY, BLACK, BORDER_RADIUS
 from Drawable import Drawable
 
 class PlayerInfoDisplay(Drawable, Thread):
-    def __init__(self, size, position, player_sprite, player, font, screen):
+    def __init__(self, size, position, player_sprites, player, font, screen):
         self.screen = screen
         Drawable.__init__(self, size, position)
-        Thread.__init__(self)
+        Thread.__init__(self, daemon=True)
         self.fill(GRAY)
 
         # Player info box sizes and rectangles
@@ -32,12 +32,26 @@ class PlayerInfoDisplay(Drawable, Thread):
         self.blit(player_info, player_info_pos)
 
         # Player image stuff
-        self.walking_images = player_sprite.walking_images
+        self.player_sprites = player_sprites
+        self.num_players = len(self.player_sprites)
+        self.curr_player = 0
+        self.walking_images = self.player_sprites[self.curr_player].walking_images
+        self.left_image = self.player_sprites[self.curr_player - 1].image
+        self.right_image = self.player_sprites[(self.curr_player + 1) % self.num_players].image
         self.current_image = 0
         self.image_size = (data_size[0] // 2, size[1])
         self.image_pos = (self.left_data.centerx - self.image_size[0] // 2, self.left_data.centery - self.image_size[1] // 2)
+        self.side_size = (self.image_size[0] // 2, self.image_size[1] // 2)
+        self.left_pos = (self.image_pos[0] - self.side_size[0], self.left_data.centery - self.side_size[1] // 2)
+        self.right_pos = (self.image_pos[0] + self.image_size[0], self.left_data.centery - self.side_size[1] // 2)
 
         self.start()
+
+    def next_player(self):
+        self.curr_player = (self.curr_player + 1) % self.num_players
+        self.walking_images = self.player_sprites[self.curr_player].walking_images
+        self.left_image = self.player_sprites[self.curr_player - 1].image
+        self.right_image = self.player_sprites[(self.curr_player + 1) % self.num_players].image
 
     def run(self):
         while True:
@@ -45,7 +59,9 @@ class PlayerInfoDisplay(Drawable, Thread):
             self.current_image = (self.current_image + 1) % len(self.walking_images)
             pygame.draw.rect(self, GRAY, self.left_data)
             self.blit(pygame.transform.smoothscale(image, self.image_size), self.image_pos)
+            self.blit(pygame.transform.smoothscale(self.left_image, self.side_size), self.left_pos)
+            self.blit(pygame.transform.smoothscale(self.right_image, self.side_size), self.right_pos)
             pygame.draw.rect(self, BLACK, self.left_data, BORDER_RADIUS)
             self.draw(self.screen)
-            time.sleep(0.1)
+            time.sleep(0.2)
         
