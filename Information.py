@@ -7,7 +7,7 @@ class Information:
         # Intial data to be updated or pulled
         self.storeAllPlayers = []
         self.currentLocation = []
-        self.startLocations = [Locations.HW2, Locations.HW11, Locations.HW8, Locations.HW5]
+        self.startLocations = [Locations.HW2, Locations.HW11, Locations.HW8, Locations.HW5, Locations.HW12, Locations.HW3]
         self.case_file = {}
 
     # when a move option occurs this will update the list of current player locations

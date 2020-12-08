@@ -28,8 +28,8 @@ class Client(threading.Thread):
         self.lost = False
         self.myNumber = None
         self.suggested = False
-        self.soundVolume = 0.01 # sound volume as fraction of 100 (0.01 --> 1%)
-        self.musicVolume = 0.03 # music volume as fraction of 100 (0.03 --> 3%)
+        self.soundVolume = 0.0 # sound volume as fraction of 100 (0.01 --> 1%)
+        self.musicVolume = 0.0 # music volume as fraction of 100 (0.03 --> 3%)
         self.repeat = -1 # music repeat setting (-1 means infinite repeat)
         sound_path = os.path.dirname(os.path.realpath(__file__)) + "\\sounds\\"
 

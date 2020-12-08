@@ -109,7 +109,7 @@ class Server():
     def __init__(self):
         
         self.running = False
-        self.max_players = 4
+        self.max_players = 6
         self.counter = 0
         self.game = Game()
     
@@ -233,4 +233,4 @@ class Server():
             await server.serve_forever()
 
 server = Server()
-asyncio.run(server.run("0.0.0.0", 25565))
+asyncio.run(server.run("0.0.0.0", 87))
