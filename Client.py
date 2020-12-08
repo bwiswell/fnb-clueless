@@ -321,4 +321,4 @@ class Client(threading.Thread):
         await self.handle_server(reader, writer)
 
     def run(self):
-        asyncio.run(self.runClient("192.168.1.106", 25565))
+        asyncio.run(self.runClient("73.243.41.224", 87))
