@@ -80,3 +80,5 @@ class Actions(EnumText):
 class LobbyButtons(Enum):
     NEW = 0
     JOIN = 1
+    VOLUP = 2
+    VOLDOWN = 3

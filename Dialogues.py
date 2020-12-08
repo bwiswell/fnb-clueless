@@ -1,8 +1,9 @@
 import re
+import math
 
 import pygame
 
-from Constants import WHITE, GRAY, BLACK, BORDER_RADIUS
+from Constants import WHITE, GRAY, BLACK, BLUE, BORDER_RADIUS, DIALOGUE_BORDER_RADIUS, DIALOGUE_BORDER_DIAMETER
 
 import ClueEnums
 
@@ -10,7 +11,31 @@ from Drawable import CenteredDrawable, Button
 
 class Dialogue(CenteredDrawable):
     def __init__(self, size, center):
-        CenteredDrawable.__init__(self, size, center)
+        CenteredDrawable.__init__(self, size, center, True)
+        w = size[0]
+        h = size[1]
+
+        tl = (DIALOGUE_BORDER_DIAMETER, DIALOGUE_BORDER_DIAMETER)
+        tr = (w - DIALOGUE_BORDER_DIAMETER, DIALOGUE_BORDER_DIAMETER)
+        bl = (DIALOGUE_BORDER_DIAMETER, h - DIALOGUE_BORDER_DIAMETER)
+        br = (w - DIALOGUE_BORDER_DIAMETER, h - DIALOGUE_BORDER_DIAMETER)
+
+        pygame.draw.circle(self, BLUE, tl, DIALOGUE_BORDER_DIAMETER)
+        pygame.draw.circle(self, BLUE, tr, DIALOGUE_BORDER_DIAMETER)
+        pygame.draw.circle(self, BLUE, bl, DIALOGUE_BORDER_DIAMETER)
+        pygame.draw.circle(self, BLUE, br, DIALOGUE_BORDER_DIAMETER)
+
+        top = [(tl[0], 0), (tr[0], 0), (tr[0], DIALOGUE_BORDER_DIAMETER), (tl[0], DIALOGUE_BORDER_DIAMETER)]
+        right = [(w - DIALOGUE_BORDER_DIAMETER, tr[1]), (w, tr[1]), (w, br[1]), (w - DIALOGUE_BORDER_DIAMETER, br[1])]
+        bottom = [(bl[0], h), (bl[0], h - DIALOGUE_BORDER_DIAMETER), (br[0], h - DIALOGUE_BORDER_DIAMETER), (br[0], h)]
+        left = [(0, tl[1]), (DIALOGUE_BORDER_DIAMETER, tl[1]), (DIALOGUE_BORDER_DIAMETER, bl[1]), (0, bl[1])]
+
+        pygame.draw.polygon(self, BLUE, top)
+        pygame.draw.polygon(self, BLUE, right)
+        pygame.draw.polygon(self, BLUE, bottom)
+        pygame.draw.polygon(self, BLUE, left)
+
+        pygame.draw.polygon(self, WHITE, [tl, tr, br, bl])
 
     def getResponse(self):
         raise NotImplementedError
@@ -84,19 +109,19 @@ class InputDialogue(Dialogue):
 class ConfirmationDialogue(Dialogue):
     def __init__(self, font, text, center):
         text_object = font.render(text, True, BLACK)
-        text_rect = text_object.get_rect()
-        dialogue_height = text_rect.size[1] * 3
-        Dialogue.__init__(self, (text_rect.size[0] + BORDER_RADIUS * 2, dialogue_height + BORDER_RADIUS * 2), center)
-        text_surface = pygame.Surface((text_rect.size[0], dialogue_height))
-        text_surface.fill(WHITE)
-        x_margins = text_rect.size[0] // 3
-        y_margins = dialogue_height // 4
-        text_surface.blit(text_object, (0, y_margins - text_rect.size[1] // 2))
-        self.confirm = Button(font.render("Confirm", True, BLACK), (x_margins, y_margins * 3), True)
-        text_surface.blit(self.confirm, self.confirm.position)
-        self.cancel = Button(font.render("Cancel", True, BLACK), (x_margins * 2, y_margins * 3), False)
-        text_surface.blit(self.cancel, self.cancel.position)
-        self.blit(text_surface, (BORDER_RADIUS, BORDER_RADIUS))
+        dialogue_height = text_object.get_height() * 3
+        x_offset = text_object.get_width() // 3 + DIALOGUE_BORDER_DIAMETER
+        y_offset = dialogue_height // 4 + DIALOGUE_BORDER_DIAMETER
+        w = text_object.get_width() + DIALOGUE_BORDER_DIAMETER * 2
+        h = dialogue_height + DIALOGUE_BORDER_DIAMETER * 2
+
+        Dialogue.__init__(self, (w, h), center)
+        
+        self.blit(text_object, (w // 2 - text_object.get_width() // 2, y_offset - text_object.get_height() // 2))
+        self.confirm = Button(font.render("Confirm", True, BLACK), (x_offset, h - y_offset))
+        self.confirm.draw(self)
+        self.cancel = Button(font.render("Cancel", True, BLACK), (w - x_offset, h - y_offset))
+        self.cancel.draw(self)
     
     # Detect clicks until the player selects "confirm" or "cancel"
     def getResponse(self):
@@ -106,9 +131,9 @@ class ConfirmationDialogue(Dialogue):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     adj_pos = (event.pos[0] - self.position[0], event.pos[1] - self.position[1])
                     if self.confirm.rect.collidepoint(adj_pos):
-                        return self.confirm.return_value
+                        return True
                     elif self.cancel.rect.collidepoint(adj_pos):
-                        return self.cancel.return_value
+                        return False
 
 # Simple class that takes a list of cards, displays one, and has up and down arrows
 # the player can interact with to scroll through the cards in the list
@@ -168,26 +193,26 @@ class Slot(pygame.Surface):
 class SuggestionDialogue(Dialogue):
     def __init__(self, font, text, center, screen_width, card_deck, location=None):
         text_object = font.render(text, True, BLACK)
-        dialogue_width = max(screen_width // 3, text_object.get_width())
+        dialogue_width = math.floor(text_object.get_width() * 1.2)
         slot_width = dialogue_width // 3
-        slot_y_offset = text_object.get_height() * 2
-        text_pos = (dialogue_width // 2 - text_object.get_width() // 2, slot_y_offset // 2 - text_object.get_height() // 2)
-        player_slot = Slot(slot_width, (0, slot_y_offset), "player", card_deck.player_cards)
-        location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", card_deck.room_cards)
-        if location is not None:
-            location_as_room = ClueEnums.getLocationAsRoom(location)
-            location_slot = Slot(slot_width, (slot_width, slot_y_offset), "location", [card_deck.card_dict[location_as_room]], False)
-        weapon_slot = Slot(slot_width, (slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
-        self.slots = [player_slot, location_slot, weapon_slot]
-        slot_height = player_slot.size[1]
-        dialogue_height = slot_height + slot_y_offset * 2
-        Dialogue.__init__(self, (dialogue_width, dialogue_height), center)
+        slot_y_offset = text_object.get_height() * 2 + DIALOGUE_BORDER_DIAMETER
 
-        self.fill(WHITE)
-        self.blit(text_object, text_pos)
+        player_slot = Slot(slot_width, (DIALOGUE_BORDER_DIAMETER, slot_y_offset), "player", card_deck.player_cards)
+        location_slot = Slot(slot_width, (DIALOGUE_BORDER_DIAMETER + slot_width, slot_y_offset), "location", card_deck.room_cards)
+        if location is not None:
+            room = ClueEnums.getLocationAsRoom(location)
+            location_slot = Slot(slot_width, (DIALOGUE_BORDER_DIAMETER + slot_width, slot_y_offset), "location", [card_deck.card_dict[room]], False)
+        weapon_slot = Slot(slot_width, (DIALOGUE_BORDER_DIAMETER + slot_width * 2, slot_y_offset), "weapon", card_deck.weapon_cards)
+        self.slots = [player_slot, location_slot, weapon_slot]
+
+        w = dialogue_width + DIALOGUE_BORDER_DIAMETER * 2
+        h = player_slot.size[1] + slot_y_offset * 2 + DIALOGUE_BORDER_DIAMETER * 2
+        Dialogue.__init__(self, (w, h), center)
+
+        self.blit(text_object, (w // 2 - text_object.get_width() // 2, text_object.get_height() // 2 + DIALOGUE_BORDER_DIAMETER))
         for slot in self.slots:
             self.blit(slot, slot.position)
-        self.confirm = Button(font.render("Confirm", True, BLACK), (dialogue_width // 2, dialogue_height - slot_y_offset // 2), True)
+        self.confirm = Button(font.render("Confirm", True, BLACK), (w // 2, h - text_object.get_height() - DIALOGUE_BORDER_DIAMETER), True)
         self.blit(self.confirm, self.confirm.position)
 
     # Encapsulates the currently selected cards into a dict whose keys are the

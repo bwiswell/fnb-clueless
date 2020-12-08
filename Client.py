@@ -4,24 +4,25 @@ import Player as pl
 import Wrapper as wrap
 import Information as info
 import Lobby
-import ClueGUI
 import asyncio
 import ClueEnums
-from ClueEnums import Actions
+from ClueEnums import Actions, LobbyButtons
 import AdjList
 import time
-from Constants import RED, GREEN
+from Constants import RED, GREEN, BLACK
+import threading
+from ClientRequest import *
 import pygame
 import os
 
 player = pl.Player()
 
 
-class Client():
-    def __init__(self):
+class Client(threading.Thread):
+    def __init__(self, request_queue):
+        threading.Thread.__init__(self)
         self.running = False
         self.info = info.Information()
-        self.gui = None
         self.validMoves = []
         self.actionList = []
         self.lost = False
@@ -31,7 +32,6 @@ class Client():
         self.musicVolume = 0.03 # music volume as fraction of 100 (0.03 --> 3%)
         self.repeat = -1 # music repeat setting (-1 means infinite repeat)
         sound_path = os.path.dirname(os.path.realpath(__file__)) + "\\sounds\\"
-        pygame.init() # initializes pygame, TODO: remove when Ben says?
 
         # initializes all game action sounds
         self.suggest_sound = pygame.mixer.Sound(sound_path + 'Suggest.wav')
@@ -40,23 +40,38 @@ class Client():
         self.won_sound = pygame.mixer.Sound(sound_path + 'Won.wav')
         self.lost_sound = pygame.mixer.Sound(sound_path + 'Lost.wav')
 
-        # sets all game action sound volumes
+        # initializes in game soundtrack and starts playing music
+        pygame.mixer.music.load(sound_path + "Clue-Less_Soundtrack.mp3")
+        self.change_volume()
+        pygame.mixer.music.play(self.repeat)
+
+        # GUI request queue
+        self.request_queue = request_queue
+
+        # GUI response
+        self.response = None
+        self.response_lock = threading.Lock()
+
+    def change_volume(self, dv=0):
+        if dv < 0 and self.soundVolume > 0:
+            self.soundVolume -= 0.01
+            self.musicVolume -= 0.01
+        elif dv > 0 and self.musicVolume < 1:
+            self.soundVolume += 0.01
+            self.musicVolume += 0.01
         pygame.mixer.Sound.set_volume(self.suggest_sound, self.soundVolume)
         pygame.mixer.Sound.set_volume(self.accuse_sound, self.soundVolume)
         pygame.mixer.Sound.set_volume(self.move_sound, self.soundVolume)
         pygame.mixer.Sound.set_volume(self.won_sound, self.soundVolume)
         pygame.mixer.Sound.set_volume(self.lost_sound, self.soundVolume)
-
-        # initializes in game soundtrack and starts playing music
-        pygame.mixer.music.load(sound_path + "Clue-Less_Soundtrack.mp3")
         pygame.mixer.music.set_volume(self.musicVolume)
-        pygame.mixer.music.play(self.repeat)
 
     async def handle_server(self,reader,writer):
         # start the lobby
-        lobby = Lobby.Lobby()
+        self.request_queue.put(LobbyInitRequest())
         # get name from lobby
-        name = lobby.getPlayerName()
+        self.request_queue.put(NameRequest())
+        name = self.getGUIResponse()
 
         player.name = name
         player.location = "ballroom"
@@ -80,27 +95,51 @@ class Client():
                 self.myNumber = data_var.data.playerNum
                 if(data_var.data.playerNum == 0):
                     # Player 1, give start button (now called getStart())
-                    lobby.getStart("FNBC")
+                    start = False
+                    while not start:
+                        self.request_queue.put(StartRequest())
+                        response = self.getGUIResponse()
+                        if response == LobbyButtons.VOLUP:
+                            self.change_volume(1)
+                        elif response == LobbyButtons.VOLDOWN:
+                            self.change_volume(-1)
+                        else:
+                            start = True
                     data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgLobbyReady()))
                     writer.write(data_string)
                 else:
-                    # Not player 1, wait for game to start
-                    lobby.showWaitingMessage()   
+                    start = False
+                    while not start:
+                        self.request_queue.put(StartRequest())
+                        response = self.getGUIResponse()
+                        if response == LobbyButtons.VOLUP:
+                            self.change_volume(1)
+                        elif response == LobbyButtons.VOLDOWN:
+                            self.change_volume(-1)
+                        else:
+                            start = True
+                    self.request_queue.put(WaitRequest()) 
 
             # General location update message (new locations in storeAllPlayers)   
             elif( data_var.id == 501):
                 self.info = data_var.data.info
-                self.gui.updateGUI(self.info.storeAllPlayers)
+                self.request_queue.put(UpdateRequest(self.info.storeAllPlayers))
 
             # Game start message
             elif(data_var.id == 100):
-                lobby.close()
+                self.request_queue.put(LobbyQuitRequest())
                 self.info = data_var.data.gameInfo
-                self.gui = ClueGUI.ClueGUI(data_var.data.indviPlayer,self.info.storeAllPlayers)
+                self.request_queue.put(GUIInitRequest(data_var.data.indviPlayer,self.info.storeAllPlayers))
+
+            # Next player's turn
+            elif(data_var.id == 110):
+                player_name = data_var.data.name
+                self.request_queue.put(MessageRequest("It's " + player_name + "'s turn!", BLACK))
+                self.request_queue.put(NextPlayerRequest())
 
             # Turn start message for this client's player
             elif(data_var.id == 105):
-                self.gui.postMessage("Your turn has begun!", GREEN)
+                self.request_queue.put(MessageRequest("Your turn has begun!", GREEN))
                 self.suggested = False
                 self.validMoves = AdjList.determineValidMoves(self.info.storeAllPlayers[self.myNumber], self.info.storeAllPlayers)
 
@@ -117,7 +156,8 @@ class Client():
                 else:
                     self.actionList = [Actions.MOVE, Actions.ACCUSE]
 
-                action = self.gui.getPlayerAction(self.actionList)
+                self.request_queue.put(ActionRequest(self.actionList))
+                action = self.getGUIResponse()
                 self.actionList.remove(action)
                 msg = self.handleAction(action)
                 writer.write(msg)
@@ -137,7 +177,8 @@ class Client():
                 if (len(self.actionList) == 0 or Actions.MOVE not in self.actionList):
                     self.actionList.append(Actions.ENDTURN)
 
-                action = self.gui.getPlayerAction(self.actionList)
+                self.request_queue.put(ActionRequest(self.actionList))
+                action = self.getGUIResponse()
                 self.actionList.remove(action)
                 msg = self.handleAction(action)
                 writer.write(msg)
@@ -150,18 +191,18 @@ class Client():
                 suggestion_text += data_var.data.suggestion["player"].text
                 suggestion_text += " in the " + data_var.data.suggestion["location"].text
                 suggestion_text += " with the " + data_var.data.suggestion["weapon"].text + "!"
-                self.gui.postMessage(suggestion_text)
+                self.request_queue.put(MessageRequest(suggestion_text, BLACK))
                 disproven_text = data_var.data.name + " was "
                 if data_var.data.disprov_card is None:
                     disproven_text += "not "
                 disproven_text += "disproven."
-                self.gui.postMessage(disproven_text)
+                self.request_queue.put(MessageRequest(disproven_text, BLACK))
                 # If this client made the suggestion, then this player gets to see which card
                 # and which player disproved it (if any)
                 if data_var.data.disprov_card is not None and data_var.data.playerNum == self.myNumber:
                     disproven_text = data_var.data.disprov_player.name + " disproved your suggestion with the "
                     disproven_text += data_var.data.disprov_card.text + " card."
-                    self.gui.postMessage(disproven_text)
+                    self.request_queue.put(MessageRequest(disproven_text, BLACK))
 
             # Game lost message (somebody, maybe this client, made an incorrect accusation
             # and now the server is broadcasting to all clients what the accusation was
@@ -173,9 +214,9 @@ class Client():
                 accusation_text += data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
-                self.gui.postMessage(accusation_text)
+                self.request_queue.put(MessageRequest(accusation_text, BLACK))
                 lost_text = data_var.data.name + " lost the game!"
-                self.gui.postMessage(lost_text)
+                self.request_queue.put(MessageRequest(lost_text, BLACK))
                 # If this client made the accusation, then set the lost flag to True
                 if data_var.data.playerNum == self.myNumber:
                     self.lost = True
@@ -185,16 +226,16 @@ class Client():
             elif(data_var.id == 6667):
                 pygame.mixer.Sound.play(self.lost_sound)
                 lost_text = "Everybody has made an incorrect accusation - nobody wins!"
-                self.gui.postMessage(lost_text, RED)
+                self.request_queue.put(MessageRequest(lost_text, RED))
                 case_file_text = "You should have guessed that is was "
                 case_file_text += data_var.data.caseFile["player"].text + " in the "
                 case_file_text += data_var.data.caseFile["location"].text + " with the "
                 case_file_text += data_var.data.caseFile["weapon"].text + "!"
-                self.gui.postMessage(case_file_text, RED)
+                self.request_queue.put(MessageRequest(case_file_text, RED))
 
                 # Give players time to see the lost message and then quit the game
-                time.sleep(3)
-                self.gui.quit()
+                time.sleep(5)
+                self.request_queue.put(GUIQuitRequest())
                 self.running = False
 
             # Game won message (somebody, maybe this client, made a correct accusation and
@@ -204,15 +245,15 @@ class Client():
                 if data_var.data.name == player.name:
                     pygame.mixer.Sound.play(self.won_sound)
                 won_message = data_var.data.name + " won!"
-                self.gui.postMessage(won_message)
+                self.request_queue.put(MessageRequest(won_message, GREEN))
                 accusation_text = "It was " + data_var.data.accusation["player"].text
                 accusation_text += " in the " + data_var.data.accusation["location"].text
                 accusation_text += " with the " + data_var.data.accusation["weapon"].text + "!"
-                self.gui.postMessage(accusation_text)
+                self.request_queue.put(MessageRequest(accusation_text, GREEN))
 
                 # Give players time to see the won message and then quit the game
-                time.sleep(3)
-                self.gui.quit()
+                time.sleep(5)
+                self.request_queue.put(GUIQuitRequest())
                 self.running = False
 
             else:
@@ -221,6 +262,18 @@ class Client():
         # Close server connection
         writer.close()
         await writer.wait_closed()
+
+    def getGUIResponse(self):
+        response = None
+        while response is None:
+            self.response_lock.acquire()
+            try:
+                response = self.response
+                if response is not None:
+                    self.response = None
+            finally:
+                self.response_lock.release()
+        return response
     
     # Handle any player action and return the response message to be sent back to the
     # server
@@ -229,7 +282,8 @@ class Client():
         if action == Actions.MOVE:
             pygame.mixer.Sound.play(self.move_sound)
             player = self.info.storeAllPlayers[self.myNumber]
-            move = self.gui.getPlayerMove(self.validMoves)
+            self.request_queue.put(MoveRequest(self.validMoves))
+            move = self.getGUIResponse()
             if ClueEnums.isRoom(move) is True:
                 self.suggested = False
             player.location = move
@@ -240,32 +294,31 @@ class Client():
             pygame.mixer.Sound.play(self.suggest_sound)
             self.suggested = True
             location = self.info.storeAllPlayers[self.myNumber].location
-            suggestion = self.gui.getPlayerSuggestion(location)
+            self.request_queue.put(SuggestionRequest(location))
+            suggestion = self.getGUIResponse()
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgSuggest(suggestion)))
             return data_string
         # Handle an accuse action
         elif action == Actions.ACCUSE:
             pygame.mixer.Sound.play(self.accuse_sound)
-            location = self.info.storeAllPlayers[self.myNumber].location
-            accusation = self.gui.getPlayerAccusation()
+            self.request_queue.put(AccusationRequest())
+            accusation = self.getGUIResponse()
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgAccuse(accusation)))
             return data_string
         # Handle an end turn action
         else:
-            self.gui.postMessage("Your turn has ended.", RED)
+            self.request_queue.put(MessageRequest("Your turn has ended.", RED))
             data_string = pickle.dumps(wrap.HeaderNew(wrap.MsgEndTurn()))
             return data_string
 
         
     # method to connect the client to the server.
-    async def run(self,host,port):
+    async def runClient(self,host,port):
         self.running = True
         reader, writer = await asyncio.open_connection(
             host,port
         )
-
         await self.handle_server(reader, writer)
 
-
-client = Client()
-asyncio.run(client.run("71.204.206.17", 25565))
+    def run(self):
+        asyncio.run(self.runClient("192.168.1.106", 25565))
